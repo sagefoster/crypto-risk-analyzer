@@ -501,7 +501,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return tableWrapper;
     }
 
-    function createWinnerSection(tokenResults, riskFreeRate) {
+    function createWinnerSection(tokenResults, riskFreeRate, timeframeDays) {
         // Sort tokens by Sharpe ratio (primary) and Sortino ratio (secondary)
         const sortedTokens = [...tokenResults].sort((a, b) => {
             if (Math.abs(a.sharpeRatio - b.sharpeRatio) > 0.01) {
@@ -512,6 +512,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         const winner = sortedTokens[0];
         const winnerName = winner.id.toUpperCase();
+        const timeframeText = getTimeframeText(timeframeDays);
         
         // Format all metrics for winner
         const winnerReturn = (winner.meanReturn * 100).toFixed(2);
@@ -521,10 +522,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         const winnerSharpe = winner.sharpeRatio.toFixed(3);
         const winnerSortino = winner.sortinoRatio >= 999 ? '∞' : winner.sortinoRatio.toFixed(3);
 
+        // Format price data (with fallbacks for backwards compatibility)
+        const winnerLow = winner.lowPrice ? winner.lowPrice.toFixed(2) : 'N/A';
+        const winnerHigh = winner.highPrice ? winner.highPrice.toFixed(2) : 'N/A';
+        const winnerCurrent = winner.currentPrice ? winner.currentPrice.toFixed(2) : 'N/A';
+
         const winnerDiv = document.createElement('div');
         winnerDiv.className = 'winner higher';
         winnerDiv.innerHTML = `
-            <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance</div>
+            <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance over ${timeframeText}</div>
+            <div class="winner-price-range">
+                <span class="price-label">Price Range:</span> 
+                <span class="price-value">$${winnerLow} <span class="range-arrow">→</span> $${winnerHigh}</span>
+                <span class="price-context">(Current: $${winnerCurrent})</span>
+            </div>
             <div class="winner-metrics">
                 <div class="winner-metric-row">
                     <span class="metric-label">Return:</span> <span class="metric-value">${winnerReturn}%</span>
@@ -620,11 +631,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             const mdd = (tokenData.maxDrawdown * 100).toFixed(2);
             const mddDisplay = tokenData.maxDrawdown > 0 ? `-${mdd}` : mdd;
             
+            // Format price data (with fallbacks for backwards compatibility)
+            const lowPrice = tokenData.lowPrice ? tokenData.lowPrice.toFixed(2) : 'N/A';
+            const highPrice = tokenData.highPrice ? tokenData.highPrice.toFixed(2) : 'N/A';
+            
             const performanceClass = tokenData.sharpeRatio > 1 ? 'excellent' : tokenData.sharpeRatio > 0 ? 'good' : 'poor';
             
             summaryHTML += `
                 <div class="summary-card ${performanceClass} clickable" data-token="${tokenId}" role="button" tabindex="0" aria-label="View detailed analysis for ${tokenName}">
                     <h4>${tokenName}</h4>
+                    <div class="price-range-summary">
+                        <span class="range-label">${timeframeText} Range:</span>
+                        <span class="range-value">$${lowPrice} - $${highPrice}</span>
+                    </div>
                     <div class="summary-stat">
                         <span class="summary-label">Return</span>
                         <span class="summary-value">${returnPct}%</span>
@@ -695,7 +714,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // STEP 1: Show winner/conclusion first (if multiple tokens)
         if (isMultiple) {
-            const winnerSection = createWinnerSection(tokenResults, data.riskFreeRate);
+            const winnerSection = createWinnerSection(tokenResults, data.riskFreeRate, timeframeDays);
             resultsContainer.appendChild(winnerSection);
         }
 

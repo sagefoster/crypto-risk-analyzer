@@ -924,8 +924,31 @@ small {
 
 .summary-card h4 {
     font-size: 1.3rem;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     color: var(--text-primary);
+}
+
+.price-range-summary {
+    text-align: center;
+    padding: 8px 0;
+    margin-bottom: 12px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.price-range-summary .range-label {
+    display: block;
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.price-range-summary .range-value {
+    color: var(--accent-primary);
+    font-size: 0.95rem;
+    font-weight: 600;
 }
 
 .summary-stat {
@@ -1226,6 +1249,40 @@ small {
     color: var(--success);
     margin-bottom: 16px;
     text-align: center;
+}
+
+.winner-price-range {
+    text-align: center;
+    padding: 12px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(88, 166, 255, 0.03));
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.winner-price-range .price-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-right: 8px;
+}
+
+.winner-price-range .price-value {
+    color: var(--accent-primary);
+    font-size: 1.1rem;
+    font-weight: 700;
+}
+
+.winner-price-range .range-arrow {
+    color: var(--text-tertiary);
+    margin: 0 6px;
+}
+
+.winner-price-range .price-context {
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-left: 12px;
 }
 
 .winner-metrics {

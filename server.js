@@ -524,6 +524,12 @@ app.post('/api/analyze', async (req, res) => {
       const pricesWithTimestamps = tokenData.data.prices;
       const prices = pricesWithTimestamps.map(p => p[1]);
 
+      // Calculate low and high prices over the period
+      const lowPrice = Math.min(...prices);
+      const highPrice = Math.max(...prices);
+      const currentPrice = prices[prices.length - 1];
+      const startPrice = prices[0];
+
       // Calculate comprehensive return metrics first
       const returnMetrics = calculateReturns(prices, timeframe);
       
@@ -574,6 +580,11 @@ app.post('/api/analyze', async (req, res) => {
 
       return {
         id: tokenId,
+        // Price data
+        startPrice: startPrice,
+        currentPrice: currentPrice,
+        lowPrice: lowPrice,
+        highPrice: highPrice,
         // Return metrics
         periodReturn: returnMetrics.periodReturn,          // Simple return from start to end
         cagr: returnMetrics.cagr,                          // Compound Annual Growth Rate
