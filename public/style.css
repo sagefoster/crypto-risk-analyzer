@@ -450,12 +450,67 @@ small {
 .risk-free-rate .label {
     color: var(--text-secondary);
     margin-right: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .risk-free-rate .value {
     color: var(--accent-primary);
     font-weight: 600;
     font-size: 1.1rem;
+}
+
+/* Tooltip styles */
+.rate-tooltip {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    cursor: help;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.rate-tooltip:hover {
+    opacity: 1;
+}
+
+.tooltip-text {
+    visibility: hidden;
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    width: 280px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.2s, visibility 0.2s;
+    font-weight: 400;
+}
+
+.tooltip-text::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: var(--bg-secondary);
+}
+
+.rate-tooltip:hover .tooltip-text {
+    visibility: visible;
+    opacity: 1;
 }
 
 .comparison {
@@ -1081,6 +1136,22 @@ small {
         width: 100%;
         justify-content: center;
         padding: 12px 16px;
+    }
+
+    /* Tooltip mobile adjustments */
+    .tooltip-text {
+        width: 240px;
+        font-size: 0.8rem;
+        padding: 10px 12px;
+        left: auto;
+        right: 0;
+        transform: none;
+    }
+
+    .tooltip-text::after {
+        left: auto;
+        right: 20px;
+        transform: none;
     }
 
     /* Hide excessive details on very small screens */

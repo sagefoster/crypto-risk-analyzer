@@ -21,7 +21,7 @@
             <ul class="features-list">
                 <li><strong>Return & Volatility</strong> - Annualized return and standard deviation (risk)</li>
                 <li><strong>Maximum Drawdown</strong> - Largest peak-to-trough loss during the period</li>
-                <li><strong>Sharpe Ratio</strong> - Risk-adjusted returns vs. US Treasury bonds (most common)</li>
+                <li><strong>Sharpe Ratio</strong> - Return per unit of risk, compared to 10-Year U.S. Treasury yield</li>
                 <li><strong>Sortino Ratio</strong> - Risk-adjusted returns focusing only on downside risk</li>
                 <li><strong>Market Correlations</strong> - How each asset moves relative to S&P 500 and Bitcoin</li>
             </ul>
@@ -76,7 +76,12 @@
             <div class="card">
                 <h2>Analysis Results</h2>
                 <div class="risk-free-rate">
-                    <span class="label">Risk-Free Rate (10-Year Treasury):</span>
+                    <span class="label">
+                        Risk-Free Rate 
+                        <span class="rate-tooltip">ⓘ
+                            <span class="tooltip-text">10-Year U.S. Treasury yield from Federal Reserve (FRED). Used as the benchmark for risk-free returns in Sharpe and Sortino ratio calculations.</span>
+                        </span>
+                    </span>
                     <span class="value" id="riskFreeRate">-</span>
                 </div>
 

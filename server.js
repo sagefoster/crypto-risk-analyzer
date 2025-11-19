@@ -12,14 +12,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
 
-// Helper function to fetch US Treasury rate from FRED API
+// Helper function to fetch 10-Year U.S. Treasury yield (risk-free rate)
+// Data source: Federal Reserve Economic Data (FRED) - DGS10 series
+// This is the market yield on U.S. Treasury securities at 10-year constant maturity,
+// widely used as the benchmark risk-free rate in financial analysis
 async function fetchTreasuryRate() {
-  // Try FRED API first (requires free API key, but works with demo key for limited requests)
+  // Primary source: FRED API (Federal Reserve Bank of St. Louis)
+  // Most reliable and frequently updated source for Treasury yields
   try {
     const response = await axios.get('https://api.stlouisfed.org/fred/series/observations', {
       params: {
-        series_id: 'DGS10',
-        api_key: 'demo', // Free API key can be obtained from https://fred.stlouisfed.org/docs/api/api_key.html
+        series_id: 'DGS10', // Daily 10-Year Treasury Constant Maturity Rate
+        api_key: 'demo', // Free API key available at: https://fred.stlouisfed.org/docs/api/api_key.html
         file_type: 'json',
         sort_order: 'desc',
         limit: 1
@@ -30,12 +34,12 @@ async function fetchTreasuryRate() {
     if (response.data && response.data.observations && response.data.observations.length > 0) {
       const latestRate = parseFloat(response.data.observations[0].value);
       if (!isNaN(latestRate) && latestRate > 0) {
-        console.log(`Fetched Treasury rate from FRED: ${latestRate}%`);
+        console.log(`Fetched 10-Year Treasury yield from FRED: ${latestRate}%`);
         return latestRate;
       }
     }
   } catch (error) {
-    console.log('FRED API failed, trying alternative method...');
+    console.log('FRED API failed, trying alternative sources...');
   }
 
   // Alternative: Try fetching from Treasury.gov JSON endpoint
@@ -90,13 +94,15 @@ async function fetchTreasuryRate() {
     console.log('Alternative API failed');
   }
 
-  // Final fallback: return a reasonable default (4.5% as of 2024)
-  // Note: This is a conservative estimate. In production, consider:
+  // Final fallback: return a reasonable default based on recent 10-Year Treasury rates
+  // As of November 2024, the 10-Year Treasury yield ranges from ~4.0% to 4.8%
+  // Using 4.25% as a conservative middle estimate
+  // Note: In production, consider:
   // 1. Caching the last successful fetch
-  // 2. Using a paid financial data API
-  // 3. Allowing users to input the rate manually
-  console.log('Using fallback Treasury rate: 4.5% (all APIs failed)');
-  return 4.5;
+  // 2. Using a paid financial data API with higher rate limits
+  // 3. Storing historical rates as backup
+  console.log('Using fallback Treasury rate: 4.25% (all APIs failed)');
+  return 4.25;
 }
 
 // Helper function to calculate Sharpe ratio
