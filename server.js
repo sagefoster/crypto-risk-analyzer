@@ -121,8 +121,8 @@ function calculateSharpeRatio(prices, riskFreeRate) {
   // Calculate mean return
   const meanReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
 
-  // Calculate standard deviation
-  const variance = returns.reduce((sum, r) => sum + Math.pow(r - meanReturn, 2), 0) / returns.length;
+  // Calculate standard deviation (using sample variance with n-1 denominator for unbiased estimator)
+  const variance = returns.reduce((sum, r) => sum + Math.pow(r - meanReturn, 2), 0) / (returns.length - 1);
   const stdDev = Math.sqrt(variance);
 
   // Convert annual risk-free rate to daily rate
@@ -239,14 +239,26 @@ function calculateSortinoRatio(prices, riskFreeRate) {
   // Convert annual risk-free rate to daily rate
   const dailyRiskFreeRate = riskFreeRate / 100 / 365;
 
-  // Calculate downside deviation (only negative returns below target)
-  // Target is typically 0 or risk-free rate - we'll use 0 for simplicity
+  // Calculate downside deviation using standard Sortino methodology
+  // Target return is typically 0 or MAR (Minimum Acceptable Return)
+  // We use 0 as the target, meaning we only penalize negative returns
   const targetReturn = 0;
-  const downsideReturns = returns.filter(r => r < targetReturn);
   
-  if (downsideReturns.length === 0) {
-    // If no negative returns, downside deviation is 0, Sortino is undefined/infinite
-    // Return a high value to indicate excellent downside protection
+  // Calculate downside deviation: sqrt(sum(min(return - target, 0)^2) / n)
+  // This is the standard approach - includes all observations, not just negative returns
+  let sumSquaredDownside = 0;
+  let downsideCount = 0;
+  
+  for (let i = 0; i < returns.length; i++) {
+    const deviation = returns[i] - targetReturn;
+    if (deviation < 0) {
+      sumSquaredDownside += deviation * deviation;
+      downsideCount++;
+    }
+  }
+  
+  // If no negative returns, downside deviation is 0, Sortino is infinite
+  if (downsideCount === 0 || sumSquaredDownside === 0) {
     return {
       sortinoRatio: 999,
       meanReturn: meanReturn * 252,
@@ -255,9 +267,8 @@ function calculateSortinoRatio(prices, riskFreeRate) {
     };
   }
 
-  // Calculate downside deviation (standard deviation of negative returns)
-  const downsideMean = downsideReturns.reduce((sum, r) => sum + r, 0) / downsideReturns.length;
-  const downsideVariance = downsideReturns.reduce((sum, r) => sum + Math.pow(r - downsideMean, 2), 0) / downsideReturns.length;
+  // Use n-1 for sample downside deviation (unbiased estimator)
+  const downsideVariance = sumSquaredDownside / (downsideCount - 1);
   const downsideDeviation = Math.sqrt(downsideVariance);
 
   // Calculate Sortino ratio (annualized)

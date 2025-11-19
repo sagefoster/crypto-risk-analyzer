@@ -412,6 +412,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         return winnerDiv;
     }
 
+    function createRiskFreeRateSection(riskFreeRate) {
+        const rateDiv = document.createElement('div');
+        rateDiv.className = 'risk-free-rate-section';
+        
+        rateDiv.innerHTML = `
+            <div class="risk-free-rate-content">
+                <div class="risk-free-rate-label">
+                    <strong>Risk-Free Rate:</strong> <span class="rate-value">${riskFreeRate.toFixed(2)}%</span>
+                </div>
+                <div class="risk-free-rate-explanation">
+                    Based on the current 10-Year U.S. Treasury yield from the Federal Reserve. This represents the baseline return for a risk-free investment and is used in Sharpe and Sortino ratio calculations to measure excess returns above this safe benchmark.
+                </div>
+            </div>
+        `;
+        
+        return rateDiv;
+    }
+
     function createSummarySection(tokenResults, riskFreeRate) {
         const summaryDiv = document.createElement('div');
         summaryDiv.className = 'summary-section';
