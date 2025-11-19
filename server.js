@@ -166,27 +166,26 @@ function calculateSharpeRatio(prices, riskFreeRate, dailyReturns = null) {
   const variance = returns.reduce((sum, r) => sum + Math.pow(r - meanReturn, 2), 0) / (returns.length - 1);
   const stdDev = Math.sqrt(variance);
 
-  // Convert annual risk-free rate to daily rate
-  const dailyRiskFreeRate = riskFreeRate / 100 / 365;
+  // Annualize all components before calculating Sharpe ratio
+  const annualizedMeanReturn = meanReturn * 252;
+  const annualizedVolatility = stdDev * Math.sqrt(252);
+  const annualizedRiskFreeRate = riskFreeRate / 100; // Already annual
 
-  // Calculate Sharpe ratio (annualized)
-  if (stdDev === 0) {
+  if (annualizedVolatility === 0) {
     return {
       sharpeRatio: 0,
-      meanReturn: meanReturn * 252,
-      volatility: stdDev * Math.sqrt(252),
+      meanReturn: annualizedMeanReturn,
+      volatility: annualizedVolatility,
       dailyReturns: returns.length
     };
   }
 
-  const sharpeRatio = (meanReturn - dailyRiskFreeRate) / stdDev;
-  // Annualize by multiplying by sqrt(252) for daily data
-  const annualizedSharpe = sharpeRatio * Math.sqrt(252);
+  const sharpeRatio = (annualizedMeanReturn - annualizedRiskFreeRate) / annualizedVolatility;
 
   return {
-    sharpeRatio: annualizedSharpe,
-    meanReturn: meanReturn * 252, // Annualized
-    volatility: stdDev * Math.sqrt(252), // Annualized
+    sharpeRatio: sharpeRatio,
+    meanReturn: annualizedMeanReturn,
+    volatility: annualizedVolatility,
     dailyReturns: returns.length
   };
 }
@@ -285,9 +284,6 @@ function calculateSortinoRatio(prices, riskFreeRate, dailyReturns = null) {
   // Calculate mean return
   const meanReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
 
-  // Convert annual risk-free rate to daily rate
-  const dailyRiskFreeRate = riskFreeRate / 100 / 365;
-
   // Calculate downside deviation using standard Sortino methodology
   // Target return is typically 0 or MAR (Minimum Acceptable Return)
   // We use 0 as the target, meaning we only penalize negative returns
@@ -305,12 +301,16 @@ function calculateSortinoRatio(prices, riskFreeRate, dailyReturns = null) {
       downsideCount++;
     }
   }
+
+  // Annualize components
+  const annualizedMeanReturn = meanReturn * 252;
+  const annualizedRiskFreeRate = riskFreeRate / 100;
   
   // If no negative returns, downside deviation is 0, Sortino is infinite
   if (downsideCount === 0 || sumSquaredDownside === 0) {
     return {
       sortinoRatio: 999,
-      meanReturn: meanReturn * 252,
+      meanReturn: annualizedMeanReturn,
       downsideDeviation: 0,
       downsideVolatility: 0
     };
@@ -319,26 +319,25 @@ function calculateSortinoRatio(prices, riskFreeRate, dailyReturns = null) {
   // Use n-1 for sample downside deviation (unbiased estimator)
   const downsideVariance = sumSquaredDownside / (downsideCount - 1);
   const downsideDeviation = Math.sqrt(downsideVariance);
+  const annualizedDownsideVolatility = downsideDeviation * Math.sqrt(252);
 
   // Calculate Sortino ratio (annualized)
-  if (downsideDeviation === 0) {
+  if (annualizedDownsideVolatility === 0) {
     return {
       sortinoRatio: 999,
-      meanReturn: meanReturn * 252,
-      downsideDeviation: 0,
-      downsideVolatility: 0
+      meanReturn: annualizedMeanReturn,
+      downsideDeviation: downsideDeviation,
+      downsideVolatility: annualizedDownsideVolatility
     };
   }
 
-  const sortinoRatio = (meanReturn - dailyRiskFreeRate) / downsideDeviation;
-  // Annualize by multiplying by sqrt(252) for daily data
-  const annualizedSortino = sortinoRatio * Math.sqrt(252);
+  const sortinoRatio = (annualizedMeanReturn - annualizedRiskFreeRate) / annualizedDownsideVolatility;
 
   return {
-    sortinoRatio: annualizedSortino,
-    meanReturn: meanReturn * 252, // Annualized
+    sortinoRatio: sortinoRatio,
+    meanReturn: annualizedMeanReturn,
     downsideDeviation: downsideDeviation,
-    downsideVolatility: downsideDeviation * Math.sqrt(252), // Annualized
+    downsideVolatility: annualizedDownsideVolatility,
     dailyReturns: returns.length
   };
 }

@@ -664,11 +664,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="detailed-header">
                 <h3>Detailed Analysis</h3>
                 <button class="toggle-details-btn" id="toggleDetailsBtn">
-                    <span class="toggle-text">Show Details</span>
-                    <span class="toggle-icon">▼</span>
+                    <span class="toggle-text">Hide Details</span>
+                    <span class="toggle-icon">▲</span>
                 </button>
             </div>
-            <div class="detailed-content collapsed" id="detailedContent">
+            <div class="detailed-content" id="detailedContent">
             </div>
         `;
         resultsContainer.appendChild(detailedSection);
