@@ -5,6 +5,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const errorDiv = document.getElementById('error');
     const analyzeBtn = document.getElementById('analyzeBtn');
     const apiKeyStatus = document.getElementById('apiKeyStatus');
+    const tokensContainer = document.getElementById('tokensContainer');
+    const addTokenBtn = document.getElementById('addTokenBtn');
+    
+    let tokenIndex = 1; // Start at 1 since we already have token0
 
     // Check if API key is configured on server
     try {
@@ -21,6 +25,68 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error checking API key config:', error);
     }
 
+    // Function to add a new token input
+    function addTokenInput() {
+        const tokenGroup = document.createElement('div');
+        tokenGroup.className = 'token-input-group';
+        tokenGroup.setAttribute('data-token-index', tokenIndex);
+        
+        tokenGroup.innerHTML = `
+            <div class="form-group">
+                <label for="token${tokenIndex}">Token ID</label>
+                <div class="token-input-wrapper">
+                    <input type="text" class="token-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="e.g., ethereum" required>
+                    <button type="button" class="btn-remove-token" aria-label="Remove token">×</button>
+                </div>
+                <small>CoinGecko token ID (e.g., bitcoin, ethereum)</small>
+            </div>
+        `;
+        
+        tokensContainer.appendChild(tokenGroup);
+        
+        // Add event listener to remove button
+        const removeBtn = tokenGroup.querySelector('.btn-remove-token');
+        removeBtn.addEventListener('click', () => {
+            tokenGroup.remove();
+            updateRemoveButtons();
+        });
+        
+        tokenIndex++;
+        updateRemoveButtons();
+    }
+
+    // Function to update remove button visibility
+    function updateRemoveButtons() {
+        const tokenGroups = tokensContainer.querySelectorAll('.token-input-group');
+        tokenGroups.forEach((group, index) => {
+            const removeBtn = group.querySelector('.btn-remove-token');
+            if (tokenGroups.length > 1) {
+                removeBtn.classList.remove('hidden');
+            } else {
+                removeBtn.classList.add('hidden');
+            }
+        });
+    }
+
+    // Add event listener to "Add Token" button
+    addTokenBtn.addEventListener('click', addTokenInput);
+
+    // Initialize remove button visibility
+    updateRemoveButtons();
+
+    // Function to collect all token IDs from the form
+    function collectTokens() {
+        const tokenInputs = tokensContainer.querySelectorAll('.token-input');
+        const tokens = [];
+        tokenInputs.forEach(input => {
+            const value = input.value.trim().toLowerCase();
+            if (value) {
+                tokens.push(value);
+            }
+        });
+        return tokens;
+    }
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -28,14 +94,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         results.classList.add('hidden');
         errorDiv.classList.add('hidden');
         
+        // Collect tokens
+        const tokens = collectTokens();
+        
+        if (tokens.length === 0) {
+            showError('Please enter at least one token ID');
+            return;
+        }
+        
         // Show loading
         loading.classList.remove('hidden');
         analyzeBtn.disabled = true;
         analyzeBtn.querySelector('.btn-text').textContent = 'Analyzing...';
 
         const apiKey = document.getElementById('apiKey').value.trim();
-        const token1 = document.getElementById('token1').value.trim().toLowerCase();
-        const token2 = document.getElementById('token2').value.trim().toLowerCase();
         const timeframe = document.getElementById('timeframe').value;
 
         try {
@@ -46,8 +118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 },
                 body: JSON.stringify({
                     apiKey,
-                    token1,
-                    token2,
+                    tokens,
                     timeframe: parseInt(timeframe)
                 })
             });
@@ -153,103 +224,213 @@ document.addEventListener('DOMContentLoaded', async () => {
         return interpretationDiv;
     }
 
+    function getCorrelationInterpretation(correlationToSP500, correlationToBitcoin, tokenName) {
+        const interpretationDiv = document.createElement('div');
+        interpretationDiv.className = 'interpretation-content correlation-interpretation';
+        
+        let content = '<div class="interpretation-header"><strong>Market Correlations:</strong></div>';
+        
+        // S&P 500 Correlation
+        if (correlationToSP500 !== null) {
+            const corrValue = correlationToSP500;
+            let sp500Text = '';
+            let sp500Class = '';
+            
+            if (Math.abs(corrValue) < 0.3) {
+                sp500Text = `Low correlation (${corrValue.toFixed(2)}) to S&P 500. ${tokenName} moves largely independently from traditional stock markets, providing excellent diversification benefits for a traditional portfolio.`;
+                sp500Class = 'excellent';
+            } else if (Math.abs(corrValue) < 0.5) {
+                sp500Text = `Moderate correlation (${corrValue.toFixed(2)}) to S&P 500. ${tokenName} shows some relationship with traditional markets but maintains significant independence, offering good diversification potential.`;
+                sp500Class = 'good';
+            } else if (Math.abs(corrValue) < 0.7) {
+                sp500Text = `High correlation (${corrValue.toFixed(2)}) to S&P 500. ${tokenName} tends to move with traditional markets, reducing diversification benefits when added to a stock portfolio.`;
+                sp500Class = 'moderate';
+            } else {
+                sp500Text = `Very high correlation (${corrValue.toFixed(2)}) to S&P 500. ${tokenName} moves very closely with traditional markets, offering minimal diversification benefits.`;
+                sp500Class = 'poor';
+            }
+            
+            content += `<p class="interpretation-text ${sp500Class}"><strong>vs S&P 500:</strong> ${sp500Text}</p>`;
+        }
+        
+        // Bitcoin Correlation
+        if (correlationToBitcoin !== null) {
+            const corrValue = correlationToBitcoin;
+            let btcText = '';
+            let btcClass = '';
+            
+            if (Math.abs(corrValue) < 0.3) {
+                btcText = `Low correlation (${corrValue.toFixed(2)}) to Bitcoin. ${tokenName} moves independently from Bitcoin, suggesting it has unique price drivers and isn't just following the crypto market leader.`;
+                btcClass = 'excellent';
+            } else if (Math.abs(corrValue) < 0.5) {
+                btcText = `Moderate correlation (${corrValue.toFixed(2)}) to Bitcoin. ${tokenName} shows some relationship with Bitcoin but maintains meaningful independence in its price movements.`;
+                btcClass = 'good';
+            } else if (Math.abs(corrValue) < 0.7) {
+                btcText = `High correlation (${corrValue.toFixed(2)}) to Bitcoin. ${tokenName} tends to move with Bitcoin, indicating it's significantly influenced by Bitcoin's price action.`;
+                btcClass = 'moderate';
+            } else {
+                btcText = `Very high correlation (${corrValue.toFixed(2)}) to Bitcoin. ${tokenName} moves very closely with Bitcoin, suggesting it's heavily dependent on Bitcoin's price movements with little independent price action.`;
+                btcClass = 'poor';
+            }
+            
+            content += `<p class="interpretation-text ${btcClass}"><strong>vs Bitcoin:</strong> ${btcText}</p>`;
+        }
+        
+        // Add details section
+        content += `
+            <div class="interpretation-details">
+                <p><strong>Understanding Correlation:</strong></p>
+                <p>Correlation ranges from -1 to +1:</p>
+                <p>• <strong>+1</strong>: Perfect positive correlation (assets move together)</p>
+                <p>• <strong>0</strong>: No correlation (independent movements)</p>
+                <p>• <strong>-1</strong>: Perfect negative correlation (assets move opposite)</p>
+                <p><strong>Portfolio Implication:</strong> Lower correlation to existing holdings provides better diversification and risk reduction benefits.</p>
+            </div>
+        `;
+        
+        interpretationDiv.innerHTML = content;
+        return interpretationDiv;
+    }
+
     function displayResults(data) {
+        const resultsContainer = document.getElementById('resultsContainer');
+        resultsContainer.innerHTML = '';
+        
         // Display risk-free rate
         document.getElementById('riskFreeRate').textContent = `${data.riskFreeRate.toFixed(2)}%`;
 
-        // Calculate percentages for display
-        const token1ReturnPct = (data.token1.meanReturn * 100).toFixed(2);
-        const token1VolatilityPct = (data.token1.volatility * 100).toFixed(2);
-        const token1DownsideVolPct = (data.token1.downsideVolatility * 100).toFixed(2);
-        const token2ReturnPct = (data.token2.meanReturn * 100).toFixed(2);
-        const token2VolatilityPct = (data.token2.volatility * 100).toFixed(2);
-        const token2DownsideVolPct = (data.token2.downsideVolatility * 100).toFixed(2);
+        // Get all token results
+        const tokenResults = data.tokens || [];
+        const isSingle = tokenResults.length === 1;
+        const isMultiple = tokenResults.length > 1;
 
-        // Display token 1 results
-        const token1Name = data.token1.id.toUpperCase();
-        document.getElementById('token1Name').textContent = token1Name;
-        document.getElementById('token1Sharpe').textContent = data.token1.sharpeRatio.toFixed(3);
-        document.getElementById('token1Sortino').textContent = data.token1.sortinoRatio >= 999 ? '∞' : data.token1.sortinoRatio.toFixed(3);
-        document.getElementById('token1Return').textContent = `${token1ReturnPct}%`;
-        document.getElementById('token1Volatility').textContent = `${token1VolatilityPct}%`;
-        document.getElementById('token1DownsideVol').textContent = `${token1DownsideVolPct}%`;
+        // Create comparison container
+        const comparisonDiv = document.createElement('div');
+        comparisonDiv.className = `comparison ${isSingle ? 'single' : isMultiple ? 'multiple' : ''}`;
 
-        // Display token 2 results
-        const token2Name = data.token2.id.toUpperCase();
-        document.getElementById('token2Name').textContent = token2Name;
-        document.getElementById('token2Sharpe').textContent = data.token2.sharpeRatio.toFixed(3);
-        document.getElementById('token2Sortino').textContent = data.token2.sortinoRatio >= 999 ? '∞' : data.token2.sortinoRatio.toFixed(3);
-        document.getElementById('token2Return').textContent = `${token2ReturnPct}%`;
-        document.getElementById('token2Volatility').textContent = `${token2VolatilityPct}%`;
-        document.getElementById('token2DownsideVol').textContent = `${token2DownsideVolPct}%`;
+        // Create result cards for each token
+        tokenResults.forEach((tokenData, index) => {
+            // Add VS divider before second token if exactly 2 tokens
+            if (tokenResults.length === 2 && index === 1) {
+                const vsDivider = document.createElement('div');
+                vsDivider.className = 'vs-divider';
+                vsDivider.textContent = 'VS';
+                comparisonDiv.appendChild(vsDivider);
+            }
+            const tokenName = tokenData.id.toUpperCase();
+            const returnPct = (tokenData.meanReturn * 100).toFixed(2);
+            const volatilityPct = (tokenData.volatility * 100).toFixed(2);
+            const downsideVolPct = (tokenData.downsideVolatility * 100).toFixed(2);
 
-        // Add contextual interpretations
-        const token1InterpretationDiv = document.getElementById('token1Interpretation');
-        token1InterpretationDiv.innerHTML = '';
-        
-        // Sharpe interpretation
-        token1InterpretationDiv.appendChild(getSharpeInterpretation(
-            data.token1.sharpeRatio,
-            token1Name,
-            token1ReturnPct,
-            token1VolatilityPct,
-            data.riskFreeRate
-        ));
-        
-        // Sortino interpretation
-        token1InterpretationDiv.appendChild(getSortinoInterpretation(
-            data.token1.sortinoRatio,
-            token1Name,
-            token1ReturnPct,
-            token1DownsideVolPct,
-            data.riskFreeRate,
-            data.token1.sharpeRatio
-        ));
+            const tokenResultDiv = document.createElement('div');
+            tokenResultDiv.className = 'token-result';
+            
+            tokenResultDiv.innerHTML = `
+                <h3>${tokenName}</h3>
+                <div class="stat-box">
+                    <div class="stat">
+                        <span class="stat-label">Sharpe Ratio</span>
+                        <span class="stat-value">${tokenData.sharpeRatio.toFixed(3)}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Sortino Ratio</span>
+                        <span class="stat-value">${tokenData.sortinoRatio >= 999 ? '∞' : tokenData.sortinoRatio.toFixed(3)}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Annualized Return</span>
+                        <span class="stat-value">${returnPct}%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Volatility</span>
+                        <span class="stat-value">${volatilityPct}%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Downside Volatility</span>
+                        <span class="stat-value">${downsideVolPct}%</span>
+                    </div>
+                    ${tokenData.correlationToSP500 !== null && tokenData.correlationToSP500 !== undefined ? `
+                    <div class="stat">
+                        <span class="stat-label">Correlation to S&P 500</span>
+                        <span class="stat-value">${tokenData.correlationToSP500.toFixed(3)}</span>
+                    </div>
+                    ` : ''}
+                    ${tokenData.correlationToBitcoin !== null && tokenData.correlationToBitcoin !== undefined ? `
+                    <div class="stat">
+                        <span class="stat-label">Correlation to Bitcoin</span>
+                        <span class="stat-value">${tokenData.correlationToBitcoin.toFixed(3)}</span>
+                    </div>
+                    ` : ''}
+                </div>
+                <div class="interpretation" id="token${index}Interpretation"></div>
+            `;
 
-        const token2InterpretationDiv = document.getElementById('token2Interpretation');
-        token2InterpretationDiv.innerHTML = '';
-        
-        // Sharpe interpretation
-        token2InterpretationDiv.appendChild(getSharpeInterpretation(
-            data.token2.sharpeRatio,
-            token2Name,
-            token2ReturnPct,
-            token2VolatilityPct,
-            data.riskFreeRate
-        ));
-        
-        // Sortino interpretation
-        token2InterpretationDiv.appendChild(getSortinoInterpretation(
-            data.token2.sortinoRatio,
-            token2Name,
-            token2ReturnPct,
-            token2DownsideVolPct,
-            data.riskFreeRate,
-            data.token2.sharpeRatio
-        ));
+            comparisonDiv.appendChild(tokenResultDiv);
 
-        // Determine winner (consider both Sharpe and Sortino)
+            // Add interpretations
+            const interpretationDiv = tokenResultDiv.querySelector('.interpretation');
+            
+            // Sharpe interpretation
+            interpretationDiv.appendChild(getSharpeInterpretation(
+                tokenData.sharpeRatio,
+                tokenName,
+                returnPct,
+                volatilityPct,
+                data.riskFreeRate
+            ));
+            
+            // Sortino interpretation
+            interpretationDiv.appendChild(getSortinoInterpretation(
+                tokenData.sortinoRatio,
+                tokenName,
+                returnPct,
+                downsideVolPct,
+                data.riskFreeRate,
+                tokenData.sharpeRatio
+            ));
+            
+            // Correlation interpretation (if data available)
+            if ((tokenData.correlationToSP500 !== null && tokenData.correlationToSP500 !== undefined) || 
+                (tokenData.correlationToBitcoin !== null && tokenData.correlationToBitcoin !== undefined)) {
+                interpretationDiv.appendChild(getCorrelationInterpretation(
+                    tokenData.correlationToSP500,
+                    tokenData.correlationToBitcoin,
+                    tokenName
+                ));
+            }
+        });
+
+        resultsContainer.appendChild(comparisonDiv);
+
+        // Determine winner (if multiple tokens)
         const winnerDiv = document.getElementById('winner');
-        const token1Sharpe = data.token1.sharpeRatio;
-        const token2Sharpe = data.token2.sharpeRatio;
-        const token1Sortino = data.token1.sortinoRatio;
-        const token2Sortino = data.token2.sortinoRatio;
+        if (tokenResults.length > 1) {
+            // Sort tokens by Sharpe ratio (primary) and Sortino ratio (secondary)
+            const sortedTokens = [...tokenResults].sort((a, b) => {
+                if (Math.abs(a.sharpeRatio - b.sharpeRatio) > 0.01) {
+                    return b.sharpeRatio - a.sharpeRatio;
+                }
+                return b.sortinoRatio - a.sortinoRatio;
+            });
 
-        let winnerText = '';
-        if (token1Sharpe > token2Sharpe && token1Sortino > token2Sortino) {
-            winnerText = `🏆 ${token1Name} has higher Sharpe (${token1Sharpe.toFixed(3)}) and Sortino (${token1Sortino >= 999 ? '∞' : token1Sortino.toFixed(3)}) ratios - superior risk-adjusted returns`;
-        } else if (token2Sharpe > token1Sharpe && token2Sortino > token1Sortino) {
-            winnerText = `🏆 ${token2Name} has higher Sharpe (${token2Sharpe.toFixed(3)}) and Sortino (${token2Sortino >= 999 ? '∞' : token2Sortino.toFixed(3)}) ratios - superior risk-adjusted returns`;
-        } else if (token1Sharpe > token2Sharpe) {
-            winnerText = `🏆 ${token1Name} has higher Sharpe ratio (${token1Sharpe.toFixed(3)} vs ${token2Sharpe.toFixed(3)}), but ${token2Name} has better downside protection (Sortino: ${token2Sortino >= 999 ? '∞' : token2Sortino.toFixed(3)} vs ${token1Sortino >= 999 ? '∞' : token1Sortino.toFixed(3)})`;
-        } else if (token2Sharpe > token1Sharpe) {
-            winnerText = `🏆 ${token2Name} has higher Sharpe ratio (${token2Sharpe.toFixed(3)} vs ${token1Sharpe.toFixed(3)}), but ${token1Name} has better downside protection (Sortino: ${token1Sortino >= 999 ? '∞' : token1Sortino.toFixed(3)} vs ${token2Sortino >= 999 ? '∞' : token2Sortino.toFixed(3)})`;
+            const winner = sortedTokens[0];
+            const winnerName = winner.id.toUpperCase();
+            const winnerSharpe = winner.sharpeRatio.toFixed(3);
+            const winnerSortino = winner.sortinoRatio >= 999 ? '∞' : winner.sortinoRatio.toFixed(3);
+
+            let winnerText = `🏆 ${winnerName} has the best risk-adjusted returns (Sharpe: ${winnerSharpe}, Sortino: ${winnerSortino})`;
+            
+            if (sortedTokens.length > 1) {
+                const second = sortedTokens[1];
+                const secondName = second.id.toUpperCase();
+                winnerText += ` - outperforming ${secondName}`;
+            }
+
+            winnerDiv.textContent = winnerText;
+            winnerDiv.className = 'winner higher';
         } else {
-            winnerText = 'Both tokens have similar risk-adjusted returns';
+            winnerDiv.textContent = '';
+            winnerDiv.className = '';
         }
-        
-        winnerDiv.textContent = winnerText;
-        winnerDiv.className = 'winner higher';
 
         // Show results
         results.classList.remove('hidden');
@@ -260,4 +441,3 @@ document.addEventListener('DOMContentLoaded', async () => {
         errorDiv.classList.remove('hidden');
     }
 });
-

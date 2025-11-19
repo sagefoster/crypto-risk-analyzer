@@ -85,6 +85,77 @@ header h1 {
     gap: 20px;
 }
 
+.token-input-group {
+    margin-bottom: 16px;
+}
+
+.token-input-wrapper {
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+}
+
+.token-input-wrapper input {
+    flex: 1;
+}
+
+.btn-remove-token {
+    width: 36px;
+    height: 44px;
+    padding: 0;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 24px;
+    font-weight: 300;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.btn-remove-token:hover {
+    background: var(--error);
+    border-color: var(--error);
+    color: white;
+}
+
+.btn-remove-token.hidden {
+    display: none;
+}
+
+.btn-add-token {
+    width: 100%;
+    padding: 12px 24px;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--accent-primary);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.btn-add-token:hover {
+    background: var(--bg-secondary);
+    border-color: var(--accent-primary);
+    transform: translateY(-1px);
+}
+
+.btn-add-token span {
+    font-size: 1.5rem;
+    font-weight: 300;
+    line-height: 1;
+}
+
 label {
     display: block;
     margin-bottom: 8px;
@@ -245,10 +316,16 @@ small {
 
 .comparison {
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
     gap: 24px;
-    align-items: center;
     margin-bottom: 24px;
+}
+
+.comparison.single {
+    grid-template-columns: 1fr;
+}
+
+.comparison.multiple {
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
 .token-result {
@@ -256,6 +333,7 @@ small {
     padding: 24px;
     border-radius: 12px;
     border: 1px solid var(--border-color);
+    position: relative;
 }
 
 .token-result h3 {
@@ -299,6 +377,13 @@ small {
     color: var(--accent-primary);
     text-align: center;
     padding: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.comparison.multiple:has(.vs-divider) {
+    grid-template-columns: 1fr auto 1fr;
 }
 
 .winner {
@@ -458,6 +543,10 @@ small {
 }
 
 .sortino-interpretation {
+    margin-top: 20px;
+}
+
+.correlation-interpretation {
     margin-top: 20px;
 }
 

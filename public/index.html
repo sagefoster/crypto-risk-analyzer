@@ -22,18 +22,22 @@
                     <small id="apiKeyStatus" class="api-key-status"></small>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="token1">Token 1 ID</label>
-                        <input type="text" id="token1" name="token1" placeholder="e.g., bitcoin" required>
-                        <small>CoinGecko token ID (e.g., bitcoin, ethereum)</small>
+                <div id="tokensContainer">
+                    <div class="token-input-group" data-token-index="0">
+                        <div class="form-group">
+                            <label for="token0">Token ID</label>
+                            <div class="token-input-wrapper">
+                                <input type="text" class="token-input" id="token0" name="token0" placeholder="e.g., bitcoin" required>
+                                <button type="button" class="btn-remove-token hidden" aria-label="Remove token">×</button>
+                            </div>
+                            <small>CoinGecko token ID (e.g., bitcoin, ethereum)</small>
+                        </div>
                     </div>
-
-                    <div class="form-group">
-                        <label for="token2">Token 2 ID</label>
-                        <input type="text" id="token2" name="token2" placeholder="e.g., ethereum" required>
-                        <small>CoinGecko token ID (e.g., bitcoin, ethereum)</small>
-                    </div>
+                </div>
+                <div class="form-group">
+                    <button type="button" class="btn-add-token" id="addTokenBtn">
+                        <span>+</span> Add Another Token to Compare
+                    </button>
                 </div>
 
                 <div class="form-group">
@@ -65,62 +69,8 @@
                     <span class="value" id="riskFreeRate">-</span>
                 </div>
 
-                <div class="comparison">
-                    <div class="token-result">
-                        <h3 id="token1Name">Token 1</h3>
-                        <div class="stat-box">
-                            <div class="stat">
-                                <span class="stat-label">Sharpe Ratio</span>
-                                <span class="stat-value" id="token1Sharpe">-</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Sortino Ratio</span>
-                                <span class="stat-value" id="token1Sortino">-</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Annualized Return</span>
-                                <span class="stat-value" id="token1Return">-</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Volatility</span>
-                                <span class="stat-value" id="token1Volatility">-</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Downside Volatility</span>
-                                <span class="stat-value" id="token1DownsideVol">-</span>
-                            </div>
-                        </div>
-                        <div class="interpretation" id="token1Interpretation"></div>
-                    </div>
-
-                    <div class="vs-divider">VS</div>
-
-                    <div class="token-result">
-                        <h3 id="token2Name">Token 2</h3>
-                        <div class="stat-box">
-                            <div class="stat">
-                                <span class="stat-label">Sharpe Ratio</span>
-                                <span class="stat-value" id="token2Sharpe">-</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Sortino Ratio</span>
-                                <span class="stat-value" id="token2Sortino">-</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Annualized Return</span>
-                                <span class="stat-value" id="token2Return">-</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Volatility</span>
-                                <span class="stat-value" id="token2Volatility">-</span>
-                            </div>
-                            <div class="stat">
-                                <span class="stat-label">Downside Volatility</span>
-                                <span class="stat-value" id="token2DownsideVol">-</span>
-                            </div>
-                        </div>
-                        <div class="interpretation" id="token2Interpretation"></div>
-                    </div>
+                <div id="resultsContainer">
+                    <!-- Results will be dynamically generated here -->
                 </div>
 
                 <div class="winner" id="winner"></div>

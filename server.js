@@ -139,6 +139,47 @@ function calculateSharpeRatio(prices, riskFreeRate) {
   };
 }
 
+// Helper function to calculate correlation between two price series
+function calculateCorrelation(prices1, prices2) {
+  if (prices1.length !== prices2.length || prices1.length < 2) {
+    return null;
+  }
+
+  // Calculate returns for both series
+  const returns1 = [];
+  const returns2 = [];
+  
+  for (let i = 1; i < prices1.length; i++) {
+    returns1.push((prices1[i] - prices1[i - 1]) / prices1[i - 1]);
+    returns2.push((prices2[i] - prices2[i - 1]) / prices2[i - 1]);
+  }
+
+  // Calculate means
+  const mean1 = returns1.reduce((sum, r) => sum + r, 0) / returns1.length;
+  const mean2 = returns2.reduce((sum, r) => sum + r, 0) / returns2.length;
+
+  // Calculate correlation coefficient
+  let numerator = 0;
+  let sum1Sq = 0;
+  let sum2Sq = 0;
+
+  for (let i = 0; i < returns1.length; i++) {
+    const diff1 = returns1[i] - mean1;
+    const diff2 = returns2[i] - mean2;
+    numerator += diff1 * diff2;
+    sum1Sq += diff1 * diff1;
+    sum2Sq += diff2 * diff2;
+  }
+
+  const denominator = Math.sqrt(sum1Sq * sum2Sq);
+  
+  if (denominator === 0) {
+    return 0;
+  }
+
+  return numerator / denominator;
+}
+
 // Helper function to calculate Sortino ratio (focuses on downside risk)
 function calculateSortinoRatio(prices, riskFreeRate) {
   if (prices.length < 2) {
@@ -205,23 +246,41 @@ function calculateSortinoRatio(prices, riskFreeRate) {
 // API endpoint to analyze tokens
 app.post('/api/analyze', async (req, res) => {
   try {
-    let { apiKey, token1, token2, timeframe = 90 } = req.body;
+    let { apiKey, tokens, token1, token2, timeframe = 90 } = req.body;
 
     // Use environment variable API key if not provided in request
     if (!apiKey || apiKey.trim() === '') {
       apiKey = process.env.COINGECKO_API_KEY;
     }
 
+    // Support both old format (token1, token2) and new format (tokens array)
+    let tokenArray = tokens;
+    if (!tokenArray && token1 && token2) {
+      // Legacy support for old format
+      tokenArray = [token1, token2];
+    }
+
     // Validate inputs
-    if (!apiKey || !token1 || !token2) {
-      return res.status(400).json({ error: 'Missing required fields: apiKey (or set COINGECKO_API_KEY in .env), token1, token2' });
+    if (!apiKey) {
+      return res.status(400).json({ error: 'Missing required field: apiKey (or set COINGECKO_API_KEY in .env)' });
+    }
+
+    if (!tokenArray || !Array.isArray(tokenArray) || tokenArray.length === 0) {
+      return res.status(400).json({ error: 'Missing required field: tokens (array of token IDs)' });
+    }
+
+    // Remove duplicates and empty strings
+    tokenArray = [...new Set(tokenArray.filter(t => t && t.trim()))];
+    
+    if (tokenArray.length === 0) {
+      return res.status(400).json({ error: 'At least one valid token ID is required' });
     }
 
     // Fetch Treasury rate
     const treasuryRate = await fetchTreasuryRate();
     const dailyRiskFreeRate = treasuryRate / 365;
 
-    // Fetch historical data for both tokens
+    // Fetch historical data for all tokens
     // Auto-detect if it's a Pro or Demo API key and use appropriate endpoint
     const makeApiRequest = async (tokenId) => {
       // Try Pro API first (for Pro API keys)
@@ -266,45 +325,138 @@ app.post('/api/analyze', async (req, res) => {
       }
     };
 
-    const [token1Data, token2Data] = await Promise.all([
-      makeApiRequest(token1),
-      makeApiRequest(token2)
+    // Fetch S&P 500 data for correlation analysis
+    const fetchSP500Data = async () => {
+      try {
+        // Use Yahoo Finance API to get S&P 500 (^GSPC) data
+        const endDate = Math.floor(Date.now() / 1000);
+        const startDate = endDate - (timeframe * 24 * 60 * 60);
+        
+        const response = await axios.get(`https://query1.finance.yahoo.com/v8/finance/chart/%5EGSPC`, {
+          params: {
+            period1: startDate,
+            period2: endDate,
+            interval: '1d'
+          },
+          headers: {
+            'User-Agent': 'Mozilla/5.0'
+          },
+          timeout: 10000
+        });
+
+        if (response.data && response.data.chart && response.data.chart.result && response.data.chart.result[0]) {
+          const result = response.data.chart.result[0];
+          const timestamps = result.timestamp || [];
+          const quotes = result.indicators.quote[0];
+          const closePrices = quotes.close || [];
+          
+          // Filter out null values and return as [timestamp, price] pairs
+          const prices = [];
+          for (let i = 0; i < timestamps.length; i++) {
+            if (closePrices[i] !== null) {
+              prices.push([timestamps[i] * 1000, closePrices[i]]);
+            }
+          }
+          
+          console.log(`Fetched ${prices.length} S&P 500 data points`);
+          return prices;
+        }
+        
+        throw new Error('Invalid S&P 500 data format');
+      } catch (error) {
+        console.error('Failed to fetch S&P 500 data:', error.message);
+        return null;
+      }
+    };
+
+    // Fetch data for all tokens and S&P 500 in parallel
+    const [sp500Data, ...tokenDataArray] = await Promise.all([
+      fetchSP500Data(),
+      ...tokenArray.map(tokenId => makeApiRequest(tokenId))
     ]);
 
-    // Extract prices from market_chart data
-    // The response structure: { prices: [[timestamp, price], ...], market_caps: [...], total_volumes: [...] }
-    const token1Prices = token1Data.data.prices.map(p => p[1]);
-    const token2Prices = token2Data.data.prices.map(p => p[1]);
+    // Extract Bitcoin prices for correlation (if Bitcoin is in the list)
+    const bitcoinIndex = tokenArray.findIndex(id => id.toLowerCase() === 'bitcoin');
+    let bitcoinPrices = null;
+    
+    if (bitcoinIndex !== -1) {
+      bitcoinPrices = tokenDataArray[bitcoinIndex].data.prices.map(p => p[1]);
+    } else {
+      // If Bitcoin isn't in the list, fetch it for correlation purposes
+      try {
+        const btcData = await makeApiRequest('bitcoin');
+        bitcoinPrices = btcData.data.prices.map(p => p[1]);
+        console.log('Fetched Bitcoin data for correlation analysis');
+      } catch (error) {
+        console.log('Could not fetch Bitcoin data for correlation');
+      }
+    }
 
-    // Calculate Sharpe and Sortino ratios
-    const token1Stats = calculateSharpeRatio(token1Prices, treasuryRate);
-    const token1Sortino = calculateSortinoRatio(token1Prices, treasuryRate);
-    const token2Stats = calculateSharpeRatio(token2Prices, treasuryRate);
-    const token2Sortino = calculateSortinoRatio(token2Prices, treasuryRate);
+    // Process each token's data
+    const tokenResults = tokenDataArray.map((tokenData, index) => {
+      const tokenId = tokenArray[index];
+      
+      // Extract prices from market_chart data
+      // The response structure: { prices: [[timestamp, price], ...], market_caps: [...], total_volumes: [...] }
+      const pricesWithTimestamps = tokenData.data.prices;
+      const prices = pricesWithTimestamps.map(p => p[1]);
+
+      // Calculate Sharpe and Sortino ratios
+      const sharpeStats = calculateSharpeRatio(prices, treasuryRate);
+      const sortinoStats = calculateSortinoRatio(prices, treasuryRate);
+
+      // Calculate correlations
+      let correlationToSP500 = null;
+      let correlationToBitcoin = null;
+
+      // Correlation to S&P 500
+      if (sp500Data && sp500Data.length > 0) {
+        // Align S&P 500 data with token data by timestamp
+        const alignedSP500Prices = [];
+        const alignedTokenPrices = [];
+        
+        for (let i = 0; i < pricesWithTimestamps.length; i++) {
+          const tokenTimestamp = pricesWithTimestamps[i][0];
+          const tokenPrice = pricesWithTimestamps[i][1];
+          
+          // Find closest S&P 500 timestamp (within 24 hours)
+          const sp500Match = sp500Data.find(sp => Math.abs(sp[0] - tokenTimestamp) < 24 * 60 * 60 * 1000);
+          
+          if (sp500Match) {
+            alignedSP500Prices.push(sp500Match[1]);
+            alignedTokenPrices.push(tokenPrice);
+          }
+        }
+        
+        if (alignedSP500Prices.length >= 10) {
+          correlationToSP500 = calculateCorrelation(alignedTokenPrices, alignedSP500Prices);
+        }
+      }
+
+      // Correlation to Bitcoin (for non-Bitcoin tokens)
+      if (bitcoinPrices && tokenId.toLowerCase() !== 'bitcoin' && bitcoinPrices.length === prices.length) {
+        correlationToBitcoin = calculateCorrelation(prices, bitcoinPrices);
+      }
+
+      return {
+        id: tokenId,
+        sharpeRatio: sharpeStats.sharpeRatio,
+        sortinoRatio: sortinoStats.sortinoRatio,
+        meanReturn: sharpeStats.meanReturn,
+        volatility: sharpeStats.volatility,
+        downsideVolatility: sortinoStats.downsideVolatility,
+        correlationToSP500: correlationToSP500,
+        correlationToBitcoin: correlationToBitcoin,
+        dataPoints: sharpeStats.dailyReturns
+      };
+    });
 
     // Return results
     res.json({
       success: true,
       riskFreeRate: treasuryRate,
       timeframe: timeframe,
-      token1: {
-        id: token1,
-        sharpeRatio: token1Stats.sharpeRatio,
-        sortinoRatio: token1Sortino.sortinoRatio,
-        meanReturn: token1Stats.meanReturn,
-        volatility: token1Stats.volatility,
-        downsideVolatility: token1Sortino.downsideVolatility,
-        dataPoints: token1Stats.dailyReturns
-      },
-      token2: {
-        id: token2,
-        sharpeRatio: token2Stats.sharpeRatio,
-        sortinoRatio: token2Sortino.sortinoRatio,
-        meanReturn: token2Stats.meanReturn,
-        volatility: token2Stats.volatility,
-        downsideVolatility: token2Sortino.downsideVolatility,
-        dataPoints: token2Stats.dailyReturns
-      }
+      tokens: tokenResults
     });
   } catch (error) {
     console.error('Error analyzing tokens:', error);
