@@ -740,6 +740,22 @@ small {
     font-size: 1.1rem;
 }
 
+.stat-sublabel {
+    display: block;
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+    font-style: italic;
+    margin-top: 2px;
+    opacity: 0.8;
+}
+
+.stat-highlight {
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(88, 166, 255, 0.03));
+    border-left: 3px solid var(--accent-primary);
+    padding: 12px;
+    border-radius: 8px;
+}
+
 .vs-divider {
     font-size: 1.5rem;
     font-weight: 700;
@@ -1246,6 +1262,14 @@ small {
 
     .stat-value {
         font-size: 1rem;
+    }
+
+    .stat-sublabel {
+        font-size: 0.7rem;
+    }
+
+    .stat-highlight {
+        padding: 10px;
     }
 
     /* Interpretation sections for mobile */

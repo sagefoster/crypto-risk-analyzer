@@ -193,6 +193,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         return interpretationDiv;
     }
 
+    function getReturnMetricsInterpretation(periodReturn, cagr, annualizedReturn, tokenName, timeframeText) {
+        const interpretationDiv = document.createElement('div');
+        interpretationDiv.className = 'interpretation-content return-interpretation';
+        
+        const periodReturnPct = (periodReturn * 100).toFixed(2);
+        const cagrPct = (cagr * 100).toFixed(2);
+        const annualizedReturnPct = (annualizedReturn * 100).toFixed(2);
+        
+        let mainInterpretation = '';
+        if (periodReturn > 0.50) {
+            mainInterpretation = `Strong returns over ${timeframeText}. ${tokenName} delivered a ${periodReturnPct}% total return during this period.`;
+        } else if (periodReturn > 0.20) {
+            mainInterpretation = `Positive returns over ${timeframeText}. ${tokenName} gained ${periodReturnPct}% during this period.`;
+        } else if (periodReturn > 0) {
+            mainInterpretation = `Modest positive returns over ${timeframeText}. ${tokenName} gained ${periodReturnPct}% during this period.`;
+        } else if (periodReturn > -0.20) {
+            mainInterpretation = `Negative returns over ${timeframeText}. ${tokenName} lost ${Math.abs(parseFloat(periodReturnPct))}% during this period.`;
+        } else {
+            mainInterpretation = `Significant losses over ${timeframeText}. ${tokenName} declined ${Math.abs(parseFloat(periodReturnPct))}% during this period.`;
+        }
+        
+        interpretationDiv.innerHTML = `
+            <div class="interpretation-header">
+                <strong>Return Metrics:</strong> Three ways to measure performance over ${timeframeText}
+            </div>
+            <p class="interpretation-text">${mainInterpretation}</p>
+            <div class="interpretation-details">
+                <p><strong>1. Period Return (${periodReturnPct}%):</strong> The simplest measure—total return from start to end. If you invested $100 at the beginning, you'd have $${(100 * (1 + periodReturn)).toFixed(2)} at the end.</p>
+                <p><strong>2. CAGR (${cagrPct}%):</strong> Compound Annual Growth Rate—the smoothed annual return if growth was consistent each year. Shows "What if this ${timeframeText} performance repeated every year?" Most useful for comparing investments over different time periods.</p>
+                <p><strong>Formula:</strong> ((Ending Price ÷ Starting Price)^(1 ÷ Years)) - 1</p>
+                <p><strong>3. Annualized Return (${annualizedReturnPct}%):</strong> Average of daily returns × 252 trading days. Useful for volatility-adjusted metrics (Sharpe, Sortino) but can differ from CAGR due to volatility effects.</p>
+                <p><strong>Which to Use?</strong> Period Return for total gain, CAGR for comparing across timeframes, Annualized Return for academic/risk metrics.</p>
+            </div>
+            <div class="interpretation-separator"></div>
+        `;
+        
+        return interpretationDiv;
+    }
+
     function getSharpeInterpretation(sharpeRatio, tokenName, returnPct, volatilityPct, riskFreeRate, timeframeText) {
         const interpretationDiv = document.createElement('div');
         interpretationDiv.className = 'interpretation-content';
@@ -583,10 +622,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 comparisonDiv.appendChild(vsDivider);
             }
             const tokenName = tokenData.id.toUpperCase();
-            const returnPct = (tokenData.meanReturn * 100).toFixed(2);
+            // Return metrics
+            const periodReturnPct = (tokenData.periodReturn * 100).toFixed(2);
+            const cagrPct = (tokenData.cagr * 100).toFixed(2);
+            const annualizedReturnPct = (tokenData.annualizedReturn * 100).toFixed(2);
             const volatilityPct = (tokenData.volatility * 100).toFixed(2);
             const downsideVolPct = (tokenData.downsideVolatility * 100).toFixed(2);
-
             const maxDrawdownPct = (tokenData.maxDrawdown * 100).toFixed(2);
 
             const tokenResultDiv = document.createElement('div');
@@ -596,9 +637,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h3>${tokenName}</h3>
                 <p class="timeframe-context">Based on ${timeframeText} of historical data</p>
                 <div class="stats-grid">
+                    <div class="stat stat-highlight">
+                        <span class="stat-label">Period Return</span>
+                        <span class="stat-value">${periodReturnPct}%</span>
+                        <span class="stat-sublabel">Total return over ${timeframeText}</span>
+                    </div>
+                    <div class="stat stat-highlight">
+                        <span class="stat-label">CAGR</span>
+                        <span class="stat-value">${cagrPct}%</span>
+                        <span class="stat-sublabel">Compound annual growth rate</span>
+                    </div>
                     <div class="stat">
                         <span class="stat-label">Annualized Return</span>
-                        <span class="stat-value">${returnPct}%</span>
+                        <span class="stat-value">${annualizedReturnPct}%</span>
+                        <span class="stat-sublabel">Arithmetic mean annualized</span>
                     </div>
                     <div class="stat">
                         <span class="stat-label">Volatility (Std Dev)</span>
@@ -641,7 +693,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Add interpretations
             const interpretationDiv = tokenResultDiv.querySelector('.interpretation');
             
-            // Volatility interpretation (new!)
+            // Return metrics interpretation (new!)
+            interpretationDiv.appendChild(getReturnMetricsInterpretation(
+                tokenData.periodReturn,
+                tokenData.cagr,
+                tokenData.annualizedReturn,
+                tokenName,
+                timeframeText
+            ));
+            
+            // Volatility interpretation
             interpretationDiv.appendChild(getVolatilityInterpretation(
                 tokenData.volatility,
                 tokenName,
@@ -653,7 +714,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             interpretationDiv.appendChild(getSharpeInterpretation(
                 tokenData.sharpeRatio,
                 tokenName,
-                returnPct,
+                annualizedReturnPct,
                 volatilityPct,
                 data.riskFreeRate,
                 timeframeText
@@ -670,7 +731,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             interpretationDiv.appendChild(getSortinoInterpretation(
                 tokenData.sortinoRatio,
                 tokenName,
-                returnPct,
+                annualizedReturnPct,
                 downsideVolPct,
                 data.riskFreeRate,
                 tokenData.sharpeRatio,

@@ -105,18 +105,59 @@ async function fetchTreasuryRate() {
   return 4.25;
 }
 
-// Helper function to calculate Sharpe ratio
-function calculateSharpeRatio(prices, riskFreeRate) {
+// Helper function to calculate comprehensive return metrics
+function calculateReturns(prices, timeframeDays) {
   if (prices.length < 2) {
     throw new Error('Insufficient price data');
   }
 
-  // Calculate daily returns
+  const startPrice = prices[0];
+  const endPrice = prices[prices.length - 1];
+  
+  // 1. Period Return (Simple Return): Total return from start to end
+  const periodReturn = (endPrice - startPrice) / startPrice;
+  
+  // 2. Calculate actual time period in years
+  const years = timeframeDays / 365;
+  
+  // 3. CAGR (Compound Annual Growth Rate): Geometric mean return
+  // Formula: ((Ending Value / Beginning Value) ^ (1 / Years)) - 1
+  const cagr = Math.pow(endPrice / startPrice, 1 / years) - 1;
+  
+  // 4. Annualized Return (Arithmetic Mean): Mean of daily returns annualized
   const returns = [];
   for (let i = 1; i < prices.length; i++) {
     const dailyReturn = (prices[i] - prices[i - 1]) / prices[i - 1];
     returns.push(dailyReturn);
   }
+  const meanDailyReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
+  const annualizedMeanReturn = meanDailyReturn * 252; // 252 trading days
+  
+  return {
+    periodReturn: periodReturn,
+    cagr: cagr,
+    annualizedReturn: annualizedMeanReturn,
+    returns: returns, // Return the daily returns array for other calculations
+    timeframeDays: timeframeDays,
+    years: years
+  };
+}
+
+// Helper function to calculate Sharpe ratio
+function calculateSharpeRatio(prices, riskFreeRate, dailyReturns = null) {
+  if (prices.length < 2) {
+    throw new Error('Insufficient price data');
+  }
+
+  // Use provided daily returns or calculate them
+  const returns = dailyReturns || (() => {
+    const r = [];
+    for (let i = 1; i < prices.length; i++) {
+      const dailyReturn = (prices[i] - prices[i - 1]) / prices[i - 1];
+      r.push(dailyReturn);
+    }
+    return r;
+  })();
 
   // Calculate mean return
   const meanReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
@@ -130,7 +171,12 @@ function calculateSharpeRatio(prices, riskFreeRate) {
 
   // Calculate Sharpe ratio (annualized)
   if (stdDev === 0) {
-    return 0;
+    return {
+      sharpeRatio: 0,
+      meanReturn: meanReturn * 252,
+      volatility: stdDev * Math.sqrt(252),
+      dailyReturns: returns.length
+    };
   }
 
   const sharpeRatio = (meanReturn - dailyRiskFreeRate) / stdDev;
@@ -221,17 +267,20 @@ function calculateCorrelation(prices1, prices2) {
 }
 
 // Helper function to calculate Sortino ratio (focuses on downside risk)
-function calculateSortinoRatio(prices, riskFreeRate) {
+function calculateSortinoRatio(prices, riskFreeRate, dailyReturns = null) {
   if (prices.length < 2) {
     throw new Error('Insufficient price data');
   }
 
-  // Calculate daily returns
-  const returns = [];
-  for (let i = 1; i < prices.length; i++) {
-    const dailyReturn = (prices[i] - prices[i - 1]) / prices[i - 1];
-    returns.push(dailyReturn);
-  }
+  // Use provided daily returns or calculate them
+  const returns = dailyReturns || (() => {
+    const r = [];
+    for (let i = 1; i < prices.length; i++) {
+      const dailyReturn = (prices[i] - prices[i - 1]) / prices[i - 1];
+      r.push(dailyReturn);
+    }
+    return r;
+  })();
 
   // Calculate mean return
   const meanReturn = returns.reduce((sum, r) => sum + r, 0) / returns.length;
@@ -452,9 +501,12 @@ app.post('/api/analyze', async (req, res) => {
       const pricesWithTimestamps = tokenData.data.prices;
       const prices = pricesWithTimestamps.map(p => p[1]);
 
-      // Calculate Sharpe and Sortino ratios
-      const sharpeStats = calculateSharpeRatio(prices, treasuryRate);
-      const sortinoStats = calculateSortinoRatio(prices, treasuryRate);
+      // Calculate comprehensive return metrics first
+      const returnMetrics = calculateReturns(prices, timeframe);
+      
+      // Calculate Sharpe and Sortino ratios (pass daily returns to avoid recalculation)
+      const sharpeStats = calculateSharpeRatio(prices, treasuryRate, returnMetrics.returns);
+      const sortinoStats = calculateSortinoRatio(prices, treasuryRate, returnMetrics.returns);
       
       // Calculate Maximum Drawdown
       const mddStats = calculateMaxDrawdown(prices);
@@ -499,15 +551,24 @@ app.post('/api/analyze', async (req, res) => {
 
       return {
         id: tokenId,
-        meanReturn: sharpeStats.meanReturn,
+        // Return metrics
+        periodReturn: returnMetrics.periodReturn,          // Simple return from start to end
+        cagr: returnMetrics.cagr,                          // Compound Annual Growth Rate
+        annualizedReturn: returnMetrics.annualizedReturn,  // Arithmetic mean of daily returns * 252
+        meanReturn: sharpeStats.meanReturn,                // Legacy: same as annualizedReturn (for backward compatibility)
+        // Risk metrics
         volatility: sharpeStats.volatility,
         maxDrawdown: mddStats.maxDrawdown,
         sharpeRatio: sharpeStats.sharpeRatio,
         sortinoRatio: sortinoStats.sortinoRatio,
         downsideVolatility: sortinoStats.downsideVolatility,
+        // Correlation metrics
         correlationToSP500: correlationToSP500,
         correlationToBitcoin: correlationToBitcoin,
-        dataPoints: sharpeStats.dailyReturns
+        // Metadata
+        dataPoints: sharpeStats.dailyReturns,
+        timeframeDays: returnMetrics.timeframeDays,
+        timeframeYears: returnMetrics.years
       };
     });
 
