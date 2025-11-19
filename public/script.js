@@ -626,7 +626,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         tokenResults.forEach(tokenData => {
             const tokenName = tokenData.id.toUpperCase();
             const tokenId = tokenData.id.toLowerCase();
-            const returnPct = (tokenData.meanReturn * 100).toFixed(2);
+            const returnPct = (tokenData.periodReturn * 100).toFixed(2); // Use period return for quick overview
             const sharpe = tokenData.sharpeRatio.toFixed(2);
             const mdd = (tokenData.maxDrawdown * 100).toFixed(2);
             const mddDisplay = tokenData.maxDrawdown > 0 ? `-${mdd}` : mdd;
@@ -645,7 +645,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <span class="range-value">$${lowPrice} - $${highPrice}</span>
                     </div>
                     <div class="summary-stat">
-                        <span class="summary-label">Return</span>
+                        <span class="summary-label">Period Return</span>
                         <span class="summary-value">${returnPct}%</span>
                     </div>
                     <div class="summary-stat">

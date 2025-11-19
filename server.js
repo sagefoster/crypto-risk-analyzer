@@ -529,7 +529,6 @@ app.post('/api/analyze', async (req, res) => {
       const highPrice = Math.max(...prices);
       const currentPrice = prices[prices.length - 1];
       const startPrice = prices[0];
-      console.log(`[DEBUG] ${tokenId} prices: low=$${lowPrice}, high=$${highPrice}, current=$${currentPrice}`);
 
       // Calculate comprehensive return metrics first
       const returnMetrics = calculateReturns(prices, timeframe);
