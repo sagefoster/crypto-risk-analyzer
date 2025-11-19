@@ -238,6 +238,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         let interpretation = '';
         let interpretationClass = '';
+        const excessReturn = (parseFloat(returnPct) - riskFreeRate).toFixed(2);
         
         if (sharpeRatio > 2) {
             interpretation = `Excellent risk-adjusted performance. ${tokenName} is generating returns that significantly exceed the risk-free rate (${riskFreeRate.toFixed(2)}%) while maintaining reasonable volatility. This indicates strong risk management and efficient return generation.`;
@@ -256,11 +257,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             interpretationClass = 'very-poor';
         }
         
+        // Add context for low Sharpe ratios when returns are poor
+        let contextNote = '';
+        if (sharpeRatio < 0.3 && sharpeRatio > 0) {
+            contextNote = `<p class="context-note"><strong>Why is this Sharpe ratio low?</strong> Over ${timeframeText}, ${tokenName} only delivered ${excessReturn}% excess return above risk-free Treasury bonds, while experiencing ${volatilityPct}% volatility. The low Sharpe ratio (${sharpeRatio.toFixed(3)}) reflects that ${tokenName} took on significant risk but generated minimal reward during this specific period. Longer timeframes may show different results.</p>`;
+        }
+        
         interpretationDiv.innerHTML = `
             <div class="interpretation-header">
                 <strong>Sharpe Ratio:</strong> Return per unit of total risk
             </div>
             <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
+            ${contextNote}
             <div class="interpretation-details">
                 <p><strong>Formula:</strong> (Return - Risk-Free Rate) ÷ Volatility = (${returnPct}% - ${riskFreeRate.toFixed(2)}%) ÷ ${volatilityPct}% = <strong>${sharpeRatio.toFixed(3)}</strong></p>
                 <p><strong>Key Insight:</strong> ${sharpeRatio > 1 ? 'Earning more than 1% extra return for each 1% of risk taken.' : sharpeRatio > 0 ? 'Positive excess return, but not keeping pace with risk.' : 'Losing money while taking risk. Treasury bonds would be better.'}</p>

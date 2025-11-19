@@ -1289,6 +1289,23 @@ small {
     color: var(--error);
 }
 
+.context-note {
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(88, 166, 255, 0.03));
+    border-left: 3px solid var(--accent-primary);
+    padding: 12px 16px;
+    margin: 16px 0;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+}
+
+.context-note strong {
+    color: var(--accent-primary);
+    display: block;
+    margin-bottom: 6px;
+}
+
 .interpretation-details {
     margin-top: 16px;
     padding-top: 16px;
