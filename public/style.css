@@ -687,10 +687,30 @@ small {
 
 .token-result h3 {
     text-align: center;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
     font-size: 1.3rem;
     text-transform: capitalize;
     color: var(--text-primary);
+}
+
+.timeframe-context {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    font-style: italic;
+}
+
+.overview-context {
+    text-align: center;
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.6;
+    padding: 12px 20px;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    border-left: 3px solid var(--accent-primary);
 }
 
 .stat-box {

@@ -157,7 +157,43 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    function getSharpeInterpretation(sharpeRatio, tokenName, returnPct, volatilityPct, riskFreeRate) {
+    function getVolatilityInterpretation(volatility, tokenName, volatilityPct, timeframeText) {
+        const interpretationDiv = document.createElement('div');
+        interpretationDiv.className = 'interpretation-content volatility-interpretation';
+        
+        let interpretation = '';
+        let interpretationClass = '';
+        
+        if (volatility < 0.20) {
+            interpretation = `Very low volatility. ${tokenName} showed minimal price fluctuations during the ${timeframeText}, with a standard deviation of ${volatilityPct}%. This indicates stable, predictable price behavior with returns clustering closely around the average.`;
+            interpretationClass = 'excellent';
+        } else if (volatility < 0.40) {
+            interpretation = `Low to moderate volatility. Over ${timeframeText}, ${tokenName}'s daily returns deviated ${volatilityPct}% from the average on an annualized basis. This represents moderate price swings typical of established crypto assets.`;
+            interpretationClass = 'good';
+        } else if (volatility < 0.70) {
+            interpretation = `High volatility. ${tokenName}'s ${volatilityPct}% standard deviation over ${timeframeText} indicates significant price swings. Daily returns varied widely from the average, meaning prices could move dramatically up or down in short periods.`;
+            interpretationClass = 'warning';
+        } else {
+            interpretation = `Extreme volatility. With a standard deviation of ${volatilityPct}% over ${timeframeText}, ${tokenName} experienced severe price fluctuations. This level of volatility means prices regularly moved far from the average—expect large gains or losses.`;
+            interpretationClass = 'poor';
+        }
+        
+        interpretationDiv.innerHTML = `
+            <div class="interpretation-header">
+                <strong>Volatility (Standard Deviation):</strong> Measures price consistency over ${timeframeText}
+            </div>
+            <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
+            <div class="interpretation-details">
+                <p><strong>What Standard Deviation Means:</strong> ${volatilityPct}% volatility means that in a typical year, ${tokenName}'s returns will stay within a range of ${volatilityPct}% above or below the average return about 68% of the time (1 standard deviation). Higher volatility = bigger price swings and more uncertainty.</p>
+                <p><strong>Context:</strong> This is calculated from ${timeframeText} of daily price data. More volatility means more risk, but also potential for higher returns.</p>
+            </div>
+            <div class="interpretation-separator"></div>
+        `;
+        
+        return interpretationDiv;
+    }
+
+    function getSharpeInterpretation(sharpeRatio, tokenName, returnPct, volatilityPct, riskFreeRate, timeframeText) {
         const interpretationDiv = document.createElement('div');
         interpretationDiv.className = 'interpretation-content';
         
@@ -196,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return interpretationDiv;
     }
 
-    function getMaxDrawdownInterpretation(maxDrawdown, tokenName) {
+    function getMaxDrawdownInterpretation(maxDrawdown, tokenName, timeframeText) {
         const interpretationDiv = document.createElement('div');
         interpretationDiv.className = 'interpretation-content maxdd-interpretation';
         
@@ -205,30 +241,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         let interpretationClass = '';
         
         if (maxDrawdown < 0.05) {
-            interpretation = `Excellent downside protection. ${tokenName} experienced a maximum peak-to-trough loss of only ${mddPct}% during this period. This indicates strong price stability and minimal drawdown risk, making it suitable for risk-averse investors.`;
+            interpretation = `Excellent downside protection. Over ${timeframeText}, ${tokenName} experienced a maximum peak-to-trough loss of only ${mddPct}%. This indicates strong price stability and minimal drawdown risk during this period.`;
             interpretationClass = 'excellent';
         } else if (maxDrawdown < 0.15) {
-            interpretation = `Good risk management. ${tokenName} had a maximum drawdown of ${mddPct}%. This is a reasonable level of downside risk for a cryptocurrency, showing the asset maintained relative stability during the worst market conditions.`;
+            interpretation = `Good risk management. During ${timeframeText}, ${tokenName} had a maximum drawdown of ${mddPct}%. This is a reasonable level of downside risk for a cryptocurrency, showing the asset maintained relative stability during the worst market conditions.`;
             interpretationClass = 'good';
         } else if (maxDrawdown < 0.30) {
-            interpretation = `Moderate drawdown risk. ${tokenName} experienced a ${mddPct}% peak-to-trough decline. This is typical for crypto assets and represents a significant but manageable level of risk. Investors should be comfortable with this magnitude of drawdowns.`;
+            interpretation = `Moderate drawdown risk. Over ${timeframeText}, ${tokenName} experienced a ${mddPct}% peak-to-trough decline. This is typical for crypto assets and represents a significant but manageable level of risk during this period.`;
             interpretationClass = 'moderate';
         } else if (maxDrawdown < 0.50) {
-            interpretation = `High drawdown risk. ${tokenName} suffered a ${mddPct}% peak-to-trough loss. This represents substantial downside risk and requires a high risk tolerance. Investors need strong conviction to hold through such drawdowns.`;
+            interpretation = `High drawdown risk. During ${timeframeText}, ${tokenName} suffered a ${mddPct}% peak-to-trough loss. This represents substantial downside risk and requires a high risk tolerance.`;
             interpretationClass = 'poor';
         } else {
-            interpretation = `Very high drawdown risk. ${tokenName} experienced a severe ${mddPct}% peak-to-trough decline. This extreme drawdown level indicates very high risk and volatility. Only investors with exceptional risk tolerance should consider this asset.`;
+            interpretation = `Very high drawdown risk. Over ${timeframeText}, ${tokenName} experienced a severe ${mddPct}% peak-to-trough decline. This extreme drawdown level indicates very high risk and volatility during this period.`;
             interpretationClass = 'very-poor';
         }
         
         interpretationDiv.innerHTML = `
             <div class="interpretation-header">
-                <strong>Maximum Drawdown:</strong> Worst peak-to-trough loss
+                <strong>Maximum Drawdown:</strong> Largest peak-to-trough loss during ${timeframeText}
             </div>
             <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
             <div class="interpretation-details">
-                <p><strong>What It Shows:</strong> If you bought at the absolute worst time, you'd have lost <strong>${mddPct}%</strong> at the low point.</p>
-                <p><strong>To Recover:</strong> Asset needs to gain <strong>${(100 * maxDrawdown / (1 - maxDrawdown)).toFixed(2)}%</strong> to break even. ${maxDrawdown < 0.20 ? 'Quick recovery possible.' : maxDrawdown < 0.50 ? 'Long recovery period likely.' : 'Very long recovery ahead.'}</p>
+                <p><strong>What It Shows:</strong> This measures the largest percentage drop from a peak price to a subsequent trough during ${timeframeText}. If you bought ${tokenName} at the absolute worst time (the peak), you'd have lost <strong>${mddPct}%</strong> at the low point before any recovery.</p>
+                <p><strong>To Recover:</strong> From that low point, the asset needs to gain <strong>${(100 * maxDrawdown / (1 - maxDrawdown)).toFixed(2)}%</strong> to break even. ${maxDrawdown < 0.20 ? 'Quick recovery possible.' : maxDrawdown < 0.50 ? 'Long recovery period likely.' : 'Very long recovery ahead.'}</p>
             </div>
             <div class="interpretation-separator"></div>
         `;
@@ -236,7 +272,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         return interpretationDiv;
     }
 
-    function getSortinoInterpretation(sortinoRatio, tokenName, returnPct, downsideVolPct, riskFreeRate, sharpeRatio) {
+    function getSortinoInterpretation(sortinoRatio, tokenName, returnPct, downsideVolPct, riskFreeRate, sharpeRatio, timeframeText) {
         const interpretationDiv = document.createElement('div');
         interpretationDiv.className = 'interpretation-content sortino-interpretation';
         
@@ -245,19 +281,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Handle infinite/very high Sortino (no downside volatility)
         if (sortinoRatio >= 999) {
-            interpretation = `Exceptional downside protection. ${tokenName} had no negative returns during this period, meaning perfect downside risk management. The Sortino Ratio is extremely high, indicating the asset only moved upward relative to the risk-free rate.`;
+            interpretation = `Exceptional downside protection. During ${timeframeText}, ${tokenName} had no negative returns, meaning perfect downside risk management. The Sortino Ratio is extremely high, indicating the asset only moved upward relative to the risk-free rate.`;
             interpretationClass = 'excellent';
         } else if (sortinoRatio > 2) {
-            interpretation = `Excellent downside risk management. ${tokenName} has a high Sortino Ratio, meaning it generates strong returns while experiencing minimal downside volatility (${downsideVolPct}%). This indicates the asset protects well against losses while delivering returns above the risk-free rate.`;
+            interpretation = `Excellent downside risk management. Over ${timeframeText}, ${tokenName} generated strong returns while experiencing minimal downside volatility (${downsideVolPct}%). This indicates the asset protected well against losses during this period while delivering returns above the risk-free rate.`;
             interpretationClass = 'excellent';
         } else if (sortinoRatio > 1) {
-            interpretation = `Good downside protection. ${tokenName} shows decent returns relative to its downside volatility (${downsideVolPct}%). The asset manages downside risk reasonably well while generating excess returns.`;
+            interpretation = `Good downside protection. During ${timeframeText}, ${tokenName} showed decent returns relative to its downside volatility (${downsideVolPct}%). The asset managed downside risk reasonably well while generating excess returns.`;
             interpretationClass = 'good';
         } else if (sortinoRatio > 0) {
-            interpretation = `Moderate downside risk. ${tokenName} has positive returns but experiences significant downside volatility (${downsideVolPct}%). While returns exceed the risk-free rate, the asset has notable downside risk exposure.`;
+            interpretation = `Moderate downside risk. Over ${timeframeText}, ${tokenName} had positive returns but experienced significant downside volatility (${downsideVolPct}%). While returns exceeded the risk-free rate, the asset had notable downside risk exposure during this period.`;
             interpretationClass = 'moderate';
         } else {
-            interpretation = `Poor downside risk management. ${tokenName} has negative returns with high downside volatility (${downsideVolPct}%). The asset is underperforming the risk-free rate and experiencing significant downside movements, making it a risky investment during this period.`;
+            interpretation = `Poor downside risk management. During ${timeframeText}, ${tokenName} had negative returns with high downside volatility (${downsideVolPct}%). The asset underperformed the risk-free rate and experienced significant downside movements during this period.`;
             interpretationClass = 'poor';
         }
         
@@ -266,11 +302,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         interpretationDiv.innerHTML = `
             <div class="interpretation-header">
-                <strong>Sortino Ratio:</strong> Return per unit of downside risk
+                <strong>Sortino Ratio:</strong> Return per unit of downside risk over ${timeframeText}
             </div>
             <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
             <div class="interpretation-details">
-                <p><strong>Why It Matters:</strong> Only penalizes bad volatility (losses), not upside gains. Better for crypto than Sharpe.</p>
+                <p><strong>Why It Matters:</strong> Only penalizes bad volatility (losses), not upside gains. Better for crypto than Sharpe. Calculated from ${timeframeText} of daily returns, focusing only on days with negative returns.</p>
                 <p><strong>Formula:</strong> (Return - Risk-Free Rate) ÷ Downside Volatility = <strong>${sortinoDisplay}</strong></p>
                 <p><strong>Comparison:</strong> ${comparisonNote}</p>
             </div>
@@ -279,11 +315,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         return interpretationDiv;
     }
 
-    function getCorrelationInterpretation(correlationToSP500, correlationToBitcoin, tokenName) {
+    function getCorrelationInterpretation(correlationToSP500, correlationToBitcoin, tokenName, timeframeText) {
         const interpretationDiv = document.createElement('div');
         interpretationDiv.className = 'interpretation-content correlation-interpretation';
         
-        let content = '<div class="interpretation-header"><strong>Correlations:</strong> How it moves with other assets</div>';
+        let content = `<div class="interpretation-header"><strong>Correlations:</strong> How ${tokenName} moved with other assets over ${timeframeText}</div>`;
         
         // S&P 500 Correlation
         if (correlationToSP500 !== null) {
@@ -335,6 +371,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         content += `
             <div class="interpretation-details">
                 <p><strong>Scale:</strong> -1 (opposite moves) → 0 (independent) → +1 (moves together)</p>
+                <p><strong>Calculated From:</strong> Daily price movements over ${timeframeText}. Measures how consistently ${tokenName} moved in the same direction as the compared asset.</p>
                 <p><strong>For Portfolios:</strong> Lower correlation = better diversification and risk reduction.</p>
             </div>
         `;
@@ -430,11 +467,27 @@ document.addEventListener('DOMContentLoaded', async () => {
         return rateDiv;
     }
 
-    function createSummarySection(tokenResults, riskFreeRate) {
+    function getTimeframeText(days) {
+        if (days === 30) return '30 days';
+        if (days === 90) return '90 days';
+        if (days === 365) return '1 year';
+        if (days === 1095) return '3 years';
+        if (days === 1825) return '5 years';
+        if (days === 3650) return '10 years';
+        return `${days} days`;
+    }
+
+    function createSummarySection(tokenResults, riskFreeRate, timeframeDays) {
         const summaryDiv = document.createElement('div');
         summaryDiv.className = 'summary-section';
         
-        let summaryHTML = '<h3 class="summary-title">Quick Overview</h3><div class="summary-cards">';
+        const timeframeText = getTimeframeText(timeframeDays);
+        
+        let summaryHTML = `
+            <h3 class="summary-title">Quick Overview</h3>
+            <p class="overview-context">Analysis period: <strong>${timeframeText}</strong> | Risk-adjusted returns compared to ${riskFreeRate.toFixed(2)}% risk-free rate | Max Drawdown shows peak-to-trough loss during this period</p>
+            <div class="summary-cards">
+        `;
         
         tokenResults.forEach(tokenData => {
             const tokenName = tokenData.id.toUpperCase();
@@ -476,8 +529,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Display risk-free rate
         document.getElementById('riskFreeRate').textContent = `${data.riskFreeRate.toFixed(2)}%`;
 
-        // Get all token results
+        // Get all token results and timeframe
         const tokenResults = data.tokens || [];
+        const timeframeDays = data.timeframe || 365;
         const isSingle = tokenResults.length === 1;
         const isMultiple = tokenResults.length > 1;
 
@@ -487,11 +541,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             resultsContainer.appendChild(winnerSection);
         }
 
-        // STEP 2: Show summary stats for all tokens
-        const summarySection = createSummarySection(tokenResults, data.riskFreeRate);
+        // STEP 2: Show risk-free rate info
+        const riskFreeRateSection = createRiskFreeRateSection(data.riskFreeRate);
+        resultsContainer.appendChild(riskFreeRateSection);
+
+        // STEP 3: Show summary stats for all tokens
+        const summarySection = createSummarySection(tokenResults, data.riskFreeRate, timeframeDays);
         resultsContainer.appendChild(summarySection);
 
-        // STEP 3: Create detailed breakdown section (collapsible)
+        // STEP 4: Create detailed breakdown section (collapsible)
         const detailedSection = document.createElement('div');
         detailedSection.className = 'detailed-section';
         detailedSection.innerHTML = `
@@ -514,6 +572,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         comparisonDiv.className = `comparison ${isSingle ? 'single' : isMultiple ? 'multiple' : ''}`;
 
         // Create result cards for each token
+        const timeframeText = getTimeframeText(timeframeDays);
+        
         tokenResults.forEach((tokenData, index) => {
             // Add VS divider before second token if exactly 2 tokens
             if (tokenResults.length === 2 && index === 1) {
@@ -534,13 +594,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             tokenResultDiv.innerHTML = `
                 <h3>${tokenName}</h3>
+                <p class="timeframe-context">Based on ${timeframeText} of historical data</p>
                 <div class="stats-grid">
                     <div class="stat">
                         <span class="stat-label">Annualized Return</span>
                         <span class="stat-value">${returnPct}%</span>
                     </div>
                     <div class="stat">
-                        <span class="stat-label">Volatility</span>
+                        <span class="stat-label">Volatility (Std Dev)</span>
                         <span class="stat-value">${volatilityPct}%</span>
                     </div>
                     <div class="stat">
@@ -580,19 +641,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Add interpretations
             const interpretationDiv = tokenResultDiv.querySelector('.interpretation');
             
+            // Volatility interpretation (new!)
+            interpretationDiv.appendChild(getVolatilityInterpretation(
+                tokenData.volatility,
+                tokenName,
+                volatilityPct,
+                timeframeText
+            ));
+            
             // Sharpe interpretation
             interpretationDiv.appendChild(getSharpeInterpretation(
                 tokenData.sharpeRatio,
                 tokenName,
                 returnPct,
                 volatilityPct,
-                data.riskFreeRate
+                data.riskFreeRate,
+                timeframeText
             ));
             
             // Maximum Drawdown interpretation
             interpretationDiv.appendChild(getMaxDrawdownInterpretation(
                 tokenData.maxDrawdown,
-                tokenName
+                tokenName,
+                timeframeText
             ));
             
             // Sortino interpretation
@@ -602,7 +673,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 returnPct,
                 downsideVolPct,
                 data.riskFreeRate,
-                tokenData.sharpeRatio
+                tokenData.sharpeRatio,
+                timeframeText
             ));
             
             // Correlation interpretation (if data available)
@@ -611,7 +683,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 interpretationDiv.appendChild(getCorrelationInterpretation(
                     tokenData.correlationToSP500,
                     tokenData.correlationToBitcoin,
-                    tokenName
+                    tokenName,
+                    timeframeText
                 ));
             }
         });
