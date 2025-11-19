@@ -994,9 +994,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const resultsContainer = document.getElementById('resultsContainer');
         resultsContainer.innerHTML = '';
         
-        // Display risk-free rate
-        document.getElementById('riskFreeRate').textContent = `${data.riskFreeRate.toFixed(2)}%`;
-
         // Get all token results and timeframe
         const tokenResults = data.tokens || [];
         const timeframeDays = data.timeframe || 365;
@@ -1009,11 +1006,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             resultsContainer.appendChild(winnerSection);
         }
 
-        // STEP 2: Show risk-free rate info
-        const riskFreeRateSection = createRiskFreeRateSection(data.riskFreeRate);
-        resultsContainer.appendChild(riskFreeRateSection);
-
-        // STEP 3: Show summary stats for all tokens
+        // STEP 2: Show summary stats for all tokens
         const summarySection = createSummarySection(tokenResults, data.riskFreeRate, timeframeDays);
         resultsContainer.appendChild(summarySection);
 
