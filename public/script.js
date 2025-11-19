@@ -419,6 +419,73 @@ document.addEventListener('DOMContentLoaded', async () => {
         return interpretationDiv;
     }
 
+    function createMetricsTable(tokenResults, timeframeText) {
+        const tableWrapper = document.createElement('div');
+        tableWrapper.className = 'metrics-table-wrapper';
+        
+        let tableHTML = `
+            <p class="table-context">Comprehensive metrics comparison for ${timeframeText}</p>
+            <div class="metrics-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Metric</th>
+                            ${tokenResults.map(t => `<th>${t.id.toUpperCase()}</th>`).join('')}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="metric-name">Period Return</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${(t.periodReturn * 100).toFixed(2)}%</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">CAGR</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${(t.cagr * 100).toFixed(2)}%</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Annualized Return</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${(t.annualizedReturn * 100).toFixed(2)}%</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Volatility</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${(t.volatility * 100).toFixed(2)}%</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Max Drawdown</td>
+                            ${tokenResults.map(t => {
+                                const mdd = (t.maxDrawdown * 100).toFixed(2);
+                                return `<td class="metric-value">${t.maxDrawdown > 0 ? `-${mdd}` : mdd}%</td>`;
+                            }).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Sharpe Ratio</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${t.sharpeRatio.toFixed(3)}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Sortino Ratio</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${t.sortinoRatio >= 999 ? '∞' : t.sortinoRatio.toFixed(3)}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Downside Volatility</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${(t.downsideVolatility * 100).toFixed(2)}%</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Correlation to S&P 500</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${t.correlationToSP500 !== null ? t.correlationToSP500.toFixed(3) : 'N/A'}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Correlation to Bitcoin</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${t.correlationToBitcoin !== null ? t.correlationToBitcoin.toFixed(3) : 'N/A'}</td>`).join('')}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        `;
+        
+        tableWrapper.innerHTML = tableHTML;
+        return tableWrapper;
+    }
+
     function createWinnerSection(tokenResults, riskFreeRate) {
         // Sort tokens by Sharpe ratio (primary) and Sortino ratio (secondary)
         const sortedTokens = [...tokenResults].sort((a, b) => {
@@ -435,6 +502,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const winnerReturn = (winner.meanReturn * 100).toFixed(2);
         const winnerVol = (winner.volatility * 100).toFixed(2);
         const winnerMDD = (winner.maxDrawdown * 100).toFixed(2);
+        const winnerMDDDisplay = winner.maxDrawdown > 0 ? `-${winnerMDD}` : winnerMDD;
         const winnerSharpe = winner.sharpeRatio.toFixed(3);
         const winnerSortino = winner.sortinoRatio >= 999 ? '∞' : winner.sortinoRatio.toFixed(3);
 
@@ -446,7 +514,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="winner-metric-row">
                     <span class="metric-label">Return:</span> <span class="metric-value">${winnerReturn}%</span>
                     <span class="metric-label">Volatility:</span> <span class="metric-value">${winnerVol}%</span>
-                    <span class="metric-label">Max Drawdown:</span> <span class="metric-value">${winnerMDD}%</span>
+                    <span class="metric-label">Max Drawdown:</span> <span class="metric-value">${winnerMDDDisplay}%</span>
                 </div>
                 <div class="winner-metric-row">
                     <span class="metric-label">Sharpe Ratio:</span> <span class="metric-value">${winnerSharpe}</span>
@@ -533,6 +601,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const returnPct = (tokenData.meanReturn * 100).toFixed(2);
             const sharpe = tokenData.sharpeRatio.toFixed(2);
             const mdd = (tokenData.maxDrawdown * 100).toFixed(2);
+            const mddDisplay = tokenData.maxDrawdown > 0 ? `-${mdd}` : mdd;
             
             const performanceClass = tokenData.sharpeRatio > 1 ? 'excellent' : tokenData.sharpeRatio > 0 ? 'good' : 'poor';
             
@@ -549,7 +618,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </div>
                     <div class="summary-stat">
                         <span class="summary-label">Max Drawdown</span>
-                        <span class="summary-value">${mdd}%</span>
+                        <span class="summary-value">${mddDisplay}%</span>
                     </div>
                 </div>
             `;
@@ -605,96 +674,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         resultsContainer.appendChild(detailedSection);
 
         const detailedContent = detailedSection.querySelector('#detailedContent');
-
-        // Create comparison container
-        const comparisonDiv = document.createElement('div');
-        comparisonDiv.className = `comparison ${isSingle ? 'single' : isMultiple ? 'multiple' : ''}`;
-
-        // Create result cards for each token
         const timeframeText = getTimeframeText(timeframeDays);
+
+        // STEP 1: Create metrics comparison table
+        const tableSection = createMetricsTable(tokenResults, timeframeText);
+        detailedContent.appendChild(tableSection);
+
+        // STEP 2: Create expandable interpretation sections for each token
+        const interpretationsSection = document.createElement('div');
+        interpretationsSection.className = 'interpretations-section';
+        
+        const interpretationsTitle = document.createElement('h4');
+        interpretationsTitle.textContent = 'Detailed Written Analysis';
+        interpretationsTitle.style.cssText = 'margin-top: 32px; margin-bottom: 16px; color: var(--text-primary); text-align: center;';
+        interpretationsSection.appendChild(interpretationsTitle);
         
         tokenResults.forEach((tokenData, index) => {
-            // Add VS divider before second token if exactly 2 tokens
-            if (tokenResults.length === 2 && index === 1) {
-                const vsDivider = document.createElement('div');
-                vsDivider.className = 'vs-divider';
-                vsDivider.textContent = 'VS';
-                comparisonDiv.appendChild(vsDivider);
-            }
             const tokenName = tokenData.id.toUpperCase();
-            // Return metrics
-            const periodReturnPct = (tokenData.periodReturn * 100).toFixed(2);
-            const cagrPct = (tokenData.cagr * 100).toFixed(2);
             const annualizedReturnPct = (tokenData.annualizedReturn * 100).toFixed(2);
             const volatilityPct = (tokenData.volatility * 100).toFixed(2);
             const downsideVolPct = (tokenData.downsideVolatility * 100).toFixed(2);
-            const maxDrawdownPct = (tokenData.maxDrawdown * 100).toFixed(2);
 
-            const tokenResultDiv = document.createElement('div');
-            tokenResultDiv.className = 'token-result';
+            // Create expandable card for this asset
+            const assetCard = document.createElement('div');
+            assetCard.className = 'asset-interpretation-card';
             
-            tokenResultDiv.innerHTML = `
-                <h3>${tokenName}</h3>
-                <p class="timeframe-context">Based on ${timeframeText} of historical data</p>
-                <div class="stats-grid">
-                    <div class="stat stat-highlight">
-                        <span class="stat-label">Period Return</span>
-                        <span class="stat-value">${periodReturnPct}%</span>
-                        <span class="stat-sublabel">Total return over ${timeframeText}</span>
-                    </div>
-                    <div class="stat stat-highlight">
-                        <span class="stat-label">CAGR</span>
-                        <span class="stat-value">${cagrPct}%</span>
-                        <span class="stat-sublabel">Compound annual growth rate</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Annualized Return</span>
-                        <span class="stat-value">${annualizedReturnPct}%</span>
-                        <span class="stat-sublabel">Arithmetic mean annualized</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Volatility (Std Dev)</span>
-                        <span class="stat-value">${volatilityPct}%</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Maximum Drawdown</span>
-                        <span class="stat-value">${maxDrawdownPct}%</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Sharpe Ratio</span>
-                        <span class="stat-value">${tokenData.sharpeRatio.toFixed(3)}</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Sortino Ratio</span>
-                        <span class="stat-value">${tokenData.sortinoRatio >= 999 ? '∞' : tokenData.sortinoRatio.toFixed(3)}</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Downside Volatility</span>
-                        <span class="stat-value">${downsideVolPct}%</span>
-                    </div>
-                    ${tokenData.correlationToSP500 !== null && tokenData.correlationToSP500 !== undefined ? `
-                    <div class="stat">
-                        <span class="stat-label">Correlation to S&P 500</span>
-                        <span class="stat-value">${tokenData.correlationToSP500.toFixed(3)}</span>
-                    </div>
-                    ` : ''}
-                    ${tokenData.correlationToBitcoin !== null && tokenData.correlationToBitcoin !== undefined ? `
-                    <div class="stat">
-                        <span class="stat-label">Correlation to Bitcoin</span>
-                        <span class="stat-value">${tokenData.correlationToBitcoin.toFixed(3)}</span>
-                    </div>
-                    ` : ''}
+            assetCard.innerHTML = `
+                <div class="asset-card-header" data-asset-index="${index}">
+                    <h4>${tokenName}</h4>
+                    <button class="expand-asset-btn">
+                        <span class="expand-text">Expand Analysis</span>
+                        <span class="expand-icon">▼</span>
+                    </button>
                 </div>
-                <div class="interpretation" id="token${index}Interpretation"></div>
+                <div class="asset-card-content collapsed" id="assetContent${index}">
+                    <p class="interpretation-intro">Detailed written analysis for ${tokenName} over ${timeframeText}</p>
+                </div>
             `;
 
-            comparisonDiv.appendChild(tokenResultDiv);
+            interpretationsSection.appendChild(assetCard);
 
-            // Add interpretations
-            const interpretationDiv = tokenResultDiv.querySelector('.interpretation');
+            // Add interpretations to the content area
+            const contentArea = assetCard.querySelector(`#assetContent${index}`);
             
-            // Return metrics interpretation (new!)
-            interpretationDiv.appendChild(getReturnMetricsInterpretation(
+            // Return metrics interpretation
+            contentArea.appendChild(getReturnMetricsInterpretation(
                 tokenData.periodReturn,
                 tokenData.cagr,
                 tokenData.annualizedReturn,
@@ -703,7 +727,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             ));
             
             // Volatility interpretation
-            interpretationDiv.appendChild(getVolatilityInterpretation(
+            contentArea.appendChild(getVolatilityInterpretation(
                 tokenData.volatility,
                 tokenName,
                 volatilityPct,
@@ -711,7 +735,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             ));
             
             // Sharpe interpretation
-            interpretationDiv.appendChild(getSharpeInterpretation(
+            contentArea.appendChild(getSharpeInterpretation(
                 tokenData.sharpeRatio,
                 tokenName,
                 annualizedReturnPct,
@@ -721,14 +745,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             ));
             
             // Maximum Drawdown interpretation
-            interpretationDiv.appendChild(getMaxDrawdownInterpretation(
+            contentArea.appendChild(getMaxDrawdownInterpretation(
                 tokenData.maxDrawdown,
                 tokenName,
                 timeframeText
             ));
             
             // Sortino interpretation
-            interpretationDiv.appendChild(getSortinoInterpretation(
+            contentArea.appendChild(getSortinoInterpretation(
                 tokenData.sortinoRatio,
                 tokenName,
                 annualizedReturnPct,
@@ -741,16 +765,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Correlation interpretation (if data available)
             if ((tokenData.correlationToSP500 !== null && tokenData.correlationToSP500 !== undefined) || 
                 (tokenData.correlationToBitcoin !== null && tokenData.correlationToBitcoin !== undefined)) {
-                interpretationDiv.appendChild(getCorrelationInterpretation(
+                contentArea.appendChild(getCorrelationInterpretation(
                     tokenData.correlationToSP500,
                     tokenData.correlationToBitcoin,
                     tokenName,
                     timeframeText
                 ));
             }
+            
+            // Add click handler for expand/collapse
+            const headerBtn = assetCard.querySelector('.expand-asset-btn');
+            headerBtn.addEventListener('click', () => {
+                contentArea.classList.toggle('collapsed');
+                const isCollapsed = contentArea.classList.contains('collapsed');
+                headerBtn.querySelector('.expand-text').textContent = isCollapsed ? 'Expand Analysis' : 'Collapse Analysis';
+                headerBtn.querySelector('.expand-icon').textContent = isCollapsed ? '▼' : '▲';
+            });
         });
 
-        detailedContent.appendChild(comparisonDiv);
+        detailedContent.appendChild(interpretationsSection);
 
         // Add toggle functionality for detailed section
         const toggleBtn = document.getElementById('toggleDetailsBtn');

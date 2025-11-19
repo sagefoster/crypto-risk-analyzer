@@ -951,6 +951,145 @@ small {
     opacity: 0;
 }
 
+/* Metrics Table Styles */
+.metrics-table-wrapper {
+    margin: 20px 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.table-context {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+    margin-bottom: 16px;
+}
+
+.metrics-table {
+    overflow-x: auto;
+    border-radius: 12px;
+    background: var(--bg-tertiary);
+    padding: 16px;
+}
+
+.metrics-table table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--text-primary);
+}
+
+.metrics-table th {
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.15), rgba(88, 166, 255, 0.05));
+    padding: 12px 16px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent-primary);
+    color: var(--text-primary);
+}
+
+.metrics-table td {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.metrics-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.metrics-table tbody tr:hover {
+    background: rgba(88, 166, 255, 0.05);
+}
+
+.metrics-table .metric-name {
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.metrics-table .metric-value {
+    font-weight: 500;
+    color: var(--text-primary);
+    text-align: center;
+}
+
+/* Asset Interpretation Cards */
+.interpretations-section {
+    margin-top: 32px;
+}
+
+.asset-interpretation-card {
+    background: var(--bg-tertiary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    animation: scaleIn 0.5s ease-out forwards;
+}
+
+.asset-interpretation-card:hover {
+    border-color: var(--accent-primary);
+    box-shadow: 0 4px 16px rgba(88, 166, 255, 0.15);
+}
+
+.asset-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.10), rgba(88, 166, 255, 0.03));
+    border-bottom: 1px solid var(--border-color);
+    cursor: pointer;
+}
+
+.asset-card-header h4 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.2rem;
+}
+
+.expand-asset-btn {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.expand-asset-btn:hover {
+    background: var(--accent-primary);
+    border-color: var(--accent-primary);
+    color: white;
+    transform: scale(1.05);
+}
+
+.expand-icon {
+    transition: transform 0.3s ease;
+}
+
+.asset-card-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out;
+}
+
+.asset-card-content:not(.collapsed) {
+    max-height: 10000px;
+    padding: 20px;
+}
+
+.interpretation-intro {
+    color: var(--text-secondary);
+    font-style: italic;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
 .winner {
     padding: 24px;
     background: linear-gradient(135deg, rgba(63, 185, 80, 0.1), rgba(63, 185, 80, 0.05));
