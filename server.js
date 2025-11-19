@@ -139,6 +139,40 @@ function calculateSharpeRatio(prices, riskFreeRate) {
   };
 }
 
+// Helper function to calculate Maximum Drawdown
+function calculateMaxDrawdown(prices) {
+  if (prices.length < 2) {
+    return 0;
+  }
+
+  let maxDrawdown = 0;
+  let peak = prices[0];
+  let peakIndex = 0;
+  let troughIndex = 0;
+  let maxDrawdownEnd = 0;
+
+  for (let i = 0; i < prices.length; i++) {
+    if (prices[i] > peak) {
+      peak = prices[i];
+      peakIndex = i;
+    }
+    
+    const drawdown = (peak - prices[i]) / peak;
+    
+    if (drawdown > maxDrawdown) {
+      maxDrawdown = drawdown;
+      troughIndex = i;
+      maxDrawdownEnd = peakIndex;
+    }
+  }
+
+  return {
+    maxDrawdown: maxDrawdown,
+    peakIndex: maxDrawdownEnd,
+    troughIndex: troughIndex
+  };
+}
+
 // Helper function to calculate correlation between two price series
 function calculateCorrelation(prices1, prices2) {
   if (prices1.length !== prices2.length || prices1.length < 2) {
@@ -404,6 +438,9 @@ app.post('/api/analyze', async (req, res) => {
       // Calculate Sharpe and Sortino ratios
       const sharpeStats = calculateSharpeRatio(prices, treasuryRate);
       const sortinoStats = calculateSortinoRatio(prices, treasuryRate);
+      
+      // Calculate Maximum Drawdown
+      const mddStats = calculateMaxDrawdown(prices);
 
       // Calculate correlations
       let correlationToSP500 = null;
@@ -445,10 +482,11 @@ app.post('/api/analyze', async (req, res) => {
 
       return {
         id: tokenId,
-        sharpeRatio: sharpeStats.sharpeRatio,
-        sortinoRatio: sortinoStats.sortinoRatio,
         meanReturn: sharpeStats.meanReturn,
         volatility: sharpeStats.volatility,
+        maxDrawdown: mddStats.maxDrawdown,
+        sharpeRatio: sharpeStats.sharpeRatio,
+        sortinoRatio: sortinoStats.sortinoRatio,
         downsideVolatility: sortinoStats.downsideVolatility,
         correlationToSP500: correlationToSP500,
         correlationToBitcoin: correlationToBitcoin,

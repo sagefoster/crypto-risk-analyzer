@@ -163,6 +163,47 @@ document.addEventListener('DOMContentLoaded', async () => {
         return interpretationDiv;
     }
 
+    function getMaxDrawdownInterpretation(maxDrawdown, tokenName) {
+        const interpretationDiv = document.createElement('div');
+        interpretationDiv.className = 'interpretation-content maxdd-interpretation';
+        
+        const mddPct = (maxDrawdown * 100).toFixed(2);
+        let interpretation = '';
+        let interpretationClass = '';
+        
+        if (maxDrawdown < 0.05) {
+            interpretation = `Excellent downside protection. ${tokenName} experienced a maximum peak-to-trough loss of only ${mddPct}% during this period. This indicates strong price stability and minimal drawdown risk, making it suitable for risk-averse investors.`;
+            interpretationClass = 'excellent';
+        } else if (maxDrawdown < 0.15) {
+            interpretation = `Good risk management. ${tokenName} had a maximum drawdown of ${mddPct}%. This is a reasonable level of downside risk for a cryptocurrency, showing the asset maintained relative stability during the worst market conditions.`;
+            interpretationClass = 'good';
+        } else if (maxDrawdown < 0.30) {
+            interpretation = `Moderate drawdown risk. ${tokenName} experienced a ${mddPct}% peak-to-trough decline. This is typical for crypto assets and represents a significant but manageable level of risk. Investors should be comfortable with this magnitude of drawdowns.`;
+            interpretationClass = 'moderate';
+        } else if (maxDrawdown < 0.50) {
+            interpretation = `High drawdown risk. ${tokenName} suffered a ${mddPct}% peak-to-trough loss. This represents substantial downside risk and requires a high risk tolerance. Investors need strong conviction to hold through such drawdowns.`;
+            interpretationClass = 'poor';
+        } else {
+            interpretation = `Very high drawdown risk. ${tokenName} experienced a severe ${mddPct}% peak-to-trough decline. This extreme drawdown level indicates very high risk and volatility. Only investors with exceptional risk tolerance should consider this asset.`;
+            interpretationClass = 'very-poor';
+        }
+        
+        interpretationDiv.innerHTML = `
+            <div class="interpretation-header">
+                <strong>Maximum Drawdown (Peak Loss):</strong>
+            </div>
+            <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
+            <div class="interpretation-details">
+                <p><strong>What It Measures:</strong> Maximum Drawdown shows the largest peak-to-trough decline in value during the period. It represents the worst loss an investor would have experienced if they bought at the peak and held through to the lowest point.</p>
+                <p><strong>Interpretation:</strong> ${maxDrawdown < 0.15 ? 'Low' : maxDrawdown < 0.30 ? 'Moderate' : maxDrawdown < 0.50 ? 'High' : 'Very High'} drawdown risk. ${maxDrawdown < 0.20 ? 'The asset shows good stability with limited downside exposure.' : 'Investors should be prepared for significant temporary losses and have a long-term investment horizon.'}</p>
+                <p><strong>Recovery Requirement:</strong> After a ${mddPct}% loss, the asset needs to gain ${(100 * maxDrawdown / (1 - maxDrawdown)).toFixed(2)}% to return to its previous peak.</p>
+            </div>
+            <div class="interpretation-separator"></div>
+        `;
+        
+        return interpretationDiv;
+    }
+
     function getSortinoInterpretation(sortinoRatio, tokenName, returnPct, downsideVolPct, riskFreeRate, sharpeRatio) {
         const interpretationDiv = document.createElement('div');
         interpretationDiv.className = 'interpretation-content sortino-interpretation';
@@ -304,6 +345,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             const volatilityPct = (tokenData.volatility * 100).toFixed(2);
             const downsideVolPct = (tokenData.downsideVolatility * 100).toFixed(2);
 
+            const maxDrawdownPct = (tokenData.maxDrawdown * 100).toFixed(2);
+
             const tokenResultDiv = document.createElement('div');
             tokenResultDiv.className = 'token-result';
             
@@ -311,20 +354,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <h3>${tokenName}</h3>
                 <div class="stat-box">
                     <div class="stat">
-                        <span class="stat-label">Sharpe Ratio</span>
-                        <span class="stat-value">${tokenData.sharpeRatio.toFixed(3)}</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat-label">Sortino Ratio</span>
-                        <span class="stat-value">${tokenData.sortinoRatio >= 999 ? '∞' : tokenData.sortinoRatio.toFixed(3)}</span>
-                    </div>
-                    <div class="stat">
                         <span class="stat-label">Annualized Return</span>
                         <span class="stat-value">${returnPct}%</span>
                     </div>
                     <div class="stat">
                         <span class="stat-label">Volatility</span>
                         <span class="stat-value">${volatilityPct}%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Maximum Drawdown</span>
+                        <span class="stat-value">${maxDrawdownPct}%</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Sharpe Ratio</span>
+                        <span class="stat-value">${tokenData.sharpeRatio.toFixed(3)}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Sortino Ratio</span>
+                        <span class="stat-value">${tokenData.sortinoRatio >= 999 ? '∞' : tokenData.sortinoRatio.toFixed(3)}</span>
                     </div>
                     <div class="stat">
                         <span class="stat-label">Downside Volatility</span>
@@ -358,6 +405,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 returnPct,
                 volatilityPct,
                 data.riskFreeRate
+            ));
+            
+            // Maximum Drawdown interpretation
+            interpretationDiv.appendChild(getMaxDrawdownInterpretation(
+                tokenData.maxDrawdown,
+                tokenName
             ));
             
             // Sortino interpretation
