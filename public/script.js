@@ -569,7 +569,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="winner-metrics">
                 <div class="winner-metric-row">
                     <span class="metric-label">Return:</span> <span class="metric-value">${winnerReturn}% <span class="info-icon" data-metric="annualizedReturn" data-value="${winnerReturn}">ⓘ</span></span>
-                    <span class="metric-label">Std Deviation (σ):</span> <span class="metric-value">${winnerVol}% <span class="metric-sublabel">annualized</span> <span class="info-icon" data-metric="volatility" data-value="${winnerVol}">ⓘ</span></span>
+                    <span class="metric-label">Std Deviation (σ):</span> <span class="metric-value">${winnerVol}% <span class="info-icon" data-metric="volatility" data-value="${winnerVol}">ⓘ</span></span>
                     <span class="metric-label">Max Drawdown:</span> <span class="metric-value">${winnerMDDDisplay}% <span class="info-icon" data-metric="maxDrawdown" data-value="${winnerMDDDisplay}">ⓘ</span></span>
                 </div>
                 <div class="winner-metric-row">
