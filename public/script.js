@@ -200,38 +200,64 @@ document.addEventListener('DOMContentLoaded', async () => {
         const periodReturnPct = (periodReturn * 100).toFixed(2);
         const cagrPct = (cagr * 100).toFixed(2);
         const annualizedReturnPct = (annualizedReturn * 100).toFixed(2);
+        const isOneYear = timeframeText === '1 year';
         
+        // Main interpretation based on actual performance
         let mainInterpretation = '';
+        const dollarResult = (100 * (1 + periodReturn)).toFixed(2);
+        
         if (periodReturn > 0.50) {
-            mainInterpretation = `Strong returns over ${timeframeText}. ${tokenName} delivered a ${periodReturnPct}% total return during this period.`;
+            mainInterpretation = `<strong>Strong returns:</strong> ${tokenName} gained ${periodReturnPct}% over ${timeframeText}. A $100 investment would be worth $${dollarResult}.`;
         } else if (periodReturn > 0.20) {
-            mainInterpretation = `Positive returns over ${timeframeText}. ${tokenName} gained ${periodReturnPct}% during this period.`;
+            mainInterpretation = `<strong>Positive returns:</strong> ${tokenName} gained ${periodReturnPct}% over ${timeframeText}. A $100 investment would be worth $${dollarResult}.`;
         } else if (periodReturn > 0) {
-            mainInterpretation = `Modest positive returns over ${timeframeText}. ${tokenName} gained ${periodReturnPct}% during this period.`;
+            mainInterpretation = `<strong>Modest gains:</strong> ${tokenName} gained ${periodReturnPct}% over ${timeframeText}. A $100 investment would be worth $${dollarResult}.`;
         } else if (periodReturn > -0.20) {
-            mainInterpretation = `Negative returns over ${timeframeText}. ${tokenName} lost ${Math.abs(parseFloat(periodReturnPct))}% during this period.`;
+            mainInterpretation = `<strong>Negative returns:</strong> ${tokenName} lost ${Math.abs(parseFloat(periodReturnPct))}% over ${timeframeText}. A $100 investment would be worth $${dollarResult}.`;
         } else {
-            mainInterpretation = `Significant losses over ${timeframeText}. ${tokenName} declined ${Math.abs(parseFloat(periodReturnPct))}% during this period.`;
+            mainInterpretation = `<strong>Significant losses:</strong> ${tokenName} declined ${Math.abs(parseFloat(periodReturnPct))}% over ${timeframeText}. A $100 investment would be worth $${dollarResult}.`;
         }
         
-        // Add explanation for why these differ
-        let whyDifferentNote = '';
-        if (timeframeText === '1 year' && Math.abs(parseFloat(periodReturnPct) - parseFloat(annualizedReturnPct)) > 1) {
-            whyDifferentNote = `<p class="context-note"><strong>Why do these differ for ${timeframeText}?</strong> Period Return and CAGR show the <em>actual</em> price change (${periodReturnPct}%), while Annualized Return (${annualizedReturnPct}%) shows the <em>average daily return × 252</em>. The difference comes from "volatility drag"—when prices swing up and down, the arithmetic mean of daily returns doesn't equal the geometric return. Higher volatility = bigger gap between these numbers.</p>`;
+        // Build metrics details based on timeframe
+        let metricsHTML = '';
+        
+        if (isOneYear) {
+            // For 1 year: Show Period Return and Annualized Return (skip CAGR as it's redundant)
+            const hasMeaningfulDifference = Math.abs(parseFloat(periodReturnPct) - parseFloat(annualizedReturnPct)) > 1;
+            
+            metricsHTML = `
+                <p><strong>Period Return: ${periodReturnPct}%</strong><br>
+                This is your actual return—what really happened to your investment from start to end over ${timeframeText}.</p>
+                
+                <p><strong>Annualized Return (Arithmetic): ${annualizedReturnPct}%</strong><br>
+                The average daily return × 252 trading days. Used in Sharpe/Sortino calculations. ${hasMeaningfulDifference ? `Differs from Period Return due to <em>volatility drag</em>—when prices swing daily, the arithmetic average doesn't match the geometric result.` : 'Similar to Period Return for this low-volatility period.'}</p>
+            `;
+        } else {
+            // For multi-year periods: Show all three metrics
+            metricsHTML = `
+                <p><strong>Period Return: ${periodReturnPct}%</strong><br>
+                Your total return from start to end over ${timeframeText}.</p>
+                
+                <p><strong>CAGR: ${cagrPct}%</strong><br>
+                Compound Annual Growth Rate—the smoothed yearly return if growth was consistent. Formula: ((Ending ÷ Starting)^(1 ÷ Years)) - 1</p>
+                
+                <p><strong>Annualized Return (Arithmetic): ${annualizedReturnPct}%</strong><br>
+                Average daily return × 252 trading days. Used in Sharpe/Sortino ratios. This arithmetic mean differs from CAGR's geometric calculation—higher volatility creates a bigger gap.</p>
+            `;
         }
+        
+        const whichToUseText = isOneYear 
+            ? `<p><strong>Which to Use?</strong> Period Return shows actual performance. Annualized Return is used for academic risk calculations but may not match real results due to volatility.</p>`
+            : `<p><strong>Which to Use?</strong> Period Return for total gain/loss. CAGR for year-over-year growth rate. Annualized Return for academic comparisons (Sharpe/Sortino calculations).</p>`;
         
         interpretationDiv.innerHTML = `
             <div class="interpretation-header">
-                <strong>Return Metrics:</strong> Three ways to measure performance over ${timeframeText}
+                <strong>Return Metrics:</strong> How ${tokenName} performed over ${timeframeText}
             </div>
             <p class="interpretation-text">${mainInterpretation}</p>
-            ${whyDifferentNote}
             <div class="interpretation-details">
-                <p><strong>1. Period Return (${periodReturnPct}%):</strong> The simplest measure—total return from start to end. If you invested $100 at the beginning, you'd have $${(100 * (1 + periodReturn)).toFixed(2)} at the end.</p>
-                <p><strong>2. CAGR (${cagrPct}%):</strong> Compound Annual Growth Rate—the smoothed annual return if growth was consistent each year. For ${timeframeText}, CAGR equals Period Return since it's exactly one year.</p>
-                <p><strong>Formula:</strong> ((Ending Price ÷ Starting Price)^(1 ÷ Years)) - 1</p>
-                <p><strong>3. Annualized Return (${annualizedReturnPct}%):</strong> <em>Arithmetic mean</em> of daily returns × 252 trading days. This is used in Sharpe/Sortino calculations but differs from CAGR because it's averaging daily % changes, not measuring actual geometric growth. The gap widens with higher volatility.</p>
-                <p><strong>Which to Use?</strong> Period Return & CAGR for actual performance, Annualized Return (arithmetic) for academic risk-adjusted metrics.</p>
+                ${metricsHTML}
+                ${whichToUseText}
             </div>
             <div class="interpretation-separator"></div>
         `;
