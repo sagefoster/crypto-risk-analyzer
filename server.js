@@ -433,9 +433,14 @@ app.post('/api/analyze', async (req, res) => {
         }
       }
 
-      // Correlation to Bitcoin (for non-Bitcoin tokens)
-      if (bitcoinPrices && tokenId.toLowerCase() !== 'bitcoin' && bitcoinPrices.length === prices.length) {
-        correlationToBitcoin = calculateCorrelation(prices, bitcoinPrices);
+      // Correlation to Bitcoin (for all tokens)
+      if (bitcoinPrices && bitcoinPrices.length === prices.length) {
+        if (tokenId.toLowerCase() === 'bitcoin') {
+          // Bitcoin's correlation to itself is always 1.0
+          correlationToBitcoin = 1.0;
+        } else {
+          correlationToBitcoin = calculateCorrelation(prices, bitcoinPrices);
+        }
       }
 
       return {

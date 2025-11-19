@@ -4,26 +4,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const results = document.getElementById('results');
     const errorDiv = document.getElementById('error');
     const analyzeBtn = document.getElementById('analyzeBtn');
-    const apiKeyStatus = document.getElementById('apiKeyStatus');
     const tokensContainer = document.getElementById('tokensContainer');
     const addTokenBtn = document.getElementById('addTokenBtn');
     
     let tokenIndex = 1; // Start at 1 since we already have token0
-
-    // Check if API key is configured on server
-    try {
-        const configResponse = await fetch('/api/config');
-        const config = await configResponse.json();
-        if (config.hasApiKey) {
-            apiKeyStatus.textContent = '✓ API key configured - you can leave this field empty';
-            apiKeyStatus.className = 'api-key-status configured';
-        } else {
-            apiKeyStatus.textContent = '⚠ No API key configured - please enter your API key';
-            apiKeyStatus.className = 'api-key-status not-configured';
-        }
-    } catch (error) {
-        console.error('Error checking API key config:', error);
-    }
 
     // Function to add a new token input
     function addTokenInput() {
@@ -107,7 +91,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         analyzeBtn.disabled = true;
         analyzeBtn.querySelector('.btn-text').textContent = 'Analyzing...';
 
-        const apiKey = document.getElementById('apiKey').value.trim();
         const timeframe = document.getElementById('timeframe').value;
 
         try {
@@ -117,7 +100,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    apiKey,
                     tokens,
                     timeframe: parseInt(timeframe)
                 })

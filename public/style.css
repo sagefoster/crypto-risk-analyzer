@@ -87,6 +87,18 @@ header h1 {
 
 .token-input-group {
     margin-bottom: 16px;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .token-input-wrapper {
@@ -129,31 +141,63 @@ header h1 {
 
 .btn-add-token {
     width: 100%;
-    padding: 12px 24px;
-    background: var(--bg-tertiary);
-    border: 1px solid var(--border-color);
-    border-radius: 8px;
+    padding: 16px 24px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+    border: 2px dashed var(--accent-primary);
+    border-radius: 12px;
     color: var(--accent-primary);
-    font-size: 0.95rem;
-    font-weight: 500;
+    font-size: 1rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 10px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-add-token::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(88, 166, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-add-token:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 .btn-add-token:hover {
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.25) 0%, rgba(118, 75, 162, 0.25) 100%);
     border-color: var(--accent-primary);
-    transform: translateY(-1px);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(88, 166, 255, 0.3);
+}
+
+.btn-add-token:active {
+    transform: translateY(0);
 }
 
 .btn-add-token span {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     font-weight: 300;
     line-height: 1;
+    position: relative;
+    z-index: 1;
+}
+
+.btn-add-token:hover span {
+    transform: rotate(90deg);
+    transition: transform 0.3s ease;
 }
 
 label {
@@ -182,7 +226,18 @@ input[type="password"]:focus,
 select:focus {
     outline: none;
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1);
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+input[type="text"],
+select {
+    transition: all 0.2s ease;
+}
+
+input[type="text"]:hover,
+select:hover {
+    border-color: rgba(88, 166, 255, 0.5);
 }
 
 input::placeholder {
@@ -225,29 +280,49 @@ small {
 
 .btn-primary {
     width: 100%;
-    padding: 14px 24px;
+    padding: 16px 24px;
     background: var(--accent-gradient);
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     color: white;
-    font-size: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s ease;
-    margin-top: 8px;
+    transition: all 0.3s ease;
+    margin-top: 12px;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-primary:hover:not(:disabled)::after {
+    width: 300px;
+    height: 300px;
 }
 
 .btn-primary:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
 }
 
 .btn-primary:active:not(:disabled) {
-    transform: translateY(0);
+    transform: translateY(-1px);
 }
 
 .btn-primary:disabled {
-    opacity: 0.6;
+    opacity: 0.7;
     cursor: not-allowed;
 }
 
