@@ -1176,6 +1176,25 @@ small {
     margin-top: 12px;
 }
 
+.winner-context {
+    text-align: center;
+    color: var(--text-tertiary);
+    font-size: 0.85rem;
+    font-style: italic;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+    line-height: 1.5;
+}
+
+.metric-sublabel {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: var(--text-tertiary);
+    font-style: italic;
+    margin-left: 4px;
+}
+
 .error {
     background: rgba(248, 81, 73, 0.1);
     border: 1px solid var(--error);

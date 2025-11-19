@@ -214,17 +214,24 @@ document.addEventListener('DOMContentLoaded', async () => {
             mainInterpretation = `Significant losses over ${timeframeText}. ${tokenName} declined ${Math.abs(parseFloat(periodReturnPct))}% during this period.`;
         }
         
+        // Add explanation for why these differ
+        let whyDifferentNote = '';
+        if (timeframeText === '1 year' && Math.abs(parseFloat(periodReturnPct) - parseFloat(annualizedReturnPct)) > 1) {
+            whyDifferentNote = `<p class="context-note"><strong>Why do these differ for ${timeframeText}?</strong> Period Return and CAGR show the <em>actual</em> price change (${periodReturnPct}%), while Annualized Return (${annualizedReturnPct}%) shows the <em>average daily return × 252</em>. The difference comes from "volatility drag"—when prices swing up and down, the arithmetic mean of daily returns doesn't equal the geometric return. Higher volatility = bigger gap between these numbers.</p>`;
+        }
+        
         interpretationDiv.innerHTML = `
             <div class="interpretation-header">
                 <strong>Return Metrics:</strong> Three ways to measure performance over ${timeframeText}
             </div>
             <p class="interpretation-text">${mainInterpretation}</p>
+            ${whyDifferentNote}
             <div class="interpretation-details">
                 <p><strong>1. Period Return (${periodReturnPct}%):</strong> The simplest measure—total return from start to end. If you invested $100 at the beginning, you'd have $${(100 * (1 + periodReturn)).toFixed(2)} at the end.</p>
-                <p><strong>2. CAGR (${cagrPct}%):</strong> Compound Annual Growth Rate—the smoothed annual return if growth was consistent each year. Shows "What if this ${timeframeText} performance repeated every year?" Most useful for comparing investments over different time periods.</p>
+                <p><strong>2. CAGR (${cagrPct}%):</strong> Compound Annual Growth Rate—the smoothed annual return if growth was consistent each year. For ${timeframeText}, CAGR equals Period Return since it's exactly one year.</p>
                 <p><strong>Formula:</strong> ((Ending Price ÷ Starting Price)^(1 ÷ Years)) - 1</p>
-                <p><strong>3. Annualized Return (${annualizedReturnPct}%):</strong> Average of daily returns × 252 trading days. Useful for volatility-adjusted metrics (Sharpe, Sortino) but can differ from CAGR due to volatility effects.</p>
-                <p><strong>Which to Use?</strong> Period Return for total gain, CAGR for comparing across timeframes, Annualized Return for academic/risk metrics.</p>
+                <p><strong>3. Annualized Return (${annualizedReturnPct}%):</strong> <em>Arithmetic mean</em> of daily returns × 252 trading days. This is used in Sharpe/Sortino calculations but differs from CAGR because it's averaging daily % changes, not measuring actual geometric growth. The gap widens with higher volatility.</p>
+                <p><strong>Which to Use?</strong> Period Return & CAGR for actual performance, Annualized Return (arithmetic) for academic risk-adjusted metrics.</p>
             </div>
             <div class="interpretation-separator"></div>
         `;
@@ -521,7 +528,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="winner-metrics">
                 <div class="winner-metric-row">
                     <span class="metric-label">Return:</span> <span class="metric-value">${winnerReturn}%</span>
-                    <span class="metric-label">Volatility:</span> <span class="metric-value">${winnerVol}%</span>
+                    <span class="metric-label">Std Deviation (σ):</span> <span class="metric-value">${winnerVol}% <span class="metric-sublabel">annualized</span></span>
                     <span class="metric-label">Max Drawdown:</span> <span class="metric-value">${winnerMDDDisplay}%</span>
                 </div>
                 <div class="winner-metric-row">
@@ -529,6 +536,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="metric-label">Sortino Ratio:</span> <span class="metric-value">${winnerSortino}</span>
                 </div>
             </div>
+            <p class="winner-context">Standard deviation measures how much daily returns vary from the average—higher σ means more price volatility and risk.</p>
         `;
         
         // Add comparison text for multiple tokens
