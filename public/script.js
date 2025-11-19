@@ -44,6 +44,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         tokenIndex++;
         updateRemoveButtons();
+        
+        // Focus the newly created input to keep keyboard open on mobile
+        // Use setTimeout to ensure DOM is fully updated
+        setTimeout(() => {
+            const newInput = tokenGroup.querySelector('.token-input');
+            if (newInput) {
+                newInput.focus();
+            }
+        }, 100);
     }
 
     // Function to update remove button visibility and add button state
@@ -603,4 +612,30 @@ document.addEventListener('DOMContentLoaded', async () => {
         errorDiv.textContent = message;
         errorDiv.classList.remove('hidden');
     }
+
+    // Initialize with default example tokens
+    function initializeDefaultTokens() {
+        // Get first token input and set to bitcoin
+        const firstInput = document.getElementById('token0');
+        if (firstInput) {
+            firstInput.value = 'bitcoin';
+        }
+
+        // Add ethereum as second token
+        addTokenInput();
+        const secondInput = document.getElementById('token1');
+        if (secondInput) {
+            secondInput.value = 'ethereum';
+        }
+
+        // Add zcash as third token
+        addTokenInput();
+        const thirdInput = document.getElementById('token2');
+        if (thirdInput) {
+            thirdInput.value = 'zcash';
+        }
+    }
+
+    // Initialize defaults on page load
+    initializeDefaultTokens();
 });
