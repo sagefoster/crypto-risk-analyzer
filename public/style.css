@@ -54,6 +54,75 @@ header h1 {
     font-size: 1.1rem;
 }
 
+/* Info Card Styles */
+.info-card {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    margin-bottom: 2rem;
+}
+
+.info-card h2 {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 1rem;
+}
+
+.overview {
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 1rem;
+    font-size: 1.05rem;
+}
+
+.features-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 1.5rem 0;
+}
+
+.features-list li {
+    padding: 0.75rem 0;
+    padding-left: 1.5rem;
+    position: relative;
+    color: var(--text-primary);
+    line-height: 1.7;
+    border-left: 3px solid transparent;
+    border-image: var(--accent-gradient) 1;
+    margin-bottom: 0.5rem;
+    background: rgba(102, 126, 234, 0.05);
+    border-radius: 0 8px 8px 0;
+    transition: all 0.2s ease;
+}
+
+.features-list li:hover {
+    background: rgba(102, 126, 234, 0.1);
+    transform: translateX(5px);
+}
+
+.features-list li strong {
+    background: var(--accent-gradient);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.tip {
+    background: rgba(88, 166, 255, 0.1);
+    border: 1px solid rgba(88, 166, 255, 0.3);
+    padding: 1rem;
+    border-radius: 8px;
+    margin-top: 1.5rem;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    font-size: 1rem;
+}
+
+.tip strong {
+    color: var(--accent-primary);
+}
+
 .card {
     background: var(--bg-secondary);
     border: 1px solid var(--border-color);

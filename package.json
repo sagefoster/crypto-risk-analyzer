@@ -1,7 +1,7 @@
 {
-  "name": "coingecko-sharpe-ratio-analyzer",
-  "version": "1.0.0",
-  "description": "Analyze Sharpe ratios of two cryptocurrency tokens using CoinGecko API",
+  "name": "crypto-risk-analyzer",
+  "version": "2.0.0",
+  "description": "Professional crypto risk analysis tool: Calculate Sharpe ratio, Sortino ratio, correlations, and volatility metrics using CoinGecko API",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -11,8 +11,12 @@
   "keywords": [
     "cryptocurrency",
     "sharpe-ratio",
+    "sortino-ratio",
+    "correlation",
+    "risk-analysis",
+    "portfolio",
     "coingecko",
-    "analysis"
+    "finance"
   ],
   "author": "",
   "license": "MIT",

@@ -3,15 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cryptocurrency Sharpe Ratio Analyzer</title>
+    <title>Crypto Risk Analyzer - Compare Risk-Adjusted Returns</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>Sharpe Ratio Analyzer</h1>
-            <p class="subtitle">Compare risk-adjusted returns of cryptocurrency assets</p>
+            <h1>Crypto Risk Analyzer</h1>
+            <p class="subtitle">Professional risk analysis for cryptocurrency investments</p>
         </header>
+
+        <div class="card info-card">
+            <h2>How It Works</h2>
+            <p class="overview">
+                This tool analyzes cryptocurrency risk using traditional finance metrics. Enter one or more crypto assets (using their CoinGecko ID like "bitcoin" or "ethereum") to calculate:
+            </p>
+            <ul class="features-list">
+                <li><strong>Sharpe Ratio</strong> - Overall risk-adjusted returns vs. US Treasury bonds</li>
+                <li><strong>Sortino Ratio</strong> - Risk-adjusted returns focusing only on downside volatility</li>
+                <li><strong>Market Correlations</strong> - How each asset moves relative to S&P 500 and Bitcoin</li>
+                <li><strong>Volatility Metrics</strong> - Annualized return, standard volatility, and downside risk</li>
+            </ul>
+            <p class="tip">💡 <strong>Tip:</strong> Click "+ Add Another Token" to compare multiple assets side-by-side.</p>
+        </div>
 
         <div class="card">
             <h2>Analysis Parameters</h2>
@@ -52,7 +66,7 @@
 
         <div id="loading" class="loading hidden">
             <div class="spinner"></div>
-            <p>Fetching data and calculating Sharpe ratios...</p>
+            <p>Fetching data and calculating risk metrics...</p>
         </div>
 
         <div id="results" class="results hidden">
