@@ -527,24 +527,28 @@ document.addEventListener('DOMContentLoaded', async () => {
         const winnerHigh = winner.highPrice ? winner.highPrice.toFixed(2) : 'N/A';
         const winnerCurrent = winner.currentPrice ? winner.currentPrice.toFixed(2) : 'N/A';
 
+        // Determine range label for winner section
+        const winnerRangeLabel = timeframeText === '1 year' ? '52-Week High/Low' : `${timeframeText} Range`;
+        
         const winnerDiv = document.createElement('div');
         winnerDiv.className = 'winner higher';
         winnerDiv.innerHTML = `
             <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance over ${timeframeText}</div>
             <div class="winner-price-range">
-                <span class="price-label">Price Range:</span> 
+                <span class="price-label">${winnerRangeLabel}:</span> 
                 <span class="price-value">$${winnerLow} <span class="range-arrow">→</span> $${winnerHigh}</span>
                 <span class="price-context">(Current: $${winnerCurrent})</span>
+                <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
             </div>
             <div class="winner-metrics">
                 <div class="winner-metric-row">
-                    <span class="metric-label">Return:</span> <span class="metric-value">${winnerReturn}%</span>
-                    <span class="metric-label">Std Deviation (σ):</span> <span class="metric-value">${winnerVol}% <span class="metric-sublabel">annualized</span></span>
-                    <span class="metric-label">Max Drawdown:</span> <span class="metric-value">${winnerMDDDisplay}%</span>
+                    <span class="metric-label">Return:</span> <span class="metric-value">${winnerReturn}% <span class="info-icon" data-metric="annualizedReturn" data-value="${winnerReturn}">ⓘ</span></span>
+                    <span class="metric-label">Std Deviation (σ):</span> <span class="metric-value">${winnerVol}% <span class="metric-sublabel">annualized</span> <span class="info-icon" data-metric="volatility" data-value="${winnerVol}">ⓘ</span></span>
+                    <span class="metric-label">Max Drawdown:</span> <span class="metric-value">${winnerMDDDisplay}% <span class="info-icon" data-metric="maxDrawdown" data-value="${winnerMDDDisplay}">ⓘ</span></span>
                 </div>
                 <div class="winner-metric-row">
-                    <span class="metric-label">Sharpe Ratio:</span> <span class="metric-value">${winnerSharpe}</span>
-                    <span class="metric-label">Sortino Ratio:</span> <span class="metric-value">${winnerSortino}</span>
+                    <span class="metric-label">Sharpe Ratio:</span> <span class="metric-value">${winnerSharpe} <span class="info-icon" data-metric="sharpe" data-value="${winnerSharpe}">ⓘ</span></span>
+                    <span class="metric-label">Sortino Ratio:</span> <span class="metric-value">${winnerSortino} <span class="info-icon" data-metric="sortino" data-value="${winnerSortino}">ⓘ</span></span>
                 </div>
             </div>
         `;
@@ -637,24 +641,31 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             const performanceClass = tokenData.sharpeRatio > 1 ? 'excellent' : tokenData.sharpeRatio > 0 ? 'good' : 'poor';
             
+            // Determine range label based on timeframe
+            let rangeLabel = timeframeText === '1 year' ? '52-Week High/Low' : `${timeframeText} Range`;
+            
             summaryHTML += `
                 <div class="summary-card ${performanceClass} clickable" data-token="${tokenId}" role="button" tabindex="0" aria-label="View detailed analysis for ${tokenName}">
                     <h4>${tokenName}</h4>
                     <div class="price-range-summary">
-                        <span class="range-label">${timeframeText} Range:</span>
+                        <span class="range-label">${rangeLabel}:</span>
                         <span class="range-value">$${lowPrice} - $${highPrice}</span>
+                        <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
                     </div>
                     <div class="summary-stat">
                         <span class="summary-label">Period Return</span>
                         <span class="summary-value">${returnPct}%</span>
+                        <span class="info-icon" data-metric="periodReturn" data-value="${returnPct}">ⓘ</span>
                     </div>
                     <div class="summary-stat">
                         <span class="summary-label">Sharpe Ratio</span>
                         <span class="summary-value">${sharpe}</span>
+                        <span class="info-icon" data-metric="sharpe" data-value="${sharpe}">ⓘ</span>
                     </div>
                     <div class="summary-stat">
                         <span class="summary-label">Max Drawdown</span>
                         <span class="summary-value">${mddDisplay}%</span>
+                        <span class="info-icon" data-metric="maxDrawdown" data-value="${mddDisplay}">ⓘ</span>
                     </div>
                     <div class="card-tooltip">👆 Click for detailed analysis</div>
                 </div>
@@ -870,6 +881,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Show results
         results.classList.remove('hidden');
         
+        // Add info icon click handlers
+        setTimeout(() => {
+            attachInfoIconHandlers();
+        }, 100);
+        
         // Auto-scroll to results after a brief delay to allow rendering
         setTimeout(() => {
             const resultsSection = document.getElementById('results');
@@ -877,6 +893,106 @@ document.addEventListener('DOMContentLoaded', async () => {
                 resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }, 300);
+    }
+
+    function getMetricTooltipContent(metric, value, timeframe) {
+        const tooltips = {
+            priceRange: {
+                title: timeframe === '1 year' ? '52-Week High/Low' : `${timeframe} Price Range`,
+                content: `The highest and lowest prices during ${timeframe}. Shows the full price volatility range over this period. Useful for understanding how much the price fluctuated.`
+            },
+            periodReturn: {
+                title: 'Period Return',
+                content: `Total return from start to end of the period. ${value}% means if you invested $100 at the start, you'd have $${(100 * (1 + parseFloat(value)/100)).toFixed(2)} at the end. This is the actual price change you experienced.`
+            },
+            annualizedReturn: {
+                title: 'Annualized Return',
+                content: `The arithmetic mean of daily returns multiplied by 252 trading days: ${value}%. Used in Sharpe/Sortino calculations. Note: This can differ from actual period return due to volatility drag. See detailed analysis for full explanation.`
+            },
+            volatility: {
+                title: 'Volatility (Standard Deviation)',
+                content: `Measures price consistency. ${value}% annualized volatility means daily returns typically vary by this much from the average. Higher = more price swings and risk. About 68% of returns fall within ±${value}% in a typical year.`
+            },
+            maxDrawdown: {
+                title: 'Maximum Drawdown',
+                content: `Largest peak-to-trough decline: ${value}%. If you bought at the absolute worst time (the peak), this is how much you'd have lost at the lowest point before any recovery. Shows worst-case scenario risk.`
+            },
+            sharpe: {
+                title: 'Sharpe Ratio',
+                content: `Risk-adjusted return metric: ${value}. Calculated as (Return - Risk-Free Rate) ÷ Volatility. Higher is better. >1 = good, >2 = very good, >3 = excellent. Measures return per unit of total risk.`
+            },
+            sortino: {
+                title: 'Sortino Ratio',
+                content: `Like Sharpe but only penalizes downside volatility: ${value}. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains).`
+            }
+        };
+
+        return tooltips[metric] || { title: 'Metric', content: 'Click for more details in the analysis below.' };
+    }
+
+    function attachInfoIconHandlers() {
+        const infoIcons = document.querySelectorAll('.info-icon');
+        
+        infoIcons.forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent card click
+                
+                const metric = icon.dataset.metric;
+                const value = icon.dataset.value;
+                const timeframe = icon.dataset.timeframe || '1 year';
+                
+                // Remove any existing tooltips
+                document.querySelectorAll('.metric-tooltip-popup').forEach(t => t.remove());
+                
+                // Create tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = 'metric-tooltip-popup';
+                
+                const content = getMetricTooltipContent(metric, value, timeframe);
+                
+                tooltip.innerHTML = `
+                    <div class="tooltip-header">
+                        <strong>${content.title}</strong>
+                        <span class="tooltip-close">×</span>
+                    </div>
+                    <div class="tooltip-content">${content.content}</div>
+                `;
+                
+                // Position tooltip near the icon
+                document.body.appendChild(tooltip);
+                
+                const iconRect = icon.getBoundingClientRect();
+                const tooltipRect = tooltip.getBoundingClientRect();
+                
+                // Position below the icon, centered
+                let left = iconRect.left + (iconRect.width / 2) - (tooltipRect.width / 2);
+                let top = iconRect.bottom + 8;
+                
+                // Keep tooltip on screen
+                if (left < 10) left = 10;
+                if (left + tooltipRect.width > window.innerWidth - 10) {
+                    left = window.innerWidth - tooltipRect.width - 10;
+                }
+                
+                tooltip.style.left = `${left}px`;
+                tooltip.style.top = `${top}px`;
+                
+                // Close button handler
+                tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
+                    tooltip.remove();
+                });
+                
+                // Close on outside click
+                setTimeout(() => {
+                    document.addEventListener('click', function closeTooltip(e) {
+                        if (!tooltip.contains(e.target)) {
+                            tooltip.remove();
+                            document.removeEventListener('click', closeTooltip);
+                        }
+                    });
+                }, 100);
+            });
+        });
     }
 
     function showError(message) {
