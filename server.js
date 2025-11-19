@@ -265,6 +265,60 @@ function calculateCorrelation(prices1, prices2) {
   return numerator / denominator;
 }
 
+// Helper function to calculate Beta relative to a benchmark
+function calculateBeta(assetPrices, benchmarkPrices) {
+  if (assetPrices.length !== benchmarkPrices.length || assetPrices.length < 2) {
+    return null;
+  }
+
+  // Calculate returns for both series
+  const assetReturns = [];
+  const benchmarkReturns = [];
+  
+  for (let i = 1; i < assetPrices.length; i++) {
+    assetReturns.push((assetPrices[i] - assetPrices[i - 1]) / assetPrices[i - 1]);
+    benchmarkReturns.push((benchmarkPrices[i] - benchmarkPrices[i - 1]) / benchmarkPrices[i - 1]);
+  }
+
+  // Calculate means
+  const assetMean = assetReturns.reduce((sum, r) => sum + r, 0) / assetReturns.length;
+  const benchmarkMean = benchmarkReturns.reduce((sum, r) => sum + r, 0) / benchmarkReturns.length;
+
+  // Calculate covariance and benchmark variance
+  let covariance = 0;
+  let benchmarkVariance = 0;
+
+  for (let i = 0; i < assetReturns.length; i++) {
+    const assetDiff = assetReturns[i] - assetMean;
+    const benchmarkDiff = benchmarkReturns[i] - benchmarkMean;
+    covariance += assetDiff * benchmarkDiff;
+    benchmarkVariance += benchmarkDiff * benchmarkDiff;
+  }
+
+  // Use n-1 for sample covariance and variance
+  const n = assetReturns.length;
+  covariance = covariance / (n - 1);
+  benchmarkVariance = benchmarkVariance / (n - 1);
+
+  if (benchmarkVariance === 0) {
+    return null;
+  }
+
+  // Beta = Covariance(asset, benchmark) / Variance(benchmark)
+  return covariance / benchmarkVariance;
+}
+
+// Helper function to calculate Calmar Ratio
+function calculateCalmarRatio(annualizedReturn, maxDrawdown) {
+  // Calmar Ratio = Annualized Return / |Maximum Drawdown|
+  // If max drawdown is 0 or very small, return null
+  if (!maxDrawdown || Math.abs(maxDrawdown) < 0.0001) {
+    return null;
+  }
+  
+  return annualizedReturn / Math.abs(maxDrawdown);
+}
+
 // Helper function to calculate Sortino ratio (focuses on downside risk)
 function calculateSortinoRatio(prices, riskFreeRate, dailyReturns = null) {
   if (prices.length < 2) {
@@ -540,11 +594,13 @@ app.post('/api/analyze', async (req, res) => {
       // Calculate Maximum Drawdown
       const mddStats = calculateMaxDrawdown(prices);
 
-      // Calculate correlations
+      // Calculate correlations and betas
       let correlationToSP500 = null;
       let correlationToBitcoin = null;
+      let betaToSP500 = null;
+      let betaToBitcoin = null;
 
-      // Correlation to S&P 500
+      // S&P 500 metrics (correlation and beta)
       if (sp500Data && sp500Data.length > 0) {
         // Align S&P 500 data with token data by timestamp
         const alignedSP500Prices = [];
@@ -565,18 +621,24 @@ app.post('/api/analyze', async (req, res) => {
         
         if (alignedSP500Prices.length >= 10) {
           correlationToSP500 = calculateCorrelation(alignedTokenPrices, alignedSP500Prices);
+          betaToSP500 = calculateBeta(alignedTokenPrices, alignedSP500Prices);
         }
       }
 
-      // Correlation to Bitcoin (for all tokens)
+      // Bitcoin metrics (correlation and beta - for all tokens)
       if (bitcoinPrices && bitcoinPrices.length === prices.length) {
         if (tokenId.toLowerCase() === 'bitcoin') {
-          // Bitcoin's correlation to itself is always 1.0
+          // Bitcoin's correlation and beta to itself is always 1.0
           correlationToBitcoin = 1.0;
+          betaToBitcoin = 1.0;
         } else {
           correlationToBitcoin = calculateCorrelation(prices, bitcoinPrices);
+          betaToBitcoin = calculateBeta(prices, bitcoinPrices);
         }
       }
+
+      // Calculate Calmar Ratio (annualized return / max drawdown)
+      const calmarRatio = calculateCalmarRatio(returnMetrics.annualizedReturn, mddStats.maxDrawdown);
 
       return {
         id: tokenId,
@@ -596,9 +658,12 @@ app.post('/api/analyze', async (req, res) => {
         sharpeRatio: sharpeStats.sharpeRatio,
         sortinoRatio: sortinoStats.sortinoRatio,
         downsideVolatility: sortinoStats.downsideVolatility,
-        // Correlation metrics
+        calmarRatio: calmarRatio,                          // Annualized return / max drawdown
+        // Correlation and Beta metrics
         correlationToSP500: correlationToSP500,
         correlationToBitcoin: correlationToBitcoin,
+        betaToSP500: betaToSP500,                          // Sensitivity to S&P 500 movements
+        betaToBitcoin: betaToBitcoin,                      // Sensitivity to Bitcoin movements
         // Metadata
         dataPoints: sharpeStats.dailyReturns,
         timeframeDays: returnMetrics.timeframeDays,

@@ -352,6 +352,97 @@ document.addEventListener('DOMContentLoaded', async () => {
         return interpretationDiv;
     }
 
+    function getCalmarInterpretation(calmarRatio, tokenName, annualizedReturn, maxDrawdown, timeframeText) {
+        const interpretationDiv = document.createElement('div');
+        interpretationDiv.className = 'interpretation-content calmar-interpretation';
+        
+        const annRetPct = (annualizedReturn * 100).toFixed(2);
+        const mddPct = (maxDrawdown * 100).toFixed(2);
+        
+        let interpretation = '';
+        let interpretationClass = '';
+        
+        if (calmarRatio === null || !isFinite(calmarRatio)) {
+            interpretation = `Calmar Ratio cannot be calculated due to zero or near-zero maximum drawdown. This means ${tokenName} had no significant peak-to-trough decline during ${timeframeText}, which is unusual for crypto assets.`;
+            interpretationClass = 'moderate';
+        } else if (calmarRatio > 3) {
+            interpretation = `Excellent risk-adjusted returns. ${tokenName}'s Calmar Ratio of ${calmarRatio.toFixed(3)} over ${timeframeText} is exceptional. This means you're getting ${calmarRatio.toFixed(2)}x return for every 1% of maximum drawdown—a highly efficient return profile.`;
+            interpretationClass = 'excellent';
+        } else if (calmarRatio > 1) {
+            interpretation = `Good risk-adjusted returns. With a Calmar Ratio of ${calmarRatio.toFixed(3)} over ${timeframeText}, ${tokenName} delivers solid returns relative to its worst drawdown. You're earning more in returns than you risk losing in drawdowns.`;
+            interpretationClass = 'good';
+        } else if (calmarRatio > 0) {
+            interpretation = `Modest risk-adjusted returns. ${tokenName}'s Calmar Ratio of ${calmarRatio.toFixed(3)} over ${timeframeText} indicates that drawdown risk is high relative to returns. Returns aren't fully compensating for worst-case losses.`;
+            interpretationClass = 'moderate';
+        } else {
+            interpretation = `Negative Calmar Ratio. ${tokenName} had negative returns (${annRetPct}%) with a ${mddPct}% max drawdown over ${timeframeText}. This represents poor performance—losses combined with significant drawdown risk.`;
+            interpretationClass = 'poor';
+        }
+        
+        interpretationDiv.innerHTML = `
+            <div class="interpretation-header">
+                <strong>Calmar Ratio:</strong> Return per unit of maximum drawdown
+            </div>
+            <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
+            <div class="interpretation-details">
+                <p><strong>Formula:</strong> Calmar Ratio = Annualized Return ÷ |Maximum Drawdown|</p>
+                <p><strong>${tokenName}'s Calculation:</strong> ${annRetPct}% ÷ ${mddPct}% = ${calmarRatio !== null && isFinite(calmarRatio) ? calmarRatio.toFixed(3) : 'N/A'}</p>
+                <p><strong>What It Means:</strong> While Sharpe/Sortino use volatility (standard deviation) to measure risk, Calmar focuses on your actual worst-case loss (max drawdown). It answers: "How much return do I get for the biggest loss I might experience?"</p>
+                <p><strong>Why It's Useful:</strong> Popular with hedge funds and CTAs because drawdowns are what investors actually feel. A high Calmar Ratio means strong returns without suffering devastating losses. >3 is excellent, >1 is good, <0 is concerning.</p>
+                ${calmarRatio !== null && isFinite(calmarRatio) ? `<p><strong>Context:</strong> For every 1% of maximum loss during ${timeframeText}, ${tokenName} delivered ${calmarRatio.toFixed(2)}% of annualized return.</p>` : ''}
+            </div>
+            <div class="interpretation-separator"></div>
+        `;
+        
+        return interpretationDiv;
+    }
+
+    function getBetaInterpretation(betaToBTC, betaToSP500, tokenName, isBitcoin, timeframeText) {
+        const interpretationDiv = document.createElement('div');
+        interpretationDiv.className = 'interpretation-content beta-interpretation';
+        
+        let interpretation = '';
+        
+        // Bitcoin special case
+        if (isBitcoin) {
+            interpretation = `${tokenName} has a Beta of 1.0 to itself (by definition). Its Beta to S&P 500 is ${betaToSP500 !== null ? betaToSP500.toFixed(3) : 'N/A'}, indicating ${betaToSP500 > 1 ? 'higher volatility than' : betaToSP500 < 1 ? 'lower volatility than' : 'similar volatility to'} traditional markets.`;
+        } else {
+            const btcInterpretation = betaToBTC !== null ? 
+                `${tokenName} has a Beta of ${betaToBTC.toFixed(3)} to Bitcoin, meaning it ${betaToBTC > 1.2 ? 'amplifies' : betaToBTC > 0.8 ? 'closely tracks' : 'dampens'} BTC's movements.` :
+                `Beta to Bitcoin is unavailable.`;
+            
+            const sp500Interpretation = betaToSP500 !== null ?
+                `Beta to S&P 500 is ${betaToSP500.toFixed(3)}, showing ${betaToSP500 > 1 ? 'more volatile than' : betaToSP500 < 1 ? 'less volatile than' : 'similar volatility to'} traditional markets.` :
+                `Beta to S&P 500 is unavailable.`;
+            
+            interpretation = `${btcInterpretation} ${sp500Interpretation}`;
+        }
+        
+        interpretationDiv.innerHTML = `
+            <div class="interpretation-header">
+                <strong>Beta Analysis:</strong> Sensitivity to Bitcoin and S&P 500 movements
+            </div>
+            <p class="interpretation-text">${interpretation}</p>
+            <div class="interpretation-details">
+                <p><strong>What Beta Measures:</strong> Beta quantifies how much an asset moves relative to a benchmark. Beta = Covariance(asset, benchmark) ÷ Variance(benchmark).</p>
+                <p><strong>Interpreting Values:</strong></p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li><strong>Beta = 1.0:</strong> Moves in lockstep with benchmark</li>
+                    <li><strong>Beta > 1.0:</strong> Amplifies benchmark moves (more volatile)</li>
+                    <li><strong>Beta < 1.0:</strong> Dampens benchmark moves (less volatile)</li>
+                    <li><strong>Beta ≈ 0:</strong> No relationship to benchmark</li>
+                    <li><strong>Beta < 0:</strong> Moves opposite to benchmark (rare)</li>
+                </ul>
+                ${betaToBTC !== null ? `<p><strong>Bitcoin Beta (${betaToBTC.toFixed(3)}):</strong> ${betaToBTC > 1.2 ? `${tokenName} is more volatile than Bitcoin—when BTC moves 1%, ${tokenName} tends to move ${betaToBTC.toFixed(1)}%.` : betaToBTC < 0.8 ? `${tokenName} is less volatile than Bitcoin—provides some diversification benefit within crypto.` : `${tokenName} moves closely with Bitcoin—limited diversification benefit.`}</p>` : ''}
+                ${betaToSP500 !== null ? `<p><strong>S&P 500 Beta (${betaToSP500.toFixed(3)}):</strong> ${betaToSP500 > 1 ? `Higher volatility than traditional stocks—crypto-specific risks dominate.` : betaToSP500 < 0.5 ? `Low correlation to traditional markets—potential portfolio diversifier.` : `Moderate correlation to traditional markets.`}</p>` : ''}
+                <p class="context-note"><strong>⚠️ Important Caveat:</strong> Beta assumes the asset is part of a <em>diversified portfolio</em>. Individual crypto assets are NOT diversified—they have idiosyncratic (asset-specific) risks that Beta doesn't capture. Use Beta cautiously for single assets. It's most useful for understanding relative movements, not absolute risk.</p>
+            </div>
+            <div class="interpretation-separator"></div>
+        `;
+        
+        return interpretationDiv;
+    }
+
     function getSortinoInterpretation(sortinoRatio, tokenName, returnPct, downsideVolPct, riskFreeRate, sharpeRatio, timeframeText) {
         const interpretationDiv = document.createElement('div');
         interpretationDiv.className = 'interpretation-content sortino-interpretation';
@@ -507,8 +598,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                             ${tokenResults.map(t => `<td class="metric-value">${t.sortinoRatio >= 999 ? '∞' : t.sortinoRatio.toFixed(3)}</td>`).join('')}
                         </tr>
                         <tr>
+                            <td class="metric-name">Calmar Ratio</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${t.calmarRatio !== null && isFinite(t.calmarRatio) ? t.calmarRatio.toFixed(3) : 'N/A'}</td>`).join('')}
+                        </tr>
+                        <tr>
                             <td class="metric-name">Downside Volatility</td>
                             ${tokenResults.map(t => `<td class="metric-value">${(t.downsideVolatility * 100).toFixed(2)}%</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Beta to S&P 500</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${t.betaToSP500 !== null ? t.betaToSP500.toFixed(3) : 'N/A'}</td>`).join('')}
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Beta to Bitcoin</td>
+                            ${tokenResults.map(t => `<td class="metric-value">${t.betaToBitcoin !== null ? t.betaToBitcoin.toFixed(3) : 'N/A'}</td>`).join('')}
                         </tr>
                         <tr>
                             <td class="metric-name">Correlation to S&P 500</td>
@@ -528,12 +631,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function createWinnerSection(tokenResults, riskFreeRate, timeframeDays) {
-        // Sort tokens by Sharpe ratio (primary) and Sortino ratio (secondary)
+        // Sort tokens by composite score weighing Sharpe, Sortino, and Calmar ratios
         const sortedTokens = [...tokenResults].sort((a, b) => {
-            if (Math.abs(a.sharpeRatio - b.sharpeRatio) > 0.01) {
+            // Primary: Sharpe ratio (most widely used)
+            if (Math.abs(a.sharpeRatio - b.sharpeRatio) > 0.1) {
                 return b.sharpeRatio - a.sharpeRatio;
             }
-            return b.sortinoRatio - a.sortinoRatio;
+            
+            // Secondary: Sortino ratio (downside risk focus)
+            const sortinoA = a.sortinoRatio >= 999 ? 999 : a.sortinoRatio;
+            const sortinoB = b.sortinoRatio >= 999 ? 999 : b.sortinoRatio;
+            if (Math.abs(sortinoA - sortinoB) > 0.1) {
+                return sortinoB - sortinoA;
+            }
+            
+            // Tertiary: Calmar ratio (drawdown focus)
+            const calmarA = a.calmarRatio !== null && isFinite(a.calmarRatio) ? a.calmarRatio : -999;
+            const calmarB = b.calmarRatio !== null && isFinite(b.calmarRatio) ? b.calmarRatio : -999;
+            return calmarB - calmarA;
         });
 
         const winner = sortedTokens[0];
@@ -547,6 +662,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const winnerMDDDisplay = winner.maxDrawdown > 0 ? `-${winnerMDD}` : winnerMDD;
         const winnerSharpe = winner.sharpeRatio.toFixed(3);
         const winnerSortino = winner.sortinoRatio >= 999 ? '∞' : winner.sortinoRatio.toFixed(3);
+        const winnerCalmar = winner.calmarRatio !== null && isFinite(winner.calmarRatio) ? winner.calmarRatio.toFixed(3) : 'N/A';
 
         // Format price data (with fallbacks for backwards compatibility)
         const winnerLow = winner.lowPrice ? winner.lowPrice.toFixed(2) : 'N/A';
@@ -575,6 +691,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <div class="winner-metric-row">
                     <span class="metric-label">Sharpe Ratio:</span> <span class="metric-value">${winnerSharpe} <span class="info-icon" data-metric="sharpe" data-value="${winnerSharpe}">ⓘ</span></span>
                     <span class="metric-label">Sortino Ratio:</span> <span class="metric-value">${winnerSortino} <span class="info-icon" data-metric="sortino" data-value="${winnerSortino}">ⓘ</span></span>
+                    <span class="metric-label">Calmar Ratio:</span> <span class="metric-value">${winnerCalmar} <span class="info-icon" data-metric="calmar" data-value="${winnerCalmar}">ⓘ</span></span>
                 </div>
             </div>
         `;
@@ -869,13 +986,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 timeframeText
             ));
             
-            // Correlation interpretation (if data available)
-            if ((tokenData.correlationToSP500 !== null && tokenData.correlationToSP500 !== undefined) || 
-                (tokenData.correlationToBitcoin !== null && tokenData.correlationToBitcoin !== undefined)) {
-                contentArea.appendChild(getCorrelationInterpretation(
-                    tokenData.correlationToSP500,
-                    tokenData.correlationToBitcoin,
+            // Calmar interpretation
+            contentArea.appendChild(getCalmarInterpretation(
+                tokenData.calmarRatio,
+                tokenName,
+                tokenData.annualizedReturn,
+                tokenData.maxDrawdown,
+                timeframeText
+            ));
+            
+            // Beta interpretation (if data available)
+            const isBitcoin = tokenData.id.toLowerCase() === 'bitcoin';
+            if ((tokenData.betaToSP500 !== null && tokenData.betaToSP500 !== undefined) || 
+                (tokenData.betaToBitcoin !== null && tokenData.betaToBitcoin !== undefined)) {
+                contentArea.appendChild(getBetaInterpretation(
+                    tokenData.betaToBitcoin,
+                    tokenData.betaToSP500,
                     tokenName,
+                    isBitcoin,
                     timeframeText
                 ));
             }
@@ -933,7 +1061,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             },
             annualizedReturn: {
                 title: 'Annualized Return',
-                content: `The arithmetic mean of daily returns multiplied by 252 trading days: ${value}%. Used in Sharpe/Sortino calculations. Note: This can differ from actual period return due to volatility drag. See detailed analysis for full explanation.`
+                content: `The arithmetic mean of daily returns multiplied by 252 trading days: ${value}%. Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag. See detailed analysis for full explanation.`
             },
             volatility: {
                 title: 'Volatility (Standard Deviation)',
@@ -950,6 +1078,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             sortino: {
                 title: 'Sortino Ratio',
                 content: `Like Sharpe but only penalizes downside volatility: ${value}. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains).`
+            },
+            calmar: {
+                title: 'Calmar Ratio',
+                content: `Return-to-drawdown metric: ${value}. Calculated as Annualized Return ÷ |Max Drawdown|. Higher is better. Shows how much return you get per unit of worst-case loss. Popular for hedge funds and trend-following strategies. >3 = excellent, >1 = good.`
+            },
+            betaSP500: {
+                title: 'Beta to S&P 500',
+                content: `Measures sensitivity to S&P 500 movements: ${value}. Beta=1 means moves with market, >1 = more volatile than market, <1 = less volatile. Important: Beta assumes diversification. Single crypto assets are NOT diversified, so interpret cautiously. Best for portfolios.`
+            },
+            betaBTC: {
+                title: 'Beta to Bitcoin',
+                content: `Measures sensitivity to Bitcoin movements: ${value}. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics.`
             }
         };
 
