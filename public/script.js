@@ -12,6 +12,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     const tokensContainer = document.getElementById('tokensContainer');
     const addTokenBtn = document.getElementById('addTokenBtn');
     
+    // Ensure bottom loading section stays hidden (we use button loading instead)
+    if (loading) {
+        loading.classList.add('hidden');
+    }
+    
     let tokenIndex = 1; // Start at 1 since we already have token0
 
     // Function to add a new token input
@@ -110,6 +115,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Hide previous results and errors
         results.classList.add('hidden');
         errorDiv.classList.add('hidden');
+        
+        // Ensure bottom loading section stays hidden (we use button loading instead)
+        if (loading) {
+            loading.classList.add('hidden');
+        }
         
         // Collect tokens
         const tokens = collectTokens();
