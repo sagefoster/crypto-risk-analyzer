@@ -693,6 +693,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const metric = icon.dataset.metric;
                 const timeframe = icon.dataset.timeframe || '1 year';
                 
+                // Get the first token's value for this metric to use in tooltip
+                let exampleValue = '';
+                const row = icon.closest('tr');
+                if (row) {
+                    const firstValueCell = row.querySelector('.metric-value');
+                    if (firstValueCell) {
+                        exampleValue = firstValueCell.textContent.trim();
+                        // Remove % or other suffixes for numeric parsing
+                        exampleValue = exampleValue.replace(/[%∞N/A]/g, '').trim();
+                    }
+                }
+                
                 // Remove any existing tooltips
                 document.querySelectorAll('.metric-tooltip-popup').forEach(t => t.remove());
                 
@@ -700,7 +712,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const tooltip = document.createElement('div');
                 tooltip.className = 'metric-tooltip-popup';
                 
-                const content = getMetricTooltipContent(metric, '', timeframe);
+                const content = getMetricTooltipContent(metric, exampleValue || '', timeframe, tokenResults);
                 
                 tooltip.innerHTML = `
                     <div class="tooltip-header">
@@ -1174,7 +1186,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 300);
     }
 
-    function getMetricTooltipContent(metric, value, timeframe) {
+    function getMetricTooltipContent(metric, value, timeframe, tokenResults = null) {
+        // Helper to safely format value
+        const formatValue = (val, suffix = '') => {
+            if (!val || val === '' || val === 'undefined' || isNaN(parseFloat(val))) {
+                return '';
+            }
+            const numVal = parseFloat(val);
+            if (isNaN(numVal)) return '';
+            return `${numVal}${suffix}`;
+        };
+        
+        const val = formatValue(value);
+        const valPct = formatValue(value, '%');
+        const valNum = val ? parseFloat(value) : null;
+        
         const tooltips = {
             priceRange: {
                 title: timeframe === '1 year' ? '52-Week High/Low' : `${timeframe} Price Range`,
@@ -1182,47 +1208,69 @@ document.addEventListener('DOMContentLoaded', async () => {
             },
             periodReturn: {
                 title: 'Period Return',
-                content: `Total return from start to end of the period. ${value}% means if you invested $100 at the start, you'd have $${(100 * (1 + parseFloat(value)/100)).toFixed(2)} at the end. This is the actual price change you experienced.`
+                content: val ? 
+                    `Total return from start to end of the period. ${valPct} means if you invested $100 at the start, you'd have $${(100 * (1 + valNum/100)).toFixed(2)} at the end. This is the actual price change you experienced.` :
+                    `Total return from start to end of the period. If you invested $100 at the start, this shows what you'd have at the end. This is the actual price change you experienced.`
             },
             annualizedReturn: {
                 title: 'Annualized Return',
-                content: `The arithmetic mean of daily returns multiplied by 252 trading days: ${value}%. Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag. See detailed analysis for full explanation.`
+                content: val ? 
+                    `The arithmetic mean of daily returns multiplied by 252 trading days: ${valPct}. Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag. See detailed analysis for full explanation.` :
+                    `The arithmetic mean of daily returns multiplied by 252 trading days. Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag.`
             },
             volatility: {
                 title: 'Volatility (Standard Deviation)',
-                content: `Measures price consistency. ${value}% annualized volatility means daily returns typically vary by this much from the average. Higher = more price swings and risk. About 68% of returns fall within ±${value}% in a typical year.`
+                content: val ? 
+                    `Measures price consistency. ${valPct} annualized volatility means daily returns typically vary by this much from the average. Higher = more price swings and risk. About 68% of returns fall within ±${valPct} in a typical year.` :
+                    `Measures price consistency. Annualized volatility shows how much daily returns typically vary from the average. Higher = more price swings and risk.`
             },
             maxDrawdown: {
                 title: 'Maximum Drawdown',
-                content: `Largest peak-to-trough decline: ${value}%. If you bought at the absolute worst time (the peak), this is how much you'd have lost at the lowest point before any recovery. Shows worst-case scenario risk.`
+                content: val ? 
+                    `Largest peak-to-trough decline: ${valPct}. If you bought at the absolute worst time (the peak), this is how much you'd have lost at the lowest point before any recovery. Shows worst-case scenario risk.` :
+                    `Largest peak-to-trough decline. If you bought at the absolute worst time (the peak), this shows how much you'd have lost at the lowest point before any recovery. Shows worst-case scenario risk.`
             },
             sharpe: {
                 title: 'Sharpe Ratio',
-                content: `Risk-adjusted return metric: ${value}. Calculated as (Return - Risk-Free Rate) ÷ Volatility. Higher is better. >1 = good, >2 = very good, >3 = excellent. Measures return per unit of total risk.`
+                content: val ? 
+                    `Risk-adjusted return metric: ${val}. Calculated as (Return - Risk-Free Rate) ÷ Volatility. Higher is better. >1 = good, >2 = very good, >3 = excellent. Measures return per unit of total risk.` :
+                    `Risk-adjusted return metric. Calculated as (Return - Risk-Free Rate) ÷ Volatility. Higher is better. >1 = good, >2 = very good, >3 = excellent. Measures return per unit of total risk.`
             },
             sortino: {
                 title: 'Sortino Ratio',
-                content: `Like Sharpe but only penalizes downside volatility: ${value}. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains).`
+                content: val ? 
+                    `Like Sharpe but only penalizes downside volatility: ${val}. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains).` :
+                    `Like Sharpe but only penalizes downside volatility. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains).`
             },
             calmar: {
                 title: 'Calmar Ratio',
-                content: `Return-to-drawdown metric: ${value}. Calculated as Annualized Return ÷ |Max Drawdown|. Higher is better. Shows how much return you get per unit of worst-case loss. Popular for hedge funds and trend-following strategies. >3 = excellent, >1 = good.`
+                content: val ? 
+                    `Return-to-drawdown metric: ${val}. Calculated as Annualized Return ÷ |Max Drawdown|. Higher is better. Shows how much return you get per unit of worst-case loss. Popular for hedge funds and trend-following strategies. >3 = excellent, >1 = good.` :
+                    `Return-to-drawdown metric. Calculated as Annualized Return ÷ |Max Drawdown|. Higher is better. Shows how much return you get per unit of worst-case loss. Popular for hedge funds and trend-following strategies. >3 = excellent, >1 = good.`
             },
             betaSP500: {
                 title: 'Beta to S&P 500',
-                content: `Measures sensitivity to S&P 500 movements: ${value}. Beta=1 means moves with market, >1 = more volatile than market, <1 = less volatile. Important: Beta assumes diversification. Single crypto assets are NOT diversified, so interpret cautiously. Best for portfolios.`
+                content: val ? 
+                    `Measures sensitivity to S&P 500 movements: ${val}. Beta=1 means moves with market, >1 = more volatile than market, <1 = less volatile. Important: Beta assumes diversification. Single crypto assets are NOT diversified, so interpret cautiously. Best for portfolios.` :
+                    `Measures sensitivity to S&P 500 movements. Beta=1 means moves with market, >1 = more volatile than market, <1 = less volatile. Important: Beta assumes diversification. Single crypto assets are NOT diversified, so interpret cautiously.`
             },
             betaBTC: {
                 title: 'Beta to Bitcoin',
-                content: `Measures sensitivity to Bitcoin movements: ${value}. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics.`
+                content: val ? 
+                    `Measures sensitivity to Bitcoin movements: ${val}. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics.` :
+                    `Measures sensitivity to Bitcoin movements. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead.`
             },
             correlationSP500: {
                 title: 'Correlation to S&P 500',
-                content: `Measures how closely this asset moves with the S&P 500 stock index. Range: -1 to +1. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification potential.`
+                content: val ? 
+                    `Measures how closely this asset moves with the S&P 500 stock index. Range: -1 to +1. Current value: ${val}. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification potential.` :
+                    `Measures how closely this asset moves with the S&P 500 stock index. Range: -1 to +1. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification potential.`
             },
             correlationBTC: {
                 title: 'Correlation to Bitcoin',
-                content: `Measures how closely this asset moves with Bitcoin. Range: -1 to +1. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification within crypto.`
+                content: val ? 
+                    `Measures how closely this asset moves with Bitcoin. Range: -1 to +1. Current value: ${val}. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification within crypto.` :
+                    `Measures how closely this asset moves with Bitcoin. Range: -1 to +1. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification within crypto.`
             }
         };
 
