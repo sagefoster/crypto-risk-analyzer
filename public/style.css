@@ -1694,21 +1694,24 @@ small {
 
     .metrics-table {
         border-radius: 0; /* Remove border radius for edge-to-edge */
-        padding: 12px 0;
+        padding: 8px 0;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
     }
 
     .metrics-table table {
-        min-width: 600px; /* Ensure table is wide enough to scroll */
-        font-size: 0.85rem;
+        width: 100%;
+        font-size: 0.75rem;
     }
 
     .metrics-table th,
     .metrics-table td {
-        padding: 10px 12px;
-        white-space: nowrap; /* Prevent text wrapping */
+        padding: 8px 6px;
+        white-space: nowrap;
+        font-size: 0.75rem;
     }
 
-    /* Sticky first column for metric names */
+    /* Sticky first column for metric names - more compact on mobile */
     .metrics-table th:first-child,
     .metrics-table td:first-child {
         position: sticky;
@@ -1716,20 +1719,35 @@ small {
         background: var(--bg-tertiary);
         z-index: 10;
         box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+        max-width: 100px; /* Limit width to prevent taking up too much space */
+        min-width: 90px;
+        padding-right: 8px;
     }
 
     .metrics-table th:first-child {
         background: linear-gradient(135deg, rgba(88, 166, 255, 0.15), rgba(88, 166, 255, 0.05));
-        z-index: 11; /* Higher than data cells */
+        z-index: 11;
     }
 
     .metrics-table .metric-name {
-        font-size: 0.8rem;
-        min-width: 140px; /* Ensure metric names are readable */
+        font-size: 0.7rem;
+        font-weight: 600;
+        line-height: 1.2;
+        word-wrap: break-word;
+        white-space: normal; /* Allow wrapping for long metric names */
+        max-width: 90px;
     }
 
     .metrics-table .metric-value {
-        font-size: 0.85rem;
+        font-size: 0.75rem;
+        min-width: 70px; /* Ensure values have enough space */
+    }
+
+    /* Make asset headers more compact */
+    .metrics-table th:not(:first-child) {
+        min-width: 70px;
+        max-width: 85px;
+        font-size: 0.75rem;
     }
 
     /* Add scroll instruction */
