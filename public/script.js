@@ -10,7 +10,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     let tokenIndex = 1; // Start at 1 since we already have token0
 
     // Function to add a new token input
-    function addTokenInput() {
+    // @param {boolean} shouldFocus - Whether to focus the new input (default: true)
+    function addTokenInput(shouldFocus = true) {
         const tokenGroups = tokensContainer.querySelectorAll('.token-input-group');
         
         // Limit to 5 tokens maximum
@@ -45,14 +46,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         tokenIndex++;
         updateRemoveButtons();
         
-        // Focus the newly created input to keep keyboard open on mobile
+        // Focus the newly created input to keep keyboard open on mobile (only when user clicks add button)
         // Use setTimeout to ensure DOM is fully updated
-        setTimeout(() => {
-            const newInput = tokenGroup.querySelector('.token-input');
-            if (newInput) {
-                newInput.focus();
-            }
-        }, 100);
+        if (shouldFocus) {
+            setTimeout(() => {
+                const newInput = tokenGroup.querySelector('.token-input');
+                if (newInput) {
+                    newInput.focus();
+                }
+            }, 100);
+        }
     }
 
     // Function to update remove button visibility and add button state
@@ -621,15 +624,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             firstInput.value = 'bitcoin';
         }
 
-        // Add ethereum as second token
-        addTokenInput();
+        // Add ethereum as second token (don't focus to prevent scroll)
+        addTokenInput(false);
         const secondInput = document.getElementById('token1');
         if (secondInput) {
             secondInput.value = 'ethereum';
         }
 
-        // Add zcash as third token
-        addTokenInput();
+        // Add zcash as third token (don't focus to prevent scroll)
+        addTokenInput(false);
         const thirdInput = document.getElementById('token2');
         if (thirdInput) {
             thirdInput.value = 'zcash';
@@ -638,4 +641,36 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize defaults on page load
     initializeDefaultTokens();
+
+    // Ensure page starts at the top
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+
+    // Make tooltip work on click/tap for mobile devices
+    const tooltipElement = document.getElementById('riskFreeTooltip');
+    const tooltipText = document.getElementById('tooltipText');
+    
+    if (tooltipElement && tooltipText) {
+        let tooltipVisible = false;
+        
+        tooltipElement.addEventListener('click', (e) => {
+            e.stopPropagation();
+            tooltipVisible = !tooltipVisible;
+            
+            if (tooltipVisible) {
+                tooltipText.classList.add('visible');
+            } else {
+                tooltipText.classList.remove('visible');
+            }
+        });
+        
+        // Close tooltip when clicking outside
+        document.addEventListener('click', () => {
+            if (tooltipVisible) {
+                tooltipVisible = false;
+                tooltipText.classList.remove('visible');
+            }
+        });
+    }
 });

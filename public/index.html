@@ -10,7 +10,7 @@
     <div class="container">
         <header>
             <h1>Crypto Risk Analyzer</h1>
-            <p class="subtitle">Professional risk analysis for cryptocurrency investments</p>
+            <p class="subtitle">Traditional risk analysis metrics for digital assets</p>
         </header>
 
         <div class="card info-card">
@@ -76,18 +76,19 @@
         <div id="results" class="results hidden">
             <div class="card">
                 <h2>Analysis Results</h2>
-                <div class="risk-free-rate">
-                    <span class="label">
-                        Risk-Free Rate 
-                        <span class="rate-tooltip">ⓘ
-                            <span class="tooltip-text">10-Year U.S. Treasury yield from Federal Reserve (FRED). Used as the benchmark for risk-free returns in Sharpe and Sortino ratio calculations.</span>
-                        </span>
-                    </span>
-                    <span class="value" id="riskFreeRate">-</span>
-                </div>
 
                 <div id="resultsContainer">
                     <!-- Results will be dynamically generated here -->
+                </div>
+
+                <div class="risk-free-rate">
+                    <span class="label">
+                        Risk-Free Rate 
+                        <span class="rate-tooltip" id="riskFreeTooltip">ⓘ
+                            <span class="tooltip-text" id="tooltipText">10-Year U.S. Treasury yield from Federal Reserve (FRED). Used as the benchmark for risk-free returns in Sharpe and Sortino ratio calculations.</span>
+                        </span>
+                    </span>
+                    <span class="value" id="riskFreeRate">-</span>
                 </div>
             </div>
         </div>

@@ -360,7 +360,14 @@ select {
     border-radius: 8px;
     color: var(--text-primary);
     font-size: 1rem;
-    transition: all 0.2s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="text"]:hover,
+input[type="password"]:hover,
+select:hover {
+    border-color: rgba(88, 166, 255, 0.4);
+    background: rgba(28, 33, 40, 0.7);
 }
 
 input[type="text"]:focus,
@@ -368,8 +375,9 @@ input[type="password"]:focus,
 select:focus {
     outline: none;
     border-color: var(--accent-primary);
-    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2);
-    transform: translateY(-1px);
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2), 0 4px 12px rgba(88, 166, 255, 0.15);
+    transform: translateY(-2px) scale(1.01);
+    background: var(--bg-secondary);
 }
 
 input[type="text"],
@@ -515,9 +523,23 @@ small {
     background: var(--bg-tertiary);
     padding: 16px;
     border-radius: 8px;
-    margin-bottom: 24px;
+    margin-top: 32px;
+    margin-bottom: 0;
     text-align: center;
     border: 1px solid var(--border-color);
+    opacity: 0;
+    animation: fadeIn 0.8s ease 0.6s forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .risk-free-rate .label {
@@ -581,9 +603,18 @@ small {
     border-top-color: var(--bg-secondary);
 }
 
-.rate-tooltip:hover .tooltip-text {
+.rate-tooltip:hover .tooltip-text,
+.tooltip-text.visible {
     visibility: visible;
     opacity: 1;
+}
+
+.rate-tooltip {
+    cursor: pointer;
+}
+
+.rate-tooltip:active {
+    transform: scale(0.95);
 }
 
 .comparison {
@@ -1336,5 +1367,179 @@ small {
             font-size: 1rem;
         }
     }
+}
+
+/* Additional Interactive Animations */
+
+/* Enhanced button press effect */
+.btn-primary:active,
+.btn-add-token:active {
+    animation: buttonPress 0.2s ease;
+}
+
+@keyframes buttonPress {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.95); }
+    100% { transform: scale(1); }
+}
+
+/* Remove button enhanced animations */
+.btn-remove-token::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(248, 81, 73, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.4s, height 0.4s;
+    z-index: 0;
+}
+
+.btn-remove-token:hover::before {
+    width: 50px;
+    height: 50px;
+}
+
+.btn-remove-token {
+    position: relative;
+}
+
+.btn-remove-token:active {
+    transform: scale(0.85) rotate(180deg);
+}
+
+/* Select dropdown animations */
+select {
+    cursor: pointer;
+}
+
+select:active {
+    transform: scale(0.98);
+}
+
+/* Stat items pulse on hover */
+.stat-item:hover {
+    animation: gentlePulse 1s ease infinite;
+}
+
+@keyframes gentlePulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.03); }
+}
+
+/* Winner header shimmer effect */
+.winner-header {
+    position: relative;
+    overflow: hidden;
+}
+
+.winner-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+/* Loading spinner enhancement */
+.spinner {
+    animation: spin 1s linear infinite, pulse 2s ease-in-out infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Form intro breathing effect */
+.form-intro {
+    animation: breathe 4s ease-in-out infinite;
+}
+
+@keyframes breathe {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(88, 166, 255, 0.2); }
+    50% { box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.1); }
+}
+
+/* Tooltip enhanced appearance */
+.tooltip-text {
+    animation: tooltipAppear 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tooltip-text.visible {
+    animation: tooltipAppear 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes tooltipAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-10px) translateX(-50%) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) translateX(-50%) scale(1);
+    }
+}
+
+/* Token input wrapper hover glow */
+.token-input-wrapper {
+    transition: all 0.3s ease;
+}
+
+.token-input-wrapper:hover {
+    filter: drop-shadow(0 0 8px rgba(88, 166, 255, 0.15));
+}
+
+/* Interpretation content slide in */
+.interpretation-content {
+    animation: slideInContent 0.4s ease forwards;
+    opacity: 0;
+}
+
+@keyframes slideInContent {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Enhanced toggle button interaction */
+.toggle-details-btn:active {
+    transform: scale(0.96);
+}
+
+.toggle-icon {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-block;
+}
+
+/* Timeframe select bounce on change */
+select:focus {
+    animation: selectBounce 0.4s ease;
+}
+
+@keyframes selectBounce {
+    0%, 100% { transform: translateY(-2px) scale(1.01); }
+    50% { transform: translateY(-3px) scale(1.02); }
 }
 
