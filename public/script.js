@@ -11,10 +11,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     const analyzeBtn = document.getElementById('analyzeBtn');
     const tokensContainer = document.getElementById('tokensContainer');
     const addTokenBtn = document.getElementById('addTokenBtn');
+    const btnLoading = document.getElementById('btnLoading');
     
-    // Ensure bottom loading section stays hidden (we use button loading instead)
+    // Ensure all loading sections stay hidden on page load
     if (loading) {
         loading.classList.add('hidden');
+        loading.style.display = 'none'; // Double ensure
+    }
+    if (btnLoading) {
+        btnLoading.classList.add('hidden');
+        btnLoading.style.display = 'none'; // Double ensure
     }
     
     let tokenIndex = 1; // Start at 1 since we already have token0
@@ -119,6 +125,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Ensure bottom loading section stays hidden (we use button loading instead)
         if (loading) {
             loading.classList.add('hidden');
+            loading.style.display = 'none';
         }
         
         // Collect tokens
@@ -133,7 +140,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         const btnLoading = document.getElementById('btnLoading');
         const loadingDetails = document.getElementById('loadingDetails');
         analyzeBtn.classList.add('hidden');
+        analyzeBtn.style.display = 'none';
         btnLoading.classList.remove('hidden');
+        btnLoading.style.display = ''; // Remove inline style to use CSS
         
         // Loading messages to rotate through
         const loadingMessages = [
@@ -185,8 +194,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             showError(error.message || 'An error occurred while analyzing the tokens. Please check your API key and token IDs.');
         } finally {
             // Hide loading state, show button
-            btnLoading.classList.add('hidden');
-            analyzeBtn.classList.remove('hidden');
+            if (btnLoading) {
+                btnLoading.classList.add('hidden');
+                btnLoading.style.display = 'none';
+            }
+            if (analyzeBtn) {
+                analyzeBtn.classList.remove('hidden');
+                analyzeBtn.style.display = '';
+            }
         }
     });
 

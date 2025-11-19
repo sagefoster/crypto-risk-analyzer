@@ -599,6 +599,11 @@ small {
     padding: 40px;
 }
 
+/* General hidden utility class */
+.hidden {
+    display: none !important;
+}
+
 .loading.hidden {
     display: none;
 }
