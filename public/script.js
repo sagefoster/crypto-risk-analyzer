@@ -536,7 +536,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <span class="metric-label">Sortino Ratio:</span> <span class="metric-value">${winnerSortino}</span>
                 </div>
             </div>
-            <p class="winner-context">Standard deviation measures how much daily returns vary from the average—higher σ means more price volatility and risk.</p>
         `;
         
         // Add comparison text for multiple tokens
@@ -609,11 +608,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         let summaryHTML = `
             <h3 class="summary-title">Quick Overview</h3>
             <p class="overview-context">Analysis period: <strong>${timeframeText}</strong> | Risk-adjusted returns compared to ${riskFreeRate.toFixed(2)}% risk-free rate | Max Drawdown shows peak-to-trough loss during this period</p>
+            <p class="tap-hint">💡 Tap any asset card to jump to its detailed analysis</p>
             <div class="summary-cards">
         `;
         
         tokenResults.forEach(tokenData => {
             const tokenName = tokenData.id.toUpperCase();
+            const tokenId = tokenData.id.toLowerCase();
             const returnPct = (tokenData.meanReturn * 100).toFixed(2);
             const sharpe = tokenData.sharpeRatio.toFixed(2);
             const mdd = (tokenData.maxDrawdown * 100).toFixed(2);
@@ -622,7 +623,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const performanceClass = tokenData.sharpeRatio > 1 ? 'excellent' : tokenData.sharpeRatio > 0 ? 'good' : 'poor';
             
             summaryHTML += `
-                <div class="summary-card ${performanceClass}">
+                <div class="summary-card ${performanceClass} clickable" data-token="${tokenId}" role="button" tabindex="0" aria-label="View detailed analysis for ${tokenName}">
                     <h4>${tokenName}</h4>
                     <div class="summary-stat">
                         <span class="summary-label">Return</span>
@@ -636,12 +637,45 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <span class="summary-label">Max Drawdown</span>
                         <span class="summary-value">${mddDisplay}%</span>
                     </div>
+                    <div class="card-tooltip">👆 Click for detailed analysis</div>
                 </div>
             `;
         });
         
         summaryHTML += '</div>';
         summaryDiv.innerHTML = summaryHTML;
+        
+        // Add click handlers to summary cards
+        setTimeout(() => {
+            const cards = summaryDiv.querySelectorAll('.summary-card.clickable');
+            cards.forEach(card => {
+                const clickHandler = () => {
+                    const tokenId = card.dataset.token;
+                    const targetCard = document.querySelector(`.asset-interpretation-card[data-token="${tokenId}"]`);
+                    if (targetCard) {
+                        // Smooth scroll to the detailed analysis card
+                        targetCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        // Expand if collapsed
+                        const content = targetCard.querySelector('.asset-card-content');
+                        if (content && content.classList.contains('collapsed')) {
+                            const expandBtn = targetCard.querySelector('.expand-asset-btn');
+                            if (expandBtn) expandBtn.click();
+                        }
+                        // Add highlight animation
+                        targetCard.classList.add('highlighted');
+                        setTimeout(() => targetCard.classList.remove('highlighted'), 2000);
+                    }
+                };
+                
+                card.addEventListener('click', clickHandler);
+                card.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        clickHandler();
+                    }
+                });
+            });
+        }, 100);
         
         return summaryDiv;
     }
@@ -714,6 +748,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Create expandable card for this asset
             const assetCard = document.createElement('div');
             assetCard.className = 'asset-interpretation-card';
+            assetCard.dataset.token = tokenData.id.toLowerCase();
             
             assetCard.innerHTML = `
                 <div class="asset-card-header" data-asset-index="${index}">
@@ -815,6 +850,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Show results
         results.classList.remove('hidden');
+        
+        // Auto-scroll to results after a brief delay to allow rendering
+        setTimeout(() => {
+            const resultsSection = document.getElementById('results');
+            if (resultsSection) {
+                resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 300);
     }
 
     function showError(message) {
