@@ -1013,9 +1013,31 @@ small {
 
 .metrics-table {
     overflow-x: auto;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
     border-radius: 12px;
     background: var(--bg-tertiary);
     padding: 16px;
+    position: relative;
+}
+
+/* Scroll hint shadow for mobile */
+.metrics-table::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 30px;
+    background: linear-gradient(to left, rgba(20, 22, 32, 0.8), transparent);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+@media (max-width: 768px) {
+    .metrics-table::after {
+        opacity: 1; /* Show scroll hint on mobile */
+    }
 }
 
 .metrics-table table {
@@ -1589,6 +1611,69 @@ small {
     .btn-primary {
         padding: 14px;
         font-size: 1rem;
+    }
+
+    /* Metrics Table Mobile Optimization */
+    .metrics-table-wrapper {
+        margin: 16px -12px; /* Extend to edges */
+    }
+
+    .table-context {
+        font-size: 0.85rem;
+        padding: 0 12px;
+        margin-bottom: 12px;
+    }
+
+    .metrics-table {
+        border-radius: 0; /* Remove border radius for edge-to-edge */
+        padding: 12px 0;
+    }
+
+    .metrics-table table {
+        min-width: 600px; /* Ensure table is wide enough to scroll */
+        font-size: 0.85rem;
+    }
+
+    .metrics-table th,
+    .metrics-table td {
+        padding: 10px 12px;
+        white-space: nowrap; /* Prevent text wrapping */
+    }
+
+    /* Sticky first column for metric names */
+    .metrics-table th:first-child,
+    .metrics-table td:first-child {
+        position: sticky;
+        left: 0;
+        background: var(--bg-tertiary);
+        z-index: 10;
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .metrics-table th:first-child {
+        background: linear-gradient(135deg, rgba(88, 166, 255, 0.15), rgba(88, 166, 255, 0.05));
+        z-index: 11; /* Higher than data cells */
+    }
+
+    .metrics-table .metric-name {
+        font-size: 0.8rem;
+        min-width: 140px; /* Ensure metric names are readable */
+    }
+
+    .metrics-table .metric-value {
+        font-size: 0.85rem;
+    }
+
+    /* Add scroll instruction */
+    .metrics-table-wrapper::before {
+        content: '← Swipe to see all assets →';
+        display: block;
+        text-align: center;
+        color: var(--text-tertiary);
+        font-size: 0.75rem;
+        font-style: italic;
+        margin-bottom: 8px;
+        animation: gentlePulse 2s ease-in-out infinite;
     }
 
     .btn-remove-token {
