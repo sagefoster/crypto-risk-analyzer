@@ -166,12 +166,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         interpretationDiv.innerHTML = `
             <div class="interpretation-header">
-                <strong>What this means:</strong>
+                <strong>Sharpe Ratio:</strong> Return per unit of total risk
             </div>
             <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
             <div class="interpretation-details">
-                <p><strong>Calculation:</strong> Sharpe Ratio = (${returnPct}% - ${riskFreeRate.toFixed(2)}%) / ${volatilityPct}% = ${sharpeRatio.toFixed(3)}</p>
-                <p><strong>Interpretation:</strong> ${sharpeRatio > 1 ? 'Good' : sharpeRatio > 0 ? 'Moderate' : 'Poor'} risk-adjusted returns. ${sharpeRatio > 0 ? 'The asset is generating excess returns above the risk-free rate.' : 'The asset is underperforming the risk-free rate, meaning a Treasury bond would have been a better choice.'}</p>
+                <p><strong>Formula:</strong> (Return - Risk-Free Rate) ÷ Volatility = (${returnPct}% - ${riskFreeRate.toFixed(2)}%) ÷ ${volatilityPct}% = <strong>${sharpeRatio.toFixed(3)}</strong></p>
+                <p><strong>Key Insight:</strong> ${sharpeRatio > 1 ? 'Earning more than 1% extra return for each 1% of risk taken.' : sharpeRatio > 0 ? 'Positive excess return, but not keeping pace with risk.' : 'Losing money while taking risk. Treasury bonds would be better.'}</p>
             </div>
             <div class="interpretation-separator"></div>
         `;
@@ -206,13 +206,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         interpretationDiv.innerHTML = `
             <div class="interpretation-header">
-                <strong>Maximum Drawdown (Peak Loss):</strong>
+                <strong>Maximum Drawdown:</strong> Worst peak-to-trough loss
             </div>
             <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
             <div class="interpretation-details">
-                <p><strong>What It Measures:</strong> Maximum Drawdown shows the largest peak-to-trough decline in value during the period. It represents the worst loss an investor would have experienced if they bought at the peak and held through to the lowest point.</p>
-                <p><strong>Interpretation:</strong> ${maxDrawdown < 0.15 ? 'Low' : maxDrawdown < 0.30 ? 'Moderate' : maxDrawdown < 0.50 ? 'High' : 'Very High'} drawdown risk. ${maxDrawdown < 0.20 ? 'The asset shows good stability with limited downside exposure.' : 'Investors should be prepared for significant temporary losses and have a long-term investment horizon.'}</p>
-                <p><strong>Recovery Requirement:</strong> After a ${mddPct}% loss, the asset needs to gain ${(100 * maxDrawdown / (1 - maxDrawdown)).toFixed(2)}% to return to its previous peak.</p>
+                <p><strong>What It Shows:</strong> If you bought at the absolute worst time, you'd have lost <strong>${mddPct}%</strong> at the low point.</p>
+                <p><strong>To Recover:</strong> Asset needs to gain <strong>${(100 * maxDrawdown / (1 - maxDrawdown)).toFixed(2)}%</strong> to break even. ${maxDrawdown < 0.20 ? 'Quick recovery possible.' : maxDrawdown < 0.50 ? 'Long recovery period likely.' : 'Very long recovery ahead.'}</p>
             </div>
             <div class="interpretation-separator"></div>
         `;
@@ -250,13 +249,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         interpretationDiv.innerHTML = `
             <div class="interpretation-header">
-                <strong>Sortino Ratio (Downside Risk Focus):</strong>
+                <strong>Sortino Ratio:</strong> Return per unit of downside risk
             </div>
             <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
             <div class="interpretation-details">
-                <p><strong>Key Difference:</strong> Unlike Sharpe Ratio which penalizes all volatility, Sortino only penalizes downside volatility (negative returns). This makes it better for assets with asymmetric return distributions.</p>
-                <p><strong>Calculation:</strong> Sortino Ratio = (${returnPct}% - ${riskFreeRate.toFixed(2)}%) / ${downsideVolPct}% = ${sortinoDisplay}</p>
-                <p><strong>Interpretation:</strong> ${sortinoRatio >= 999 ? 'Perfect' : sortinoRatio > 1 ? 'Good' : sortinoRatio > 0 ? 'Moderate' : 'Poor'} downside protection. ${comparisonNote}</p>
+                <p><strong>Why It Matters:</strong> Only penalizes bad volatility (losses), not upside gains. Better for crypto than Sharpe.</p>
+                <p><strong>Formula:</strong> (Return - Risk-Free Rate) ÷ Downside Volatility = <strong>${sortinoDisplay}</strong></p>
+                <p><strong>Comparison:</strong> ${comparisonNote}</p>
             </div>
         `;
         
@@ -267,7 +266,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const interpretationDiv = document.createElement('div');
         interpretationDiv.className = 'interpretation-content correlation-interpretation';
         
-        let content = '<div class="interpretation-header"><strong>Market Correlations:</strong></div>';
+        let content = '<div class="interpretation-header"><strong>Correlations:</strong> How it moves with other assets</div>';
         
         // S&P 500 Correlation
         if (correlationToSP500 !== null) {
@@ -276,16 +275,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             let sp500Class = '';
             
             if (Math.abs(corrValue) < 0.3) {
-                sp500Text = `Low correlation (${corrValue.toFixed(2)}) to S&P 500. ${tokenName} moves largely independently from traditional stock markets, providing excellent diversification benefits for a traditional portfolio.`;
+                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> — Moves independently from stocks. Great diversification.`;
                 sp500Class = 'excellent';
             } else if (Math.abs(corrValue) < 0.5) {
-                sp500Text = `Moderate correlation (${corrValue.toFixed(2)}) to S&P 500. ${tokenName} shows some relationship with traditional markets but maintains significant independence, offering good diversification potential.`;
+                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> — Some relationship with stocks. Good diversification.`;
                 sp500Class = 'good';
             } else if (Math.abs(corrValue) < 0.7) {
-                sp500Text = `High correlation (${corrValue.toFixed(2)}) to S&P 500. ${tokenName} tends to move with traditional markets, reducing diversification benefits when added to a stock portfolio.`;
+                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> — Tends to move with stocks. Limited diversification.`;
                 sp500Class = 'moderate';
             } else {
-                sp500Text = `Very high correlation (${corrValue.toFixed(2)}) to S&P 500. ${tokenName} moves very closely with traditional markets, offering minimal diversification benefits.`;
+                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> — Moves closely with stocks. Minimal diversification.`;
                 sp500Class = 'poor';
             }
             
@@ -299,16 +298,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             let btcClass = '';
             
             if (Math.abs(corrValue) < 0.3) {
-                btcText = `Low correlation (${corrValue.toFixed(2)}) to Bitcoin. ${tokenName} moves independently from Bitcoin, suggesting it has unique price drivers and isn't just following the crypto market leader.`;
+                btcText = `<strong>${corrValue.toFixed(2)}</strong> — Independent from Bitcoin. Unique price drivers.`;
                 btcClass = 'excellent';
             } else if (Math.abs(corrValue) < 0.5) {
-                btcText = `Moderate correlation (${corrValue.toFixed(2)}) to Bitcoin. ${tokenName} shows some relationship with Bitcoin but maintains meaningful independence in its price movements.`;
+                btcText = `<strong>${corrValue.toFixed(2)}</strong> — Some Bitcoin influence. Maintains independence.`;
                 btcClass = 'good';
             } else if (Math.abs(corrValue) < 0.7) {
-                btcText = `High correlation (${corrValue.toFixed(2)}) to Bitcoin. ${tokenName} tends to move with Bitcoin, indicating it's significantly influenced by Bitcoin's price action.`;
+                btcText = `<strong>${corrValue.toFixed(2)}</strong> — Follows Bitcoin trends closely.`;
                 btcClass = 'moderate';
             } else {
-                btcText = `Very high correlation (${corrValue.toFixed(2)}) to Bitcoin. ${tokenName} moves very closely with Bitcoin, suggesting it's heavily dependent on Bitcoin's price movements with little independent price action.`;
+                btcText = `<strong>${corrValue.toFixed(2)}</strong> — Highly dependent on Bitcoin price action.`;
                 btcClass = 'poor';
             }
             
@@ -318,12 +317,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Add details section
         content += `
             <div class="interpretation-details">
-                <p><strong>Understanding Correlation:</strong></p>
-                <p>Correlation ranges from -1 to +1:</p>
-                <p>• <strong>+1</strong>: Perfect positive correlation (assets move together)</p>
-                <p>• <strong>0</strong>: No correlation (independent movements)</p>
-                <p>• <strong>-1</strong>: Perfect negative correlation (assets move opposite)</p>
-                <p><strong>Portfolio Implication:</strong> Lower correlation to existing holdings provides better diversification and risk reduction benefits.</p>
+                <p><strong>Scale:</strong> -1 (opposite moves) → 0 (independent) → +1 (moves together)</p>
+                <p><strong>For Portfolios:</strong> Lower correlation = better diversification and risk reduction.</p>
             </div>
         `;
         

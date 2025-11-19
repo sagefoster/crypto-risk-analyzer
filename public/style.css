@@ -746,8 +746,48 @@ small {
 }
 
 @media (max-width: 768px) {
+    body {
+        padding: 12px;
+    }
+
+    header h1 {
+        font-size: 1.8rem;
+    }
+
+    header .subtitle {
+        font-size: 0.95rem;
+    }
+
+    .card {
+        padding: 20px;
+        margin-bottom: 16px;
+    }
+
+    .info-card h2 {
+        font-size: 1.3rem;
+    }
+
+    .overview {
+        font-size: 0.95rem;
+    }
+
+    .features-list li {
+        font-size: 0.9rem;
+        padding-left: 28px;
+    }
+
+    .tip {
+        font-size: 0.9rem;
+        padding: 10px;
+    }
+
     .form-row {
         grid-template-columns: 1fr;
+    }
+
+    .btn-add-token {
+        padding: 14px;
+        font-size: 0.95rem;
     }
 
     .comparison {
@@ -756,10 +796,135 @@ small {
 
     .vs-divider {
         padding: 10px;
+        margin: 10px 0;
+        font-size: 1rem;
     }
 
-    header h1 {
-        font-size: 2rem;
+    .token-result h3 {
+        font-size: 1.3rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    .stat-item {
+        padding: 10px;
+    }
+
+    .stat-label {
+        font-size: 0.85rem;
+    }
+
+    .stat-value {
+        font-size: 1rem;
+    }
+
+    /* Interpretation sections for mobile */
+    .interpretation-content {
+        padding: 14px;
+        margin: 12px 0;
+    }
+
+    .interpretation-header {
+        font-size: 0.95rem;
+        margin-bottom: 10px;
+    }
+
+    .interpretation-text {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    .interpretation-details {
+        padding: 10px;
+        margin-top: 10px;
+    }
+
+    .interpretation-details p {
+        font-size: 0.85rem;
+        margin-bottom: 8px;
+    }
+
+    /* Winner comparison mobile optimization */
+    .winner {
+        padding: 16px;
+    }
+
+    .winner-header {
+        font-size: 1.1rem;
+        margin-bottom: 12px;
+    }
+
+    .winner-metrics {
+        padding: 12px;
+    }
+
+    .winner-metric-row {
+        grid-template-columns: auto 1fr;
+        gap: 8px 12px;
+    }
+
+    .winner-metric-row .metric-label {
+        font-size: 0.85rem;
+    }
+
+    .winner-metric-row .metric-value {
+        font-size: 0.95rem;
+        text-align: right;
+    }
+
+    .winner-comparison {
+        font-size: 0.9rem;
+        padding-top: 10px;
+    }
+
+    /* Button optimizations */
+    .btn-primary {
+        padding: 14px;
+        font-size: 1rem;
+    }
+
+    .btn-remove-token {
+        width: 32px;
+        height: 32px;
+        font-size: 1.3rem;
+    }
+
+    /* Reduce spacing on mobile */
+    .form-group {
+        margin-bottom: 16px;
+    }
+
+    label {
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+    }
+
+    input[type="text"],
+    select {
+        font-size: 0.95rem;
+        padding: 10px;
+    }
+
+    /* Hide excessive details on very small screens */
+    @media (max-width: 480px) {
+        .interpretation-details {
+            font-size: 0.8rem;
+        }
+
+        .features-list {
+            font-size: 0.85rem;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+        }
+
+        .winner-metric-row {
+            gap: 6px 8px;
+        }
     }
 }
 
