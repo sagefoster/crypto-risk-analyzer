@@ -280,7 +280,7 @@ function calculateSortinoRatio(prices, riskFreeRate) {
 // API endpoint to analyze tokens
 app.post('/api/analyze', async (req, res) => {
   try {
-    let { apiKey, tokens, token1, token2, timeframe = 90 } = req.body;
+    let { apiKey, tokens, token1, token2, timeframe = 365 } = req.body;
 
     // Use environment variable API key if not provided in request
     if (!apiKey || apiKey.trim() === '') {
