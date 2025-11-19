@@ -603,6 +603,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tableWrapper = document.createElement('div');
         tableWrapper.className = 'metrics-table-wrapper';
         
+        // Helper function to create metric name cell with tooltip
+        const createMetricNameCell = (metricName, tooltipMetric) => {
+            return `<td class="metric-name">
+                <span class="metric-name-text">${metricName}</span>
+                <span class="info-icon table-info-icon" data-metric="${tooltipMetric}" data-timeframe="${timeframeText}">ⓘ</span>
+            </td>`;
+        };
+        
         let tableHTML = `
             <p class="table-context">Comprehensive metrics comparison for ${timeframeText}</p>
             <div class="metrics-table">
@@ -615,58 +623,58 @@ document.addEventListener('DOMContentLoaded', async () => {
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="metric-name">Period Return</td>
+                            ${createMetricNameCell('Period Return', 'periodReturn')}
                             ${tokenResults.map(t => `<td class="metric-value">${(t.periodReturn * 100).toFixed(2)}%</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">CAGR</td>
+                            ${createMetricNameCell('CAGR', 'periodReturn')}
                             ${tokenResults.map(t => `<td class="metric-value">${(t.cagr * 100).toFixed(2)}%</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Annualized Return</td>
+                            ${createMetricNameCell('Annualized Return', 'annualizedReturn')}
                             ${tokenResults.map(t => `<td class="metric-value">${(t.annualizedReturn * 100).toFixed(2)}%</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Volatility</td>
+                            ${createMetricNameCell('Volatility', 'volatility')}
                             ${tokenResults.map(t => `<td class="metric-value">${(t.volatility * 100).toFixed(2)}%</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Max Drawdown</td>
+                            ${createMetricNameCell('Max Drawdown', 'maxDrawdown')}
                             ${tokenResults.map(t => {
                                 const mdd = (t.maxDrawdown * 100).toFixed(2);
                                 return `<td class="metric-value">${t.maxDrawdown > 0 ? `-${mdd}` : mdd}%</td>`;
                             }).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Sharpe Ratio</td>
+                            ${createMetricNameCell('Sharpe Ratio', 'sharpe')}
                             ${tokenResults.map(t => `<td class="metric-value">${t.sharpeRatio.toFixed(3)}</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Sortino Ratio</td>
+                            ${createMetricNameCell('Sortino Ratio', 'sortino')}
                             ${tokenResults.map(t => `<td class="metric-value">${t.sortinoRatio >= 999 ? '∞' : t.sortinoRatio.toFixed(3)}</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Calmar Ratio</td>
+                            ${createMetricNameCell('Calmar Ratio', 'calmar')}
                             ${tokenResults.map(t => `<td class="metric-value">${t.calmarRatio !== null && isFinite(t.calmarRatio) ? t.calmarRatio.toFixed(3) : 'N/A'}</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Downside Volatility</td>
+                            ${createMetricNameCell('Downside Volatility', 'volatility')}
                             ${tokenResults.map(t => `<td class="metric-value">${(t.downsideVolatility * 100).toFixed(2)}%</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Beta to S&P 500</td>
+                            ${createMetricNameCell('Beta to S&P 500', 'betaSP500')}
                             ${tokenResults.map(t => `<td class="metric-value">${t.betaToSP500 !== null ? t.betaToSP500.toFixed(3) : 'N/A'}</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Beta to Bitcoin</td>
+                            ${createMetricNameCell('Beta to Bitcoin', 'betaBTC')}
                             ${tokenResults.map(t => `<td class="metric-value">${t.betaToBitcoin !== null ? t.betaToBitcoin.toFixed(3) : 'N/A'}</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Correlation to S&P 500</td>
+                            ${createMetricNameCell('Correlation to S&P 500', 'correlationSP500')}
                             ${tokenResults.map(t => `<td class="metric-value">${t.correlationToSP500 !== null ? t.correlationToSP500.toFixed(3) : 'N/A'}</td>`).join('')}
                         </tr>
                         <tr>
-                            <td class="metric-name">Correlation to Bitcoin</td>
+                            ${createMetricNameCell('Correlation to Bitcoin', 'correlationBTC')}
                             ${tokenResults.map(t => `<td class="metric-value">${t.correlationToBitcoin !== null ? t.correlationToBitcoin.toFixed(3) : 'N/A'}</td>`).join('')}
                         </tr>
                     </tbody>
@@ -675,6 +683,69 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
         
         tableWrapper.innerHTML = tableHTML;
+        
+        // Attach tooltip handlers to table info icons
+        const tableInfoIcons = tableWrapper.querySelectorAll('.table-info-icon');
+        tableInfoIcons.forEach(icon => {
+            icon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                
+                const metric = icon.dataset.metric;
+                const timeframe = icon.dataset.timeframe || '1 year';
+                
+                // Remove any existing tooltips
+                document.querySelectorAll('.metric-tooltip-popup').forEach(t => t.remove());
+                
+                // Create tooltip
+                const tooltip = document.createElement('div');
+                tooltip.className = 'metric-tooltip-popup';
+                
+                const content = getMetricTooltipContent(metric, '', timeframe);
+                
+                tooltip.innerHTML = `
+                    <div class="tooltip-header">
+                        <strong>${content.title}</strong>
+                        <span class="tooltip-close">×</span>
+                    </div>
+                    <div class="tooltip-content">${content.content}</div>
+                `;
+                
+                // Position tooltip near the icon
+                document.body.appendChild(tooltip);
+                
+                const iconRect = icon.getBoundingClientRect();
+                const tooltipRect = tooltip.getBoundingClientRect();
+                
+                // Position below the icon, centered
+                let left = iconRect.left + (iconRect.width / 2) - (tooltipRect.width / 2);
+                let top = iconRect.bottom + 8;
+                
+                // Keep tooltip on screen
+                if (left < 10) left = 10;
+                if (left + tooltipRect.width > window.innerWidth - 10) {
+                    left = window.innerWidth - tooltipRect.width - 10;
+                }
+                
+                tooltip.style.left = `${left}px`;
+                tooltip.style.top = `${top}px`;
+                
+                // Close button handler
+                tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
+                    tooltip.remove();
+                });
+                
+                // Close on outside click
+                setTimeout(() => {
+                    document.addEventListener('click', function closeTooltip(e) {
+                        if (!tooltip.contains(e.target) && !icon.contains(e.target)) {
+                            tooltip.remove();
+                            document.removeEventListener('click', closeTooltip);
+                        }
+                    });
+                }, 100);
+            });
+        });
+        
         return tableWrapper;
     }
 
@@ -703,8 +774,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         const winnerName = winner.id.toUpperCase();
         const timeframeText = getTimeframeText(timeframeDays);
         
-        // Format all metrics for winner
-        const winnerReturn = (winner.meanReturn * 100).toFixed(2);
+        // Format all metrics for winner - use period return for simple holding period return
+        const winnerReturn = (winner.periodReturn * 100).toFixed(2);
         const winnerVol = (winner.volatility * 100).toFixed(2);
         const winnerMDD = (winner.maxDrawdown * 100).toFixed(2);
         const winnerMDDDisplay = winner.maxDrawdown > 0 ? `-${winnerMDD}` : winnerMDD;
@@ -720,19 +791,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Determine range label for winner section
         const winnerRangeLabel = timeframeText === '1 year' ? '52-Week High/Low' : `${timeframeText} Range`;
         
+        // Determine return label based on timeframe
+        const winnerReturnLabel = timeframeText === '1 year' ? '1 Year Return' : `${timeframeText} Return`;
+        
         const winnerDiv = document.createElement('div');
         winnerDiv.className = 'winner higher';
         winnerDiv.innerHTML = `
             <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance over ${timeframeText}</div>
             <div class="winner-price-range">
                 <span class="price-label">${winnerRangeLabel}:</span> 
-                <span class="price-value">$${winnerHigh} <span class="range-arrow">→</span> $${winnerLow}</span>
+                <span class="price-value">$${winnerLow} - $${winnerHigh}</span>
                 <span class="price-context">(Current: $${winnerCurrent})</span>
                 <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
             </div>
             <div class="winner-metrics">
                 <div class="winner-metric-row">
-                    <span class="metric-label">Return:</span> <span class="metric-value">${winnerReturn}% <span class="info-icon" data-metric="annualizedReturn" data-value="${winnerReturn}">ⓘ</span></span>
+                    <span class="metric-label">${winnerReturnLabel}:</span> <span class="metric-value">${winnerReturn}% <span class="info-icon" data-metric="periodReturn" data-value="${winnerReturn}" data-timeframe="${timeframeText}">ⓘ</span></span>
                     <span class="metric-label">Std Deviation (σ):</span> <span class="metric-value">${winnerVol}% <span class="info-icon" data-metric="volatility" data-value="${winnerVol}">ⓘ</span></span>
                     <span class="metric-label">Max Drawdown:</span> <span class="metric-value">${winnerMDDDisplay}% <span class="info-icon" data-metric="maxDrawdown" data-value="${winnerMDDDisplay}">ⓘ</span></span>
                 </div>
@@ -748,7 +822,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (sortedTokens.length === 2) {
             const second = sortedTokens[1];
             const secondName = second.id.toUpperCase();
-            const secondReturn = (second.meanReturn * 100).toFixed(2);
+            const secondReturn = (second.periodReturn * 100).toFixed(2);
             const secondMDD = (second.maxDrawdown * 100).toFixed(2);
             
             const returnDiff = Math.abs(parseFloat(winnerReturn) - parseFloat(secondReturn)).toFixed(2);
@@ -1141,6 +1215,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             betaBTC: {
                 title: 'Beta to Bitcoin',
                 content: `Measures sensitivity to Bitcoin movements: ${value}. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics.`
+            },
+            correlationSP500: {
+                title: 'Correlation to S&P 500',
+                content: `Measures how closely this asset moves with the S&P 500 stock index. Range: -1 to +1. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification potential.`
+            },
+            correlationBTC: {
+                title: 'Correlation to Bitcoin',
+                content: `Measures how closely this asset moves with Bitcoin. Range: -1 to +1. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification within crypto.`
             }
         };
 

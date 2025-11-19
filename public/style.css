@@ -1272,6 +1272,25 @@ small {
     position: relative;
 }
 
+.metrics-table .metric-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+}
+
+.metrics-table .metric-name-text {
+    flex: 1;
+}
+
+.metrics-table .table-info-icon {
+    width: 16px;
+    height: 16px;
+    font-size: 0.7rem;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
 /* Scroll hint shadow for mobile */
 .metrics-table::after {
     content: '';
