@@ -19,6 +19,11 @@
     --warning: #d29922;
 }
 
+html, body {
+    overflow-x: hidden;
+    max-width: 100%;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     background: var(--bg-primary);
@@ -26,11 +31,14 @@ body {
     line-height: 1.6;
     min-height: 100vh;
     padding: 20px;
+    position: relative;
 }
 
 .container {
     max-width: 900px;
     margin: 0 auto;
+    overflow-x: hidden;
+    width: 100%;
 }
 
 header {
@@ -93,12 +101,32 @@ header h1 {
     margin-bottom: 0.5rem;
     background: rgba(102, 126, 234, 0.05);
     border-radius: 0 8px 8px 0;
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
+    opacity: 0;
+    animation: slideInRight 0.5s ease forwards;
 }
 
+.features-list li:nth-child(1) { animation-delay: 0.1s; }
+.features-list li:nth-child(2) { animation-delay: 0.2s; }
+.features-list li:nth-child(3) { animation-delay: 0.3s; }
+.features-list li:nth-child(4) { animation-delay: 0.4s; }
+.features-list li:nth-child(5) { animation-delay: 0.5s; }
+
 .features-list li:hover {
-    background: rgba(102, 126, 234, 0.1);
-    transform: translateX(5px);
+    background: rgba(102, 126, 234, 0.15);
+    transform: translateX(8px) scale(1.02);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+@keyframes slideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .features-list li strong {
@@ -131,11 +159,40 @@ header h1 {
     margin-bottom: 24px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    opacity: 0;
+    animation: fadeInUp 0.6s ease forwards;
+}
+
+.card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.card:nth-child(4) {
+    animation-delay: 0.4s;
 }
 
 .card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-2px) scale(1.01);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .card h2 {
@@ -549,6 +606,33 @@ small {
     border-radius: 12px;
     border: 1px solid var(--border-color);
     position: relative;
+    opacity: 0;
+    animation: slideInFromSide 0.6s ease forwards;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.token-result:nth-child(odd) {
+    animation-delay: 0.1s;
+}
+
+.token-result:nth-child(even) {
+    animation-delay: 0.2s;
+}
+
+.token-result:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(88, 166, 255, 0.15);
+}
+
+@keyframes slideInFromSide {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
 }
 
 .token-result h3 {
@@ -623,12 +707,46 @@ small {
     border: 2px solid var(--border-color);
     border-radius: 12px;
     padding: 20px;
-    transition: transform 0.2s, border-color 0.2s;
+    transition: transform 0.3s ease, border-color 0.2s, box-shadow 0.3s ease;
+    opacity: 0;
+    animation: scaleIn 0.5s ease forwards;
+}
+
+.summary-card:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.summary-card:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.summary-card:nth-child(3) {
+    animation-delay: 0.3s;
+}
+
+.summary-card:nth-child(4) {
+    animation-delay: 0.4s;
+}
+
+.summary-card:nth-child(5) {
+    animation-delay: 0.5s;
 }
 
 .summary-card:hover {
-    transform: translateY(-2px);
+    transform: translateY(-4px) scale(1.02);
     border-color: var(--primary);
+    box-shadow: 0 8px 24px rgba(88, 166, 255, 0.2);
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .summary-card.excellent {
@@ -739,10 +857,26 @@ small {
     border-radius: 12px;
     border: 2px solid var(--success);
     margin-bottom: 24px;
+    opacity: 0;
+    animation: pulseIn 0.8s ease forwards;
 }
 
 .winner.higher {
     border-color: var(--success);
+}
+
+@keyframes pulseIn {
+    0% {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    50% {
+        transform: scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .winner.lower {

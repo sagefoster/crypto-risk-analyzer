@@ -13,8 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     function addTokenInput() {
         const tokenGroups = tokensContainer.querySelectorAll('.token-input-group');
         
-        // Limit to 3 tokens maximum
-        if (tokenGroups.length >= 3) {
+        // Limit to 5 tokens maximum
+        if (tokenGroups.length >= 5) {
             return;
         }
         
@@ -69,8 +69,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
         
-        // Update add button visibility (max 3 tokens)
-        if (tokenGroups.length >= 3) {
+        // Update add button visibility (max 5 tokens)
+        if (tokenGroups.length >= 5) {
             addTokenBtn.style.display = 'none';
         } else {
             addTokenBtn.style.display = 'flex';
