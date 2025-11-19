@@ -326,6 +326,114 @@ document.addEventListener('DOMContentLoaded', async () => {
         return interpretationDiv;
     }
 
+    function createWinnerSection(tokenResults, riskFreeRate) {
+        // Sort tokens by Sharpe ratio (primary) and Sortino ratio (secondary)
+        const sortedTokens = [...tokenResults].sort((a, b) => {
+            if (Math.abs(a.sharpeRatio - b.sharpeRatio) > 0.01) {
+                return b.sharpeRatio - a.sharpeRatio;
+            }
+            return b.sortinoRatio - a.sortinoRatio;
+        });
+
+        const winner = sortedTokens[0];
+        const winnerName = winner.id.toUpperCase();
+        
+        // Format all metrics for winner
+        const winnerReturn = (winner.meanReturn * 100).toFixed(2);
+        const winnerVol = (winner.volatility * 100).toFixed(2);
+        const winnerMDD = (winner.maxDrawdown * 100).toFixed(2);
+        const winnerSharpe = winner.sharpeRatio.toFixed(3);
+        const winnerSortino = winner.sortinoRatio >= 999 ? '∞' : winner.sortinoRatio.toFixed(3);
+
+        const winnerDiv = document.createElement('div');
+        winnerDiv.className = 'winner higher';
+        winnerDiv.innerHTML = `
+            <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance</div>
+            <div class="winner-metrics">
+                <div class="winner-metric-row">
+                    <span class="metric-label">Return:</span> <span class="metric-value">${winnerReturn}%</span>
+                    <span class="metric-label">Volatility:</span> <span class="metric-value">${winnerVol}%</span>
+                    <span class="metric-label">Max Drawdown:</span> <span class="metric-value">${winnerMDD}%</span>
+                </div>
+                <div class="winner-metric-row">
+                    <span class="metric-label">Sharpe Ratio:</span> <span class="metric-value">${winnerSharpe}</span>
+                    <span class="metric-label">Sortino Ratio:</span> <span class="metric-value">${winnerSortino}</span>
+                </div>
+            </div>
+        `;
+        
+        // Add comparison text for multiple tokens
+        if (sortedTokens.length === 2) {
+            const second = sortedTokens[1];
+            const secondName = second.id.toUpperCase();
+            const secondReturn = (second.meanReturn * 100).toFixed(2);
+            const secondMDD = (second.maxDrawdown * 100).toFixed(2);
+            
+            const returnDiff = Math.abs(parseFloat(winnerReturn) - parseFloat(secondReturn)).toFixed(2);
+            const mddDiff = Math.abs(parseFloat(winnerMDD) - parseFloat(secondMDD)).toFixed(2);
+            
+            let comparisonText = `<div class="winner-comparison">Compared to ${secondName}: `;
+            
+            if (parseFloat(winnerReturn) > parseFloat(secondReturn)) {
+                comparisonText += `${returnDiff}% higher return, `;
+            } else if (parseFloat(winnerReturn) < parseFloat(secondReturn)) {
+                comparisonText += `${returnDiff}% lower return but `;
+            }
+            
+            if (parseFloat(winnerMDD) < parseFloat(secondMDD)) {
+                comparisonText += `${mddDiff}% smaller max drawdown`;
+            } else {
+                comparisonText += `${mddDiff}% larger max drawdown`;
+            }
+            
+            comparisonText += ', and superior risk-adjusted metrics (Sharpe & Sortino).</div>';
+            winnerDiv.innerHTML += comparisonText;
+        } else if (sortedTokens.length > 2) {
+            winnerDiv.innerHTML += `<div class="winner-comparison">Outperforms ${sortedTokens.length - 1} other assets based on risk-adjusted return metrics.</div>`;
+        }
+
+        return winnerDiv;
+    }
+
+    function createSummarySection(tokenResults, riskFreeRate) {
+        const summaryDiv = document.createElement('div');
+        summaryDiv.className = 'summary-section';
+        
+        let summaryHTML = '<h3 class="summary-title">Quick Overview</h3><div class="summary-cards">';
+        
+        tokenResults.forEach(tokenData => {
+            const tokenName = tokenData.id.toUpperCase();
+            const returnPct = (tokenData.meanReturn * 100).toFixed(2);
+            const sharpe = tokenData.sharpeRatio.toFixed(2);
+            const mdd = (tokenData.maxDrawdown * 100).toFixed(2);
+            
+            const performanceClass = tokenData.sharpeRatio > 1 ? 'excellent' : tokenData.sharpeRatio > 0 ? 'good' : 'poor';
+            
+            summaryHTML += `
+                <div class="summary-card ${performanceClass}">
+                    <h4>${tokenName}</h4>
+                    <div class="summary-stat">
+                        <span class="summary-label">Return</span>
+                        <span class="summary-value">${returnPct}%</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="summary-label">Sharpe Ratio</span>
+                        <span class="summary-value">${sharpe}</span>
+                    </div>
+                    <div class="summary-stat">
+                        <span class="summary-label">Max Drawdown</span>
+                        <span class="summary-value">${mdd}%</span>
+                    </div>
+                </div>
+            `;
+        });
+        
+        summaryHTML += '</div>';
+        summaryDiv.innerHTML = summaryHTML;
+        
+        return summaryDiv;
+    }
+
     function displayResults(data) {
         const resultsContainer = document.getElementById('resultsContainer');
         resultsContainer.innerHTML = '';
@@ -337,6 +445,34 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tokenResults = data.tokens || [];
         const isSingle = tokenResults.length === 1;
         const isMultiple = tokenResults.length > 1;
+
+        // STEP 1: Show winner/conclusion first (if multiple tokens)
+        if (isMultiple) {
+            const winnerSection = createWinnerSection(tokenResults, data.riskFreeRate);
+            resultsContainer.appendChild(winnerSection);
+        }
+
+        // STEP 2: Show summary stats for all tokens
+        const summarySection = createSummarySection(tokenResults, data.riskFreeRate);
+        resultsContainer.appendChild(summarySection);
+
+        // STEP 3: Create detailed breakdown section (collapsible)
+        const detailedSection = document.createElement('div');
+        detailedSection.className = 'detailed-section';
+        detailedSection.innerHTML = `
+            <div class="detailed-header">
+                <h3>Detailed Analysis</h3>
+                <button class="toggle-details-btn" id="toggleDetailsBtn">
+                    <span class="toggle-text">Show Details</span>
+                    <span class="toggle-icon">▼</span>
+                </button>
+            </div>
+            <div class="detailed-content collapsed" id="detailedContent">
+            </div>
+        `;
+        resultsContainer.appendChild(detailedSection);
+
+        const detailedContent = detailedSection.querySelector('#detailedContent');
 
         // Create comparison container
         const comparisonDiv = document.createElement('div');
@@ -363,7 +499,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             tokenResultDiv.innerHTML = `
                 <h3>${tokenName}</h3>
-                <div class="stat-box">
+                <div class="stats-grid">
                     <div class="stat">
                         <span class="stat-label">Annualized Return</span>
                         <span class="stat-value">${returnPct}%</span>
@@ -445,80 +581,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        resultsContainer.appendChild(comparisonDiv);
+        detailedContent.appendChild(comparisonDiv);
 
-        // Determine winner (if multiple tokens)
-        const winnerDiv = document.getElementById('winner');
-        if (tokenResults.length > 1) {
-            // Sort tokens by Sharpe ratio (primary) and Sortino ratio (secondary)
-            const sortedTokens = [...tokenResults].sort((a, b) => {
-                if (Math.abs(a.sharpeRatio - b.sharpeRatio) > 0.01) {
-                    return b.sharpeRatio - a.sharpeRatio;
-                }
-                return b.sortinoRatio - a.sortinoRatio;
-            });
-
-            const winner = sortedTokens[0];
-            const winnerName = winner.id.toUpperCase();
-            
-            // Format all metrics for winner
-            const winnerReturn = (winner.meanReturn * 100).toFixed(2);
-            const winnerVol = (winner.volatility * 100).toFixed(2);
-            const winnerMDD = (winner.maxDrawdown * 100).toFixed(2);
-            const winnerSharpe = winner.sharpeRatio.toFixed(3);
-            const winnerSortino = winner.sortinoRatio >= 999 ? '∞' : winner.sortinoRatio.toFixed(3);
-
-            // Create comprehensive comparison
-            winnerDiv.innerHTML = `
-                <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance</div>
-                <div class="winner-metrics">
-                    <div class="winner-metric-row">
-                        <span class="metric-label">Return:</span> <span class="metric-value">${winnerReturn}%</span>
-                        <span class="metric-label">Volatility:</span> <span class="metric-value">${winnerVol}%</span>
-                        <span class="metric-label">Max Drawdown:</span> <span class="metric-value">${winnerMDD}%</span>
-                    </div>
-                    <div class="winner-metric-row">
-                        <span class="metric-label">Sharpe Ratio:</span> <span class="metric-value">${winnerSharpe}</span>
-                        <span class="metric-label">Sortino Ratio:</span> <span class="metric-value">${winnerSortino}</span>
-                    </div>
-                </div>
-            `;
-            
-            // Add comparison text for multiple tokens
-            if (sortedTokens.length === 2) {
-                const second = sortedTokens[1];
-                const secondName = second.id.toUpperCase();
-                const secondReturn = (second.meanReturn * 100).toFixed(2);
-                const secondMDD = (second.maxDrawdown * 100).toFixed(2);
-                
-                const returnDiff = Math.abs(parseFloat(winnerReturn) - parseFloat(secondReturn)).toFixed(2);
-                const mddDiff = Math.abs(parseFloat(winnerMDD) - parseFloat(secondMDD)).toFixed(2);
-                
-                let comparisonText = `<div class="winner-comparison">Compared to ${secondName}: `;
-                
-                if (parseFloat(winnerReturn) > parseFloat(secondReturn)) {
-                    comparisonText += `${returnDiff}% higher return, `;
-                } else if (parseFloat(winnerReturn) < parseFloat(secondReturn)) {
-                    comparisonText += `${returnDiff}% lower return but `;
-                }
-                
-                if (parseFloat(winnerMDD) < parseFloat(secondMDD)) {
-                    comparisonText += `${mddDiff}% smaller max drawdown`;
-                } else {
-                    comparisonText += `${mddDiff}% larger max drawdown`;
-                }
-                
-                comparisonText += ', and superior risk-adjusted metrics (Sharpe & Sortino).</div>';
-                winnerDiv.innerHTML += comparisonText;
-            } else if (sortedTokens.length > 2) {
-                winnerDiv.innerHTML += `<div class="winner-comparison">Outperforms ${sortedTokens.length - 1} other assets based on risk-adjusted return metrics.</div>`;
-            }
-            
-            winnerDiv.className = 'winner higher';
-        } else {
-            winnerDiv.innerHTML = '';
-            winnerDiv.className = '';
-        }
+        // Add toggle functionality for detailed section
+        const toggleBtn = document.getElementById('toggleDetailsBtn');
+        const toggleText = toggleBtn.querySelector('.toggle-text');
+        const toggleIcon = toggleBtn.querySelector('.toggle-icon');
+        
+        toggleBtn.addEventListener('click', () => {
+            detailedContent.classList.toggle('collapsed');
+            const isCollapsed = detailedContent.classList.contains('collapsed');
+            toggleText.textContent = isCollapsed ? 'Show Details' : 'Hide Details';
+            toggleIcon.textContent = isCollapsed ? '▼' : '▲';
+        });
 
         // Show results
         results.classList.remove('hidden');
