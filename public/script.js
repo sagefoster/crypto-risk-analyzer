@@ -465,21 +465,63 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             const winner = sortedTokens[0];
             const winnerName = winner.id.toUpperCase();
+            
+            // Format all metrics for winner
+            const winnerReturn = (winner.meanReturn * 100).toFixed(2);
+            const winnerVol = (winner.volatility * 100).toFixed(2);
+            const winnerMDD = (winner.maxDrawdown * 100).toFixed(2);
             const winnerSharpe = winner.sharpeRatio.toFixed(3);
             const winnerSortino = winner.sortinoRatio >= 999 ? '∞' : winner.sortinoRatio.toFixed(3);
 
-            let winnerText = `🏆 ${winnerName} has the best risk-adjusted returns (Sharpe: ${winnerSharpe}, Sortino: ${winnerSortino})`;
+            // Create comprehensive comparison
+            winnerDiv.innerHTML = `
+                <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance</div>
+                <div class="winner-metrics">
+                    <div class="winner-metric-row">
+                        <span class="metric-label">Return:</span> <span class="metric-value">${winnerReturn}%</span>
+                        <span class="metric-label">Volatility:</span> <span class="metric-value">${winnerVol}%</span>
+                        <span class="metric-label">Max Drawdown:</span> <span class="metric-value">${winnerMDD}%</span>
+                    </div>
+                    <div class="winner-metric-row">
+                        <span class="metric-label">Sharpe Ratio:</span> <span class="metric-value">${winnerSharpe}</span>
+                        <span class="metric-label">Sortino Ratio:</span> <span class="metric-value">${winnerSortino}</span>
+                    </div>
+                </div>
+            `;
             
-            if (sortedTokens.length > 1) {
+            // Add comparison text for multiple tokens
+            if (sortedTokens.length === 2) {
                 const second = sortedTokens[1];
                 const secondName = second.id.toUpperCase();
-                winnerText += ` - outperforming ${secondName}`;
+                const secondReturn = (second.meanReturn * 100).toFixed(2);
+                const secondMDD = (second.maxDrawdown * 100).toFixed(2);
+                
+                const returnDiff = Math.abs(parseFloat(winnerReturn) - parseFloat(secondReturn)).toFixed(2);
+                const mddDiff = Math.abs(parseFloat(winnerMDD) - parseFloat(secondMDD)).toFixed(2);
+                
+                let comparisonText = `<div class="winner-comparison">Compared to ${secondName}: `;
+                
+                if (parseFloat(winnerReturn) > parseFloat(secondReturn)) {
+                    comparisonText += `${returnDiff}% higher return, `;
+                } else if (parseFloat(winnerReturn) < parseFloat(secondReturn)) {
+                    comparisonText += `${returnDiff}% lower return but `;
+                }
+                
+                if (parseFloat(winnerMDD) < parseFloat(secondMDD)) {
+                    comparisonText += `${mddDiff}% smaller max drawdown`;
+                } else {
+                    comparisonText += `${mddDiff}% larger max drawdown`;
+                }
+                
+                comparisonText += ', and superior risk-adjusted metrics (Sharpe & Sortino).</div>';
+                winnerDiv.innerHTML += comparisonText;
+            } else if (sortedTokens.length > 2) {
+                winnerDiv.innerHTML += `<div class="winner-comparison">Outperforms ${sortedTokens.length - 1} other assets based on risk-adjusted return metrics.</div>`;
             }
-
-            winnerDiv.textContent = winnerText;
+            
             winnerDiv.className = 'winner higher';
         } else {
-            winnerDiv.textContent = '';
+            winnerDiv.innerHTML = '';
             winnerDiv.className = '';
         }
 
