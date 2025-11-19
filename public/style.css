@@ -39,6 +39,31 @@ body {
     position: relative;
 }
 
+/* Futuristic background gradient */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: 
+        radial-gradient(circle at 20% 30%, rgba(88, 166, 255, 0.04) 0%, transparent 50%),
+        radial-gradient(circle at 80% 70%, rgba(88, 166, 255, 0.04) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+    animation: subtleShift 20s ease-in-out infinite alternate;
+}
+
+@keyframes subtleShift {
+    0% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
 .container {
     max-width: 900px;
     margin: 0 auto;
@@ -162,10 +187,30 @@ header h1 {
     border-radius: 16px;
     padding: 32px;
     margin-bottom: 24px;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.3),
+        0 0 1px rgba(88, 166, 255, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.02);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     opacity: 0;
     animation: fadeInUp 0.6s ease forwards;
+    position: relative;
+}
+
+.card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(88, 166, 255, 0.3), transparent);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.card:hover::after {
+    opacity: 1;
 }
 
 .card:nth-child(1) {
@@ -480,7 +525,10 @@ small {
 
 .btn-primary:hover:not(:disabled) {
     transform: translateY(-3px);
-    box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+    box-shadow: 
+        0 12px 36px rgba(102, 126, 234, 0.6),
+        0 0 30px rgba(88, 166, 255, 0.4),
+        0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .btn-primary:active:not(:disabled) {
@@ -907,6 +955,27 @@ small {
     transition: transform 0.3s ease, border-color 0.2s, box-shadow 0.3s ease;
     opacity: 0;
     animation: scaleIn 0.5s ease forwards;
+    box-shadow: 
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        0 1px 3px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(88, 166, 255, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+.summary-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(88, 166, 255, 0.08), transparent);
+    transition: left 0.5s ease;
+}
+
+.summary-card:hover::before {
+    left: 100%;
 }
 
 .summary-card:nth-child(1) {
@@ -930,9 +999,13 @@ small {
 }
 
 .summary-card:hover {
-    transform: translateY(-4px) scale(1.02);
+    transform: translateY(-6px) scale(1.03);
     border-color: var(--primary);
-    box-shadow: 0 8px 24px rgba(88, 166, 255, 0.2);
+    box-shadow: 
+        0 12px 32px rgba(88, 166, 255, 0.25),
+        0 0 20px rgba(88, 166, 255, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(88, 166, 255, 0.1);
 }
 
 .summary-card.clickable {
@@ -1305,6 +1378,12 @@ small {
     margin-bottom: 24px;
     opacity: 0;
     animation: pulseIn 0.8s ease forwards;
+    box-shadow: 
+        0 8px 24px rgba(63, 185, 80, 0.2),
+        0 0 40px rgba(63, 185, 80, 0.15),
+        0 4px 12px rgba(0, 0, 0, 0.15),
+        inset 0 1px 0 rgba(63, 185, 80, 0.2);
+    position: relative;
 }
 
 .winner.higher {
@@ -1769,25 +1848,27 @@ small {
 
     /* Metrics Table Mobile Optimization */
     .metrics-table-wrapper {
-        margin: 16px -12px; /* Extend to edges */
+        margin: 16px 0; /* Don't extend to edges to prevent cutoff */
+        padding: 0 12px;
     }
 
     .table-context {
         font-size: 0.85rem;
-        padding: 0 12px;
         margin-bottom: 12px;
     }
 
     .metrics-table {
-        border-radius: 0; /* Remove border radius for edge-to-edge */
-        padding: 8px 0;
+        border-radius: 8px;
+        padding: 8px;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
+        background: var(--bg-tertiary);
     }
 
     .metrics-table table {
         width: 100%;
         font-size: 0.75rem;
+        margin-left: 0; /* Ensure no negative margin */
     }
 
     .metrics-table th,
@@ -1797,17 +1878,17 @@ small {
         font-size: 0.75rem;
     }
 
-    /* Sticky first column for metric names - more compact on mobile */
     .metrics-table th:first-child,
     .metrics-table td:first-child {
         position: sticky;
-        left: 0;
+        left: 8px; /* Account for padding */
         background: var(--bg-tertiary);
         z-index: 10;
-        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.1);
-        max-width: 100px; /* Limit width to prevent taking up too much space */
+        box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+        max-width: 100px;
         min-width: 90px;
         padding-right: 8px;
+        padding-left: 8px; /* Add left padding so text isn't cut off */
     }
 
     .metrics-table th:first-child {
@@ -1820,16 +1901,15 @@ small {
         font-weight: 600;
         line-height: 1.2;
         word-wrap: break-word;
-        white-space: normal; /* Allow wrapping for long metric names */
+        white-space: normal;
         max-width: 90px;
     }
 
     .metrics-table .metric-value {
         font-size: 0.75rem;
-        min-width: 70px; /* Ensure values have enough space */
+        min-width: 70px;
     }
 
-    /* Make asset headers more compact */
     .metrics-table th:not(:first-child) {
         min-width: 70px;
         max-width: 85px;

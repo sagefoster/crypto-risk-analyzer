@@ -536,7 +536,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance over ${timeframeText}</div>
             <div class="winner-price-range">
                 <span class="price-label">${winnerRangeLabel}:</span> 
-                <span class="price-value">$${winnerLow} <span class="range-arrow">→</span> $${winnerHigh}</span>
+                <span class="price-value">$${winnerHigh} <span class="range-arrow">→</span> $${winnerLow}</span>
                 <span class="price-context">(Current: $${winnerCurrent})</span>
                 <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
             </div>
@@ -649,7 +649,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <h4>${tokenName}</h4>
                     <div class="price-range-summary">
                         <span class="range-label">${rangeLabel}:</span>
-                        <span class="range-value">$${lowPrice} - $${highPrice}</span>
+                        <span class="range-value">$${highPrice} - $${lowPrice}</span>
                         <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
                     </div>
                     <div class="summary-stat">
