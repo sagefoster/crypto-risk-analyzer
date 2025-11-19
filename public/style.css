@@ -406,6 +406,17 @@ small {
     font-size: 0.85rem;
 }
 
+.timeframe-note {
+    background: linear-gradient(135deg, rgba(255, 165, 0, 0.08), rgba(255, 165, 0, 0.03));
+    border-left: 3px solid #ffa500;
+    padding: 8px 12px;
+    border-radius: 6px;
+    color: #ffb732;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
 .optional-label {
     color: var(--text-secondary);
     font-weight: normal;

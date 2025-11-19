@@ -379,6 +379,19 @@ app.post('/api/analyze', async (req, res) => {
     const treasuryRate = await fetchTreasuryRate();
     const dailyRiskFreeRate = treasuryRate / 365;
 
+    // Check if timeframe exceeds Demo API limitations (365 days)
+    const isDemoKey = apiKey.startsWith('CG-') && !apiKey.includes('pro');
+    const maxDaysForDemo = 365;
+    
+    if (isDemoKey && timeframe > maxDaysForDemo) {
+      return res.status(400).json({
+        success: false,
+        error: `CoinGecko Demo API keys are limited to ${maxDaysForDemo} days (1 year) of historical data. Your current timeframe (${timeframe} days) exceeds this limit. Please select a shorter timeframe or upgrade to a CoinGecko Pro API key for longer historical analysis.`,
+        maxTimeframe: maxDaysForDemo,
+        requestedTimeframe: timeframe
+      });
+    }
+
     // Fetch historical data for all tokens
     // Auto-detect if it's a Pro or Demo API key and use appropriate endpoint
     const makeApiRequest = async (tokenId) => {
@@ -409,18 +422,29 @@ app.post('/api/analyze', async (req, res) => {
       } catch (proError) {
         // If Pro API fails or indicates demo key, use Demo API endpoint
         console.log(`Using Demo API for ${tokenId}...`);
-        const response = await axios.get(`https://api.coingecko.com/api/v3/coins/${tokenId}/market_chart`, {
-          params: {
-            vs_currency: 'usd',
-            days: timeframe,
-            x_cg_demo_api_key: apiKey
-          },
-          headers: {
-            'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
-            'Accept': 'application/json'
+        try {
+          const response = await axios.get(`https://api.coingecko.com/api/v3/coins/${tokenId}/market_chart`, {
+            params: {
+              vs_currency: 'usd',
+              days: timeframe,
+              x_cg_demo_api_key: apiKey
+            },
+            headers: {
+              'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+              'Accept': 'application/json'
+            }
+          });
+          return response;
+        } catch (demoError) {
+          // Check if error is due to timeframe limitation
+          if (demoError.response && demoError.response.status === 429) {
+            throw new Error(`Rate limit exceeded. Please try again in a moment or upgrade to a Pro API key.`);
           }
-        });
-        return response;
+          if (demoError.response && (demoError.response.status === 401 || demoError.response.status === 403)) {
+            throw new Error(`API authentication failed for ${timeframe} days. Demo API keys may be limited to 365 days of data. Consider using a shorter timeframe or upgrading to a Pro API key.`);
+          }
+          throw demoError;
+        }
       }
     };
 
