@@ -10,7 +10,7 @@
     <div class="container">
         <header>
             <h1>Crypto Risk Analyzer</h1>
-            <p class="subtitle">Calculate traditional risk analysis metrics for digital assets</p>
+            <p class="subtitle">Traditional risk metrics for crypto assets</p>
         </header>
 
         <div class="card info-card">
@@ -67,6 +67,17 @@
                 <button type="submit" class="btn-primary" id="analyzeBtn">
                     <span class="btn-text">Analyze</span>
                 </button>
+                
+                <!-- Button Loading State -->
+                <div id="btnLoading" class="btn-loading hidden">
+                    <div class="btn-loading-content">
+                        <div class="btn-spinner"></div>
+                        <div class="btn-loading-text">
+                            <div class="loading-message">Analyzing...</div>
+                            <div class="loading-details" id="loadingDetails">Fetching price data</div>
+                        </div>
+                    </div>
+                </div>
             </form>
         </div>
 

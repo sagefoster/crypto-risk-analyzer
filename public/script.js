@@ -119,10 +119,29 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         
-        // Show loading
-        loading.classList.remove('hidden');
-        analyzeBtn.disabled = true;
-        analyzeBtn.querySelector('.btn-text').textContent = 'Analyzing...';
+        // Hide button, show loading state
+        const btnLoading = document.getElementById('btnLoading');
+        const loadingDetails = document.getElementById('loadingDetails');
+        analyzeBtn.classList.add('hidden');
+        btnLoading.classList.remove('hidden');
+        
+        // Loading messages to rotate through
+        const loadingMessages = [
+            'Fetching price data from CoinGecko...',
+            'Retrieving S&P 500 data...',
+            'Calculating daily returns...',
+            'Computing volatility metrics...',
+            'Analyzing risk-adjusted ratios...',
+            'Calculating maximum drawdown...',
+            'Computing correlation & beta...',
+            'Finalizing analysis...'
+        ];
+        
+        let messageIndex = 0;
+        const messageInterval = setInterval(() => {
+            messageIndex = (messageIndex + 1) % loadingMessages.length;
+            loadingDetails.textContent = loadingMessages[messageIndex];
+        }, 1500);
 
         const timeframe = document.getElementById('timeframe').value;
 
@@ -144,16 +163,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 throw new Error(data.error || 'Analysis failed');
             }
 
+            // Clear message rotation
+            clearInterval(messageInterval);
+            
             // Display results
             displayResults(data);
             
         } catch (error) {
+            clearInterval(messageInterval);
             console.error('Error:', error);
             showError(error.message || 'An error occurred while analyzing the tokens. Please check your API key and token IDs.');
         } finally {
-            loading.classList.add('hidden');
-            analyzeBtn.disabled = false;
-            analyzeBtn.querySelector('.btn-text').textContent = 'Analyze';
+            // Hide loading state, show button
+            btnLoading.classList.add('hidden');
+            analyzeBtn.classList.remove('hidden');
         }
     });
 
@@ -787,6 +810,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Determine range label based on timeframe
             let rangeLabel = timeframeText === '1 year' ? '52-Week High/Low' : `${timeframeText} Range`;
             
+            // Determine return label based on timeframe
+            let returnLabel = timeframeText === '1 year' ? '1 Year Return' : `${timeframeText} Return`;
+            
             summaryHTML += `
                 <div class="summary-card ${performanceClass} clickable" data-token="${tokenId}" role="button" tabindex="0" aria-label="View detailed analysis for ${tokenName}">
                     <h4>${tokenName}</h4>
@@ -796,9 +822,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
                     </div>
                     <div class="summary-stat">
-                        <span class="summary-label">Period Return</span>
+                        <span class="summary-label">${returnLabel}</span>
                         <span class="summary-value">${returnPct}%</span>
-                        <span class="info-icon" data-metric="periodReturn" data-value="${returnPct}">ⓘ</span>
+                        <span class="info-icon" data-metric="periodReturn" data-value="${returnPct}" data-timeframe="${timeframeText}">ⓘ</span>
                     </div>
                     <div class="summary-stat">
                         <span class="summary-label">Sharpe Ratio</span>
