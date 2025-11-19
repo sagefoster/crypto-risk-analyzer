@@ -24,6 +24,11 @@ html, body {
     max-width: 100%;
 }
 
+html {
+    scroll-behavior: auto;
+    overflow-anchor: none;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
     background: var(--bg-primary);
@@ -628,7 +633,21 @@ small {
 }
 
 .comparison.multiple {
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Desktop: Show all assets side by side when space allows */
+@media (min-width: 1400px) {
+    .comparison.multiple {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+/* Larger desktop: Further optimize for 5 columns */
+@media (min-width: 1800px) {
+    .comparison.multiple {
+        grid-template-columns: repeat(5, 1fr);
+    }
 }
 
 .token-result {
@@ -729,8 +748,22 @@ small {
 
 .summary-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 16px;
+}
+
+/* Desktop: Show all assets side by side when space allows */
+@media (min-width: 1400px) {
+    .summary-cards {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    }
+}
+
+/* Larger desktop: Further optimize for 5 columns */
+@media (min-width: 1800px) {
+    .summary-cards {
+        grid-template-columns: repeat(5, 1fr);
+    }
 }
 
 .summary-card {

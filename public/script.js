@@ -1,4 +1,9 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // Prevent browser from restoring scroll position
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+
     const form = document.getElementById('analysisForm');
     const loading = document.getElementById('loading');
     const results = document.getElementById('results');
@@ -642,10 +647,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize defaults on page load
     initializeDefaultTokens();
 
-    // Ensure page starts at the top
+    // Ensure page starts at the top - more robust approach
+    // Immediate scroll
     window.scrollTo(0, 0);
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
+    
+    // Force scroll after DOM is fully loaded
+    if (document.readyState === 'complete') {
+        setTimeout(() => {
+            window.scrollTo({ top: 0, behavior: 'instant' });
+        }, 0);
+    }
+    
+    // Use requestAnimationFrame for better timing
+    requestAnimationFrame(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    });
+    
+    // Final fallback after short delay
+    setTimeout(() => {
+        window.scrollTo({ top: 0, behavior: 'instant' });
+    }, 100);
 
     // Make tooltip work on click/tap for mobile devices
     const tooltipElement = document.getElementById('riskFreeTooltip');

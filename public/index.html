@@ -10,7 +10,7 @@
     <div class="container">
         <header>
             <h1>Crypto Risk Analyzer</h1>
-            <p class="subtitle">Traditional risk analysis metrics for digital assets</p>
+            <p class="subtitle">Calculate traditional risk analysis metrics for digital assets</p>
         </header>
 
         <div class="card info-card">
@@ -30,7 +30,7 @@
 
         <div class="card">
             <h2>Analysis Parameters</h2>
-            <p class="form-intro">Pre-filled with example tokens (Bitcoin, Ethereum, Zcash). <strong>Change any inputs</strong> to analyze different assets, then click Analyze.</p>
+            <p class="form-intro">Three tokens are pre-loaded as examples (Bitcoin, Ethereum, Zcash). You can either <strong>analyze these defaults</strong> or <strong>customize the tokens and timeframe</strong> below, then click Analyze.</p>
             <form id="analysisForm">
                 <div id="tokensContainer">
                     <div class="token-input-group" data-token-index="0">
@@ -44,11 +44,6 @@
                         </div>
                     </div>
                 </div>
-                <div class="form-group">
-                    <button type="button" class="btn-add-token" id="addTokenBtn">
-                        <span>+</span> Add Another Token to Compare
-                    </button>
-                </div>
 
                 <div class="form-group">
                     <label for="timeframe">Timeframe</label>
@@ -60,6 +55,12 @@
                         <option value="1825">5 years</option>
                         <option value="3650">10 years</option>
                     </select>
+                </div>
+
+                <div class="form-group">
+                    <button type="button" class="btn-add-token" id="addTokenBtn">
+                        <span>+</span> Add Another Token to Compare
+                    </button>
                 </div>
 
                 <button type="submit" class="btn-primary" id="analyzeBtn">
