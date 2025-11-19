@@ -11,6 +11,13 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Function to add a new token input
     function addTokenInput() {
+        const tokenGroups = tokensContainer.querySelectorAll('.token-input-group');
+        
+        // Limit to 3 tokens maximum
+        if (tokenGroups.length >= 3) {
+            return;
+        }
+        
         const tokenGroup = document.createElement('div');
         tokenGroup.className = 'token-input-group';
         tokenGroup.setAttribute('data-token-index', tokenIndex);
@@ -39,9 +46,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateRemoveButtons();
     }
 
-    // Function to update remove button visibility
+    // Function to update remove button visibility and add button state
     function updateRemoveButtons() {
         const tokenGroups = tokensContainer.querySelectorAll('.token-input-group');
+        
+        // Update remove button visibility
         tokenGroups.forEach((group, index) => {
             const removeBtn = group.querySelector('.btn-remove-token');
             if (tokenGroups.length > 1) {
@@ -50,6 +59,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 removeBtn.classList.add('hidden');
             }
         });
+        
+        // Update add button visibility (max 3 tokens)
+        if (tokenGroups.length >= 3) {
+            addTokenBtn.style.display = 'none';
+        } else {
+            addTokenBtn.style.display = 'flex';
+        }
     }
 
     // Add event listener to "Add Token" button
