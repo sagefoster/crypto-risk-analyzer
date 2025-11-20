@@ -1041,6 +1041,63 @@ small {
     font-weight: 400;
 }
 
+/* Small info icons in labels */
+.info-icon-small {
+    display: inline-block;
+    margin-left: 6px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: help;
+    opacity: 0.7;
+    transition: opacity 0.2s ease, color 0.2s ease;
+    vertical-align: middle;
+    line-height: 1;
+}
+
+.info-icon-small:hover {
+    opacity: 1;
+    color: var(--accent-primary);
+}
+
+/* Simple tooltip for small info icons */
+.info-icon-small[data-tooltip] {
+    position: relative;
+}
+
+.info-icon-small[data-tooltip]:hover::after,
+.info-icon-small[data-tooltip]:active::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    max-width: 250px;
+    white-space: normal;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--border-color);
+    z-index: 1000;
+    pointer-events: none;
+}
+
+.info-icon-small[data-tooltip]:hover::before {
+    content: '';
+    position: absolute;
+    bottom: 115%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 5px solid transparent;
+    border-top-color: var(--bg-secondary);
+    z-index: 1000;
+    pointer-events: none;
+}
+
 .tooltip-text::after {
     content: '';
     position: absolute;
@@ -2769,6 +2826,16 @@ p, .overview, .interpretation-text, .interpretation-details p,
     .winner-header, .summary-title {
         font-size: clamp(1rem, 3vw, 1.2rem);
         line-height: 1.4;
+    }
+    
+    /* Mobile tooltip adjustments */
+    .info-icon-small[data-tooltip]:hover::after,
+    .info-icon-small[data-tooltip]:active::after {
+        max-width: 200px;
+        font-size: 0.75rem;
+        padding: 6px 10px;
+        white-space: normal;
+        word-wrap: break-word;
     }
 }
 

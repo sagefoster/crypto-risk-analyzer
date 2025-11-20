@@ -98,12 +98,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         const assetNumber = tokenIndex + 1; // Display number (1-indexed)
         tokenGroup.innerHTML = `
             <div class="form-group">
-                <label for="token${tokenIndex}">Digital Asset ${assetNumber}</label>
+                <label for="token${tokenIndex}">Digital Asset ${assetNumber} <span class="info-icon-small" data-tooltip="Enter asset name, ticker (BTC), or CoinGecko ID. Autocomplete available.">ⓘ</span></label>
                 <div class="token-input-wrapper">
-                    <input type="text" class="token-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="e.g., bitcoin, BTC, ethereum, ETH" required>
+                    <input type="text" class="token-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="bitcoin, BTC, ethereum, ETH" required>
                     <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                 </div>
-                <small>Asset name, ticker symbol, or CoinGecko ID (e.g., bitcoin, BTC, ethereum, ETH)</small>
             </div>
         `;
         
@@ -1231,8 +1230,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         let summaryHTML = `
             <h3 class="summary-title">Quick Overview</h3>
-            <p class="overview-context">Analysis period: <strong>${timeframeText}</strong> | Risk-adjusted returns compared to ${riskFreeRate.toFixed(2)}% risk-free rate | Max Drawdown shows peak-to-trough loss during this period</p>
-            <p class="tap-hint">💡 Tap any asset card to jump to its detailed analysis</p>
+            <p class="tap-hint">💡 Tap any card for details</p>
             <div class="summary-cards">
         `;
         
