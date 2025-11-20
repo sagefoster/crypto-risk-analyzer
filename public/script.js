@@ -14,6 +14,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             mainContent.style.visibility = 'visible';
             mainContent.style.display = 'block';
             mainContent.style.zIndex = '1';
+            
+            // Trigger header animation by restarting it
+            const header = mainContent.querySelector('.card h2');
+            if (header) {
+                // Reset animation to trigger it
+                header.style.animation = 'none';
+                // Force reflow
+                void header.offsetWidth;
+                // Reapply animation
+                header.style.animation = 'slideInDown 0.8s ease-out 0.2s forwards';
+            }
         }
         
         // Remove loader completely from DOM
