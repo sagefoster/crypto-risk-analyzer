@@ -2455,12 +2455,22 @@ p, .overview, .interpretation-text, .interpretation-details p,
     }
 }
 
-/* Disclosure Section */
-.disclosure-section {
+/* Site Footer with Disclosure */
+.site-footer {
     margin-top: 60px;
+    padding: 0;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+    position: relative;
+    z-index: 1;
+    background: var(--bg-primary);
+}
+
+/* Disclosure Section (inside footer) */
+.site-footer .disclosure-section {
+    margin-top: 0;
     padding: 24px 20px;
     background: rgba(255, 193, 7, 0.08);
-    border-top: 2px solid rgba(255, 193, 7, 0.3);
     border-bottom: 1px solid var(--border-color);
 }
 
@@ -2478,29 +2488,22 @@ p, .overview, .interpretation-text, .interpretation-details p,
     font-weight: 600;
 }
 
-/* Site Footer */
-.site-footer {
-    margin-top: 0;
-    padding: 30px 20px 40px;
-    border-top: 1px solid var(--border-color);
-    text-align: center;
-    position: relative;
-    z-index: 1;
-    background: var(--bg-primary);
-}
-
 .footer-text {
     font-size: 0.75rem;
     line-height: 1.6;
     color: var(--text-tertiary);
     max-width: 800px;
     margin: 0 auto;
+    padding: 30px 20px 40px;
     font-style: italic;
 }
 
 @media (max-width: 768px) {
-    .disclosure-section {
+    .site-footer {
         margin-top: 40px;
+    }
+    
+    .site-footer .disclosure-section {
         padding: 20px 16px;
     }
     
@@ -2509,21 +2512,16 @@ p, .overview, .interpretation-text, .interpretation-details p,
         line-height: 1.5;
     }
     
-    .site-footer {
-        margin-top: 0;
-        padding: 24px 16px 40px;
-        min-height: auto;
-    }
-    
     .footer-text {
         font-size: 0.7rem;
         line-height: 1.5;
         text-align: left;
+        padding: 24px 16px 40px;
     }
     
     /* Ensure footer is visible on mobile - prevent any hiding */
     .site-footer,
-    .disclosure-section {
+    .site-footer .disclosure-section {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
