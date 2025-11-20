@@ -237,7 +237,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Debounce search
+            // Debounce search - 400ms delay for better performance and reduced API calls
             searchTimeout = setTimeout(async () => {
                 try {
                     const response = await fetch(`/api/search-tokens?query=${encodeURIComponent(query)}`);
@@ -320,23 +320,50 @@ document.addEventListener('DOMContentLoaded', async () => {
                             autocompleteDiv.appendChild(item);
                         });
 
-                        // Position dropdown - mobile-first positioning
+                        // Position dropdown - mobile-first positioning with viewport awareness
                         const inputRect = input.getBoundingClientRect();
                         const viewportHeight = window.innerHeight;
+                        const viewportWidth = window.innerWidth;
                         const spaceBelow = viewportHeight - inputRect.bottom;
                         const spaceAbove = inputRect.top;
+                        const dropdownMaxHeight = 300;
                         
                         // Use fixed positioning on mobile for better control
                         const isMobile = window.innerWidth <= 768;
                         
                         if (isMobile) {
-                            // Mobile: use fixed positioning to prevent scroll issues
+                            // Mobile: use fixed positioning, ensure it's always visible
                             autocompleteDiv.style.position = 'fixed';
-                            autocompleteDiv.style.top = `${Math.min(inputRect.bottom + 4, viewportHeight - 200)}px`;
-                            autocompleteDiv.style.left = `${inputRect.left}px`;
-                            autocompleteDiv.style.width = `${inputRect.width}px`;
-                            autocompleteDiv.style.maxWidth = `${window.innerWidth - 24}px`; // Account for padding
-                            autocompleteDiv.style.maxHeight = `${Math.min(300, spaceBelow - 20)}px`;
+                            
+                            // Calculate optimal position - prefer below, but show above if not enough space
+                            let topPosition;
+                            let maxHeight;
+                            
+                            if (spaceBelow >= dropdownMaxHeight + 20) {
+                                // Enough space below - show below input
+                                topPosition = inputRect.bottom + 4;
+                                maxHeight = Math.min(dropdownMaxHeight, spaceBelow - 20);
+                            } else if (spaceAbove >= dropdownMaxHeight + 20) {
+                                // Not enough space below, but enough above - show above input
+                                topPosition = Math.max(8, inputRect.top - dropdownMaxHeight - 4);
+                                maxHeight = Math.min(dropdownMaxHeight, spaceAbove - 20);
+                            } else {
+                                // Limited space - show in available space, prefer below
+                                if (spaceBelow > spaceAbove) {
+                                    topPosition = inputRect.bottom + 4;
+                                    maxHeight = Math.max(150, spaceBelow - 20);
+                                } else {
+                                    topPosition = Math.max(8, inputRect.top - Math.min(dropdownMaxHeight, spaceAbove - 4));
+                                    maxHeight = Math.max(150, spaceAbove - 20);
+                                }
+                            }
+                            
+                            autocompleteDiv.style.top = `${topPosition}px`;
+                            autocompleteDiv.style.left = `${Math.max(12, inputRect.left)}px`;
+                            autocompleteDiv.style.width = `${Math.min(inputRect.width, viewportWidth - 24)}px`;
+                            autocompleteDiv.style.maxWidth = `${viewportWidth - 24}px`;
+                            autocompleteDiv.style.maxHeight = `${maxHeight}px`;
+                            autocompleteDiv.style.zIndex = '10000';
                         } else {
                             // Desktop: use absolute positioning
                             autocompleteDiv.style.position = 'absolute';
@@ -368,7 +395,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 } catch (error) {
                     console.error('Autocomplete error:', error);
                 }
-            }, 300);
+            }, 400); // Increased from 300ms to 400ms for better performance
         });
 
         // Remove autocomplete when input loses focus (after a delay to allow clicks)
@@ -1147,10 +1174,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         winnerDiv.innerHTML = `
             <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance over ${timeframeText}</div>
             <div class="winner-price-range">
-                <span class="price-label">${winnerRangeLabel}:</span> 
-                <span class="price-value">$${winnerLow} - $${winnerHigh}</span>
-                <span class="price-context">(Current: $${winnerCurrent})</span>
-                <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
+                <div class="price-range-line-1">
+                    <span class="price-label">${winnerRangeLabel}</span>
+                    <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
+                </div>
+                <div class="price-range-line-2">
+                    <span class="price-value">$${winnerHigh} - $${winnerLow}</span>
+                </div>
+                <div class="price-range-line-3">
+                    <span class="price-context">Current: $${winnerCurrent}</span>
+                </div>
             </div>
             <div class="winner-metrics">
                 <div class="winner-metric-row">

@@ -2013,13 +2013,24 @@ small {
     background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(88, 166, 255, 0.03));
     border-radius: 8px;
     border: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.winner-price-range .price-range-line-1,
+.winner-price-range .price-range-line-2,
+.winner-price-range .price-range-line-3 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
 .winner-price-range .price-label {
     color: var(--text-secondary);
     font-size: 0.9rem;
     font-weight: 600;
-    margin-right: 8px;
 }
 
 .winner-price-range .price-value {
@@ -2028,16 +2039,10 @@ small {
     font-weight: 700;
 }
 
-.winner-price-range .range-arrow {
-    color: var(--text-tertiary);
-    margin: 0 6px;
-}
-
 .winner-price-range .price-context {
     color: var(--text-tertiary);
     font-size: 0.85rem;
     font-style: italic;
-    margin-left: 12px;
 }
 
 .winner-metrics {
