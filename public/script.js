@@ -676,32 +676,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 existingDropdown.remove();
             }
             
-            // Set a flag to prevent autocomplete from triggering
+            // Set a flag to prevent autocomplete from triggering (set BEFORE any value changes)
             token2Input.setAttribute('data-programmatic-set', 'true');
             
-            // Set the value directly - use both value property and setAttribute for maximum compatibility
-            token2Input.value = randomCrypto;
-            token2Input.setAttribute('value', randomCrypto);
-            
-            // Force update the display
+            // Set the value directly - use native setter to ensure it's properly set
             const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
             nativeInputValueSetter.call(token2Input, randomCrypto);
             
-            // Trigger input event to ensure React/Vue frameworks see the change
-            const inputEvent = new Event('input', { bubbles: true, cancelable: true });
-            token2Input.dispatchEvent(inputEvent);
+            // Also set via property for compatibility
+            token2Input.value = randomCrypto;
             
             // Update default value styling
             updateDefaultValueStyle(token2Input);
             
-            // Remove the flag after a short delay
-            setTimeout(() => {
-                token2Input.removeAttribute('data-programmatic-set');
-            }, 100);
-            
-            // Trigger change event
+            // Trigger change event (but NOT input event to avoid autocomplete)
             const changeEvent = new Event('change', { bubbles: true, cancelable: true });
             token2Input.dispatchEvent(changeEvent);
+            
+            // Remove the flag after events are dispatched
+            setTimeout(() => {
+                token2Input.removeAttribute('data-programmatic-set');
+            }, 200);
             
             console.log('Value set, current value:', token2Input.value); // Debug log
             
