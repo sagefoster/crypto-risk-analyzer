@@ -7,7 +7,32 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
+    <!-- Initial Page Load Screen -->
+    <div id="initialLoader" class="initial-loader">
+        <div class="loader-content">
+            <div class="loader-logo">
+                <div class="logo-circle"></div>
+                <div class="logo-pulse"></div>
+            </div>
+            <h1 class="loader-title">Crypto Risk Analyzer</h1>
+            <div class="loader-subtitle">Calculating traditional risk metrics for digital assets</div>
+            <div class="loader-progress">
+                <div class="loader-progress-bar"></div>
+            </div>
+            <div class="loader-particles">
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+                <div class="particle"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContent">
         <header>
             <h1>Crypto Risk Analyzer</h1>
             <p class="subtitle">Calculate traditional risk metrics for digital assets</p>

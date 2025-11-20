@@ -1,4 +1,60 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // Handle initial page load screen
+    const initialLoader = document.getElementById('initialLoader');
+    const mainContent = document.getElementById('mainContent');
+    
+    // Show loader immediately
+    if (initialLoader) {
+        initialLoader.style.display = 'flex';
+        initialLoader.classList.remove('hidden');
+    }
+    
+    // Hide main content initially
+    if (mainContent) {
+        mainContent.style.opacity = '0';
+    }
+    
+    // Simulate loading progress (can be replaced with actual loading logic)
+    const progressBar = document.querySelector('.loader-progress-bar');
+    if (progressBar) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 100) {
+                progress = 100;
+                clearInterval(interval);
+                
+                // Hide loader after a brief delay
+                setTimeout(() => {
+                    if (initialLoader) {
+                        initialLoader.classList.add('hidden');
+                        setTimeout(() => {
+                            initialLoader.style.display = 'none';
+                        }, 800);
+                    }
+                    if (mainContent) {
+                        mainContent.style.opacity = '1';
+                    }
+                }, 300);
+            } else {
+                progressBar.style.width = `${progress}%`;
+            }
+        }, 100);
+    } else {
+        // Fallback: hide loader after 2 seconds
+        setTimeout(() => {
+            if (initialLoader) {
+                initialLoader.classList.add('hidden');
+                setTimeout(() => {
+                    initialLoader.style.display = 'none';
+                }, 800);
+            }
+            if (mainContent) {
+                mainContent.style.opacity = '1';
+            }
+        }, 2000);
+    }
+    
     // Prevent browser from restoring scroll position
     if ('scrollRestoration' in history) {
         history.scrollRestoration = 'manual';
