@@ -1553,15 +1553,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         winnerDiv.innerHTML = `
             <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance over the past ${timeframeText}${comparisonText}</div>
             <div class="winner-price-range">
+                <div class="price-range-line-current">
+                    <span class="price-label">Current Price:</span>
+                    <span class="price-value-large">$${winnerCurrent}</span>
+                </div>
                 <div class="price-range-line-1">
                     <span class="price-label">${winnerRangeLabel}</span>
                     <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
                 </div>
                 <div class="price-range-line-2">
                     <span class="price-value">$${winnerHigh} - $${winnerLow}</span>
-                </div>
-                <div class="price-range-line-3">
-                    <span class="price-context">Current: $${winnerCurrent}</span>
                 </div>
             </div>
             <div class="winner-metrics">
@@ -2179,10 +2180,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const targetElement = analyzeBtn || token2Input;
         
         if (targetElement) {
-            const targetRect = targetElement.getBoundingClientRect();
+            // Position scroll prompt on the right side, vertically centered
             scrollPrompt.style.position = 'fixed';
-            scrollPrompt.style.top = `${targetRect.top - 80}px`;
-            scrollPrompt.style.left = `${Math.max(20, (window.innerWidth - 220) / 2)}px`;
+            scrollPrompt.style.right = '20px';
+            scrollPrompt.style.top = '50%';
+            scrollPrompt.style.transform = 'translateY(-50%)';
+            scrollPrompt.style.left = 'auto';
         }
         
         // Make scroll prompt clickable - scroll to center analyze button

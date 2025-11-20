@@ -1033,6 +1033,7 @@ select {
     padding: 12px 16px;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
+    color: var(--text-primary) !important;
 }
 
 /* Gray out default values to show they're editable */
@@ -3603,20 +3604,26 @@ p, .overview, .interpretation-text, .interpretation-details p,
         opacity: 0;
         transform: translateY(-10px);
         transition: all 0.4s ease;
+        right: 20px;
+        top: 50%;
+        transform: translateY(-50%) translateX(-10px);
         max-width: 200px;
         cursor: pointer;
     }
     
     .scroll-prompt.visible {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateY(-50%) translateX(0);
         animation: scrollPromptBounce 2s ease-in-out infinite;
     }
     
     .scroll-prompt-content {
         background: var(--accent-gradient);
+        background-opacity: 1;
+        opacity: 1;
         color: white;
         padding: 12px 20px;
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.6), 0 0 20px rgba(88, 166, 255, 0.4);
         border-radius: 12px;
         box-shadow: 
             0 8px 24px rgba(102, 126, 234, 0.5),
