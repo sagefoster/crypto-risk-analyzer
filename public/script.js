@@ -664,6 +664,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const inputEvent = new Event('input', { bubbles: true });
                 token2Input.dispatchEvent(inputEvent);
                 
+                // Trigger change event as well
+                const changeEvent = new Event('change', { bubbles: true });
+                token2Input.dispatchEvent(changeEvent);
+                
                 // Add a brief highlight animation
                 token2Input.style.animation = 'none';
                 setTimeout(() => {
@@ -674,6 +678,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 setTimeout(() => {
                     token2Input.focus();
                 }, 100);
+                
+                // Check if scroll prompt should be shown after value is set
+                setTimeout(() => {
+                    if (!scrollPromptShown && checkAllInputsFilled()) {
+                        setTimeout(showScrollPrompt, 800);
+                    }
+                }, 200);
             }
         });
     }
@@ -2186,16 +2197,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupScrollPromptListener(document.getElementById('token1'));
     setupScrollPromptListener(document.getElementById('token2'));
     
-    // Also check when random crypto button is clicked (reuse the same button reference)
-    if (randomCryptoBtn) {
-        randomCryptoBtn.addEventListener('click', () => {
-            setTimeout(() => {
-                if (!scrollPromptShown && checkAllInputsFilled()) {
-                    setTimeout(showScrollPrompt, 800);
-                }
-            }, 200);
-        });
-    }
+    // Note: Random crypto button scroll prompt check is now handled in the main click handler above
     
     // Make analyze button glow when it's in view
     if (analyzeBtn) {
