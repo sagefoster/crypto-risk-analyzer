@@ -225,41 +225,87 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 </div>
                                 <small class="autocomplete-id">ID: ${coin.id}</small>
                             `;
+                            item.addEventListener('mousedown', (e) => {
+                                e.preventDefault(); // Prevent input blur
+                            });
+                            
                             item.addEventListener('click', (e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
+                                
+                                // Set the value
                                 input.value = coin.id;
+                                
                                 // Immediately close dropdown after selection
                                 if (autocompleteDiv) {
+                                    autocompleteDiv.style.display = 'none'; // Hide immediately
                                     autocompleteDiv.remove();
                                     autocompleteDiv = null;
                                 }
-                                // Trigger input event to clear any pending searches
-                                input.dispatchEvent(new Event('input', { bubbles: true }));
-                                input.focus();
+                                
+                                // Clear any pending search timeouts
+                                if (searchTimeout) {
+                                    clearTimeout(searchTimeout);
+                                    searchTimeout = null;
+                                }
+                                
+                                // Remove any existing click listeners
+                                const existingListeners = document.querySelectorAll('.autocomplete-dropdown');
+                                existingListeners.forEach(dropdown => dropdown.remove());
+                                
+                                // Focus input after a brief delay to ensure dropdown is closed
+                                setTimeout(() => {
+                                    input.focus();
+                                    input.blur(); // Trigger blur to close any remaining dropdowns
+                                    setTimeout(() => input.focus(), 50);
+                                }, 10);
                             });
                             autocompleteDiv.appendChild(item);
                         });
 
-                        // Position dropdown
+                        // Position dropdown - mobile-first positioning
                         const inputRect = input.getBoundingClientRect();
-                        autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
-                        autocompleteDiv.style.left = `${inputRect.left}px`;
-                        autocompleteDiv.style.width = `${inputRect.width}px`;
+                        const viewportHeight = window.innerHeight;
+                        const spaceBelow = viewportHeight - inputRect.bottom;
+                        const spaceAbove = inputRect.top;
+                        
+                        // Use fixed positioning on mobile for better control
+                        const isMobile = window.innerWidth <= 768;
+                        
+                        if (isMobile) {
+                            // Mobile: use fixed positioning to prevent scroll issues
+                            autocompleteDiv.style.position = 'fixed';
+                            autocompleteDiv.style.top = `${Math.min(inputRect.bottom + 4, viewportHeight - 200)}px`;
+                            autocompleteDiv.style.left = `${inputRect.left}px`;
+                            autocompleteDiv.style.width = `${inputRect.width}px`;
+                            autocompleteDiv.style.maxWidth = `${window.innerWidth - 24}px`; // Account for padding
+                            autocompleteDiv.style.maxHeight = `${Math.min(300, spaceBelow - 20)}px`;
+                        } else {
+                            // Desktop: use absolute positioning
+                            autocompleteDiv.style.position = 'absolute';
+                            autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
+                            autocompleteDiv.style.left = `${inputRect.left}px`;
+                            autocompleteDiv.style.width = `${inputRect.width}px`;
+                        }
 
                         // Insert after input wrapper
                         const wrapper = input.closest('.token-input-wrapper');
                         wrapper.parentNode.insertBefore(autocompleteDiv, wrapper.nextSibling);
 
-                        // Close on outside click
+                        // Close on outside click - use capture phase for better reliability
+                        const closeHandler = (e) => {
+                            if (autocompleteDiv && !autocompleteDiv.contains(e.target) && e.target !== input && !input.contains(e.target)) {
+                                autocompleteDiv.remove();
+                                autocompleteDiv = null;
+                                document.removeEventListener('click', closeHandler, true);
+                                document.removeEventListener('touchstart', closeHandler, true);
+                            }
+                        };
+                        
+                        // Use both click and touchstart for mobile
                         setTimeout(() => {
-                            document.addEventListener('click', function closeAutocomplete(e) {
-                                if (!autocompleteDiv.contains(e.target) && e.target !== input) {
-                                    autocompleteDiv.remove();
-                                    autocompleteDiv = null;
-                                    document.removeEventListener('click', closeAutocomplete);
-                                }
-                            });
+                            document.addEventListener('click', closeHandler, true);
+                            document.addEventListener('touchstart', closeHandler, true);
                         }, 100);
                     }
                 } catch (error) {
@@ -275,13 +321,49 @@ document.addEventListener('DOMContentLoaded', async () => {
                     autocompleteDiv.remove();
                     autocompleteDiv = null;
                 }
-            }, 200);
+            }, 150); // Reduced delay for better mobile responsiveness
+        });
+        
+        // Also close on input change if value is cleared
+        input.addEventListener('input', (e) => {
+            if (!e.target.value.trim() && autocompleteDiv) {
+                autocompleteDiv.remove();
+                autocompleteDiv = null;
+            }
         });
     }
 
-    // Setup autocomplete for existing inputs
-    document.querySelectorAll('.token-input').forEach(input => {
-        setupAutocomplete(input);
+    // Setup autocomplete and clear buttons for existing inputs (including first input)
+    document.querySelectorAll('.token-input-group').forEach(group => {
+        const input = group.querySelector('.token-input');
+        const clearBtn = group.querySelector('.btn-remove-token');
+        
+        // Setup autocomplete
+        if (input) {
+            setupAutocomplete(input);
+        }
+        
+        // Setup clear button for first input (and any others that might not have it)
+        if (clearBtn && input) {
+            clearBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                input.value = '';
+                input.focus();
+                // Close any open autocomplete dropdown
+                const existingDropdown = group.querySelector('.autocomplete-dropdown');
+                if (existingDropdown) {
+                    existingDropdown.remove();
+                }
+                // Also check for dropdowns in the parent container
+                const allDropdowns = document.querySelectorAll('.autocomplete-dropdown');
+                allDropdowns.forEach(dropdown => {
+                    if (dropdown.parentNode === group || dropdown.parentNode === group.parentNode) {
+                        dropdown.remove();
+                    }
+                });
+            });
+        }
     });
 
     form.addEventListener('submit', async (e) => {

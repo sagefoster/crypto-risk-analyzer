@@ -35,8 +35,17 @@ body {
     color: var(--text-primary);
     line-height: 1.6;
     min-height: 100vh;
-    padding: 20px;
+    padding: 12px; /* Mobile-first: smaller padding */
     position: relative;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Desktop: increase padding */
+@media (min-width: 769px) {
+    body {
+        padding: 20px;
+    }
 }
 
 /* Futuristic background gradient */
@@ -75,23 +84,31 @@ body::before {
 
 header {
     text-align: center;
-    margin-bottom: 40px;
-    padding: 40px 20px;
+    margin-bottom: 24px; /* Mobile-first: smaller margin */
+    padding: 24px 12px; /* Mobile-first: smaller padding */
 }
 
 header h1 {
-    font-size: 3rem;
+    font-size: clamp(1.75rem, 8vw, 3rem); /* Mobile-first: responsive font */
     font-weight: 700;
     background: var(--accent-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    margin-bottom: 10px;
+    margin-bottom: 8px;
 }
 
 .subtitle {
     color: var(--text-secondary);
-    font-size: 1.1rem;
+    font-size: clamp(0.9rem, 3vw, 1.1rem); /* Mobile-first: responsive font */
+}
+
+/* Desktop: increase header spacing */
+@media (min-width: 769px) {
+    header {
+        margin-bottom: 40px;
+        padding: 40px 20px;
+    }
 }
 
 /* Info Card Styles */
@@ -306,8 +323,10 @@ header h1 {
 }
 
 .btn-remove-token {
-    width: 36px;
-    height: 44px;
+    width: 44px; /* Mobile-first: minimum touch target */
+    height: 44px; /* Mobile-first: minimum touch target */
+    min-width: 44px; /* Ensure minimum size */
+    min-height: 44px; /* Ensure minimum size */
     padding: 0;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
@@ -320,6 +339,8 @@ header h1 {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0; /* Prevent shrinking */
+    -webkit-tap-highlight-color: rgba(248, 81, 73, 0.3); /* Mobile tap highlight */
     flex-shrink: 0;
 }
 
@@ -2500,7 +2521,7 @@ p, .overview, .interpretation-text, .interpretation-details p,
 
 /* Autocomplete Dropdown */
 .autocomplete-dropdown {
-    position: absolute;
+    position: absolute; /* Default, can be overridden to fixed on mobile */
     background: var(--bg-secondary);
     border: 2px solid var(--accent-primary);
     border-radius: 8px;
@@ -2510,13 +2531,25 @@ p, .overview, .interpretation-text, .interpretation-details p,
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
     margin-top: 4px;
     animation: fadeInUp 0.2s ease-out;
+    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+}
+
+/* Mobile: ensure dropdown is above other content */
+@media (max-width: 768px) {
+    .autocomplete-dropdown {
+        z-index: 10000; /* Very high z-index for mobile */
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5); /* Stronger shadow on mobile */
+    }
 }
 
 .autocomplete-item {
     padding: 14px 16px;
+    min-height: 44px; /* Mobile-first: minimum touch target */
     cursor: pointer;
     border-bottom: 1px solid var(--border-color);
     transition: background 0.2s ease;
+    -webkit-tap-highlight-color: rgba(88, 166, 255, 0.2); /* Mobile tap highlight */
+    touch-action: manipulation; /* Improve touch responsiveness */
 }
 
 .autocomplete-item:last-child {
@@ -2607,7 +2640,8 @@ p, .overview, .interpretation-text, .interpretation-details p,
     }
 
     .autocomplete-item {
-        padding: 12px 14px;
+        padding: 14px 16px; /* Mobile-first: maintain good touch target */
+        min-height: 48px; /* Slightly larger on mobile for easier tapping */
     }
 
     .autocomplete-header {
