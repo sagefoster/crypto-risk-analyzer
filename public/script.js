@@ -417,6 +417,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // Random crypto button functionality
+    const randomCryptoBtn = document.getElementById('randomCryptoBtn');
+    if (randomCryptoBtn) {
+        randomCryptoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Random crypto options: XRP, DOGE, SOL
+            const randomCryptos = ['ripple', 'dogecoin', 'solana'];
+            const randomCrypto = randomCryptos[Math.floor(Math.random() * randomCryptos.length)];
+            
+            // Get the third input (token2)
+            const token2Input = document.getElementById('token2');
+            if (token2Input) {
+                token2Input.value = randomCrypto;
+                
+                // Add a brief highlight animation
+                token2Input.style.animation = 'none';
+                setTimeout(() => {
+                    token2Input.style.animation = 'highlightPulse 0.6s ease';
+                }, 10);
+                
+                // Focus the input
+                setTimeout(() => {
+                    token2Input.focus();
+                }, 100);
+            }
+        });
+    }
+
     // Setup autocomplete and clear buttons for existing inputs (including first input)
     document.querySelectorAll('.token-input-group').forEach(group => {
         const input = group.querySelector('.token-input');

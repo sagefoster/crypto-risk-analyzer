@@ -701,6 +701,119 @@ header h1 {
     animation: slideIn 0.3s ease;
 }
 
+/* Optional input group (Digital Asset 3) - more appealing */
+.token-input-group-optional {
+    position: relative;
+    padding: 16px;
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.05), rgba(102, 126, 234, 0.05));
+    border: 2px solid rgba(88, 166, 255, 0.3);
+    border-radius: 12px;
+    animation: gentlePulse 3s ease-in-out infinite, slideIn 0.3s ease;
+    margin-bottom: 20px;
+}
+
+@keyframes gentlePulse {
+    0%, 100% {
+        border-color: rgba(88, 166, 255, 0.3);
+        box-shadow: 0 0 0 0 rgba(88, 166, 255, 0.2);
+    }
+    50% {
+        border-color: rgba(88, 166, 255, 0.5);
+        box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.1);
+    }
+}
+
+.token-input-wrapper-optional {
+    position: relative;
+}
+
+.token-input-optional {
+    border: 2px solid rgba(88, 166, 255, 0.4) !important;
+    background: rgba(88, 166, 255, 0.03) !important;
+    transition: all 0.3s ease;
+}
+
+.token-input-optional:focus {
+    border-color: var(--accent-primary) !important;
+    background: rgba(88, 166, 255, 0.08) !important;
+    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2) !important;
+}
+
+/* Random crypto button */
+.optional-asset-actions {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.btn-random-crypto {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.15), rgba(102, 126, 234, 0.15));
+    border: 2px solid rgba(88, 166, 255, 0.4);
+    border-radius: 10px;
+    color: var(--accent-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    animation: subtleShift 2s ease-in-out infinite;
+    -webkit-tap-highlight-color: rgba(88, 166, 255, 0.3);
+}
+
+.btn-random-crypto:hover {
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.25), rgba(102, 126, 234, 0.25));
+    border-color: var(--accent-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(88, 166, 255, 0.3);
+}
+
+.btn-random-crypto:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(88, 166, 255, 0.2);
+}
+
+.random-icon {
+    font-size: 1.2rem;
+    animation: spin 3s linear infinite;
+    display: inline-block;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.optional-hint {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Mobile adjustments for optional input */
+@media (max-width: 768px) {
+    .token-input-group-optional {
+        padding: 14px;
+        margin-bottom: 18px;
+    }
+    
+    .btn-random-crypto {
+        padding: 14px 16px;
+        font-size: 0.85rem;
+        min-height: 48px; /* Better touch target */
+    }
+    
+    .optional-hint {
+        font-size: 0.75rem;
+    }
+}
+
 @keyframes slideIn {
     from {
         opacity: 0;

@@ -67,14 +67,19 @@
                             <small>Enter ticker symbol or token's name</small>
                         </div>
                     </div>
-                    <div class="token-input-group" data-token-index="2">
+                    <div class="token-input-group token-input-group-optional" data-token-index="2">
                         <div class="form-group">
-                            <label for="token2">Digital Asset 3 <span class="info-icon-small" data-tooltip="Leave blank to analyze with 2 assets">ⓘ</span></label>
-                            <div class="token-input-wrapper">
-                                <input type="text" class="token-input" id="token2" name="token2" placeholder="Optional, enter symbol or leave blank">
+                            <label for="token2">Digital Asset 3 <span class="info-icon-small" data-tooltip="Optional: Add a third asset to compare, or analyze with just Bitcoin and Ethereum">ⓘ</span></label>
+                            <div class="token-input-wrapper token-input-wrapper-optional">
+                                <input type="text" class="token-input token-input-optional" id="token2" name="token2" placeholder="Optional, enter symbol or leave blank">
                                 <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                             </div>
-                            <small>Optional, enter symbol or leave blank</small>
+                            <div class="optional-asset-actions">
+                                <button type="button" class="btn-random-crypto" id="randomCryptoBtn" aria-label="Add random crypto">
+                                    <span class="random-icon">🎲</span> Try a Random Crypto
+                                </button>
+                                <small class="optional-hint">Optional: Add XRP, DOGE, SOL, or search for any crypto</small>
+                            </div>
                         </div>
                     </div>
                 </div>
