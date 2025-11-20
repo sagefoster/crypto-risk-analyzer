@@ -1855,6 +1855,116 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, 100);
     }
 
+    // Ensure analyze button is visible on first load
+    function ensureAnalyzeButtonVisible() {
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        if (analyzeBtn) {
+            // Use requestAnimationFrame to check after layout
+            requestAnimationFrame(() => {
+                const rect = analyzeBtn.getBoundingClientRect();
+                const viewportHeight = window.innerHeight;
+                const isVisible = rect.top >= 0 && rect.top <= viewportHeight;
+                
+                if (!isVisible) {
+                    // Scroll to button if not visible, but only slightly
+                    setTimeout(() => {
+                        analyzeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 300);
+                }
+            });
+        }
+    }
+    
+    // Check on load and after a short delay
+    window.addEventListener('load', ensureAnalyzeButtonVisible);
+    setTimeout(ensureAnalyzeButtonVisible, 500);
+    
+    // Scroll prompt when 3rd asset is entered
+    let scrollPromptShown = false;
+    function showScrollPrompt() {
+        if (scrollPromptShown) return;
+        
+        const token2Input = document.getElementById('token2');
+        if (!token2Input || !token2Input.value.trim()) return;
+        
+        scrollPromptShown = true;
+        
+        // Create scroll prompt element
+        const scrollPrompt = document.createElement('div');
+        scrollPrompt.className = 'scroll-prompt';
+        scrollPrompt.innerHTML = `
+            <div class="scroll-prompt-content">
+                <div class="scroll-prompt-icon">↓</div>
+                <div class="scroll-prompt-text">Ready to analyze?<br>Scroll down</div>
+            </div>
+        `;
+        
+        // Position near token2 input (using fixed positioning relative to viewport)
+        const token2Rect = token2Input.getBoundingClientRect();
+        scrollPrompt.style.top = `${token2Rect.bottom + window.scrollY + 20}px`;
+        scrollPrompt.style.left = `${token2Rect.left + window.scrollX}px`;
+        
+        document.body.appendChild(scrollPrompt);
+        
+        // Animate in
+        setTimeout(() => {
+            scrollPrompt.classList.add('visible');
+        }, 100);
+        
+        // Auto-hide after 5 seconds or when user scrolls
+        const hidePrompt = () => {
+            scrollPrompt.classList.remove('visible');
+            setTimeout(() => {
+                if (scrollPrompt.parentNode) {
+                    scrollPrompt.remove();
+                }
+            }, 300);
+        };
+        
+        setTimeout(hidePrompt, 5000);
+        
+        let scrollTimeout;
+        window.addEventListener('scroll', () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                if (scrollPrompt.parentNode) {
+                    hidePrompt();
+                }
+            }, 200);
+        }, { once: true });
+    }
+    
+    // Monitor token2 input for changes
+    const token2Input = document.getElementById('token2');
+    if (token2Input) {
+        // Check on input change
+        token2Input.addEventListener('input', () => {
+            if (token2Input.value.trim() && !scrollPromptShown) {
+                setTimeout(showScrollPrompt, 500);
+            }
+        });
+        
+        // Check on autocomplete selection
+        token2Input.addEventListener('change', () => {
+            if (token2Input.value.trim() && !scrollPromptShown) {
+                setTimeout(showScrollPrompt, 500);
+            }
+        });
+    }
+    
+    // Also check when random crypto button is clicked
+    const randomCryptoBtn = document.getElementById('randomCryptoBtn');
+    if (randomCryptoBtn) {
+        const originalHandler = randomCryptoBtn.onclick;
+        randomCryptoBtn.addEventListener('click', () => {
+            setTimeout(() => {
+                if (token2Input && token2Input.value.trim() && !scrollPromptShown) {
+                    setTimeout(showScrollPrompt, 800);
+                }
+            }, 200);
+        });
+    }
+    
     // Default tokens are already set in HTML (bitcoin, ethereum, blank)
     // No need to initialize - HTML has the correct structure
 

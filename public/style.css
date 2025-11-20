@@ -3423,6 +3423,78 @@ p, .overview, .interpretation-text, .interpretation-details p,
         }
     }
     
+    /* Scroll prompt animation */
+    .scroll-prompt {
+        position: absolute;
+        z-index: 9999;
+        pointer-events: none;
+        opacity: 0;
+        transform: translateY(-10px);
+        transition: all 0.4s ease;
+        max-width: 200px;
+    }
+    
+    .scroll-prompt.visible {
+        opacity: 1;
+        transform: translateY(0);
+        animation: scrollPromptBounce 2s ease-in-out infinite;
+    }
+    
+    .scroll-prompt-content {
+        background: var(--accent-gradient);
+        color: white;
+        padding: 12px 20px;
+        border-radius: 12px;
+        box-shadow: 
+            0 8px 24px rgba(102, 126, 234, 0.5),
+            0 0 20px rgba(88, 166, 255, 0.3),
+            0 4px 12px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+        line-height: 1.4;
+    }
+    
+    .scroll-prompt-icon {
+        font-size: 24px;
+        animation: scrollPromptArrow 1.5s ease-in-out infinite;
+    }
+    
+    .scroll-prompt-text {
+        text-align: left;
+    }
+    
+    @keyframes scrollPromptBounce {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(-8px);
+        }
+    }
+    
+    @keyframes scrollPromptArrow {
+        0%, 100% {
+            transform: translateY(0);
+        }
+        50% {
+            transform: translateY(6px);
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .scroll-prompt-content {
+            padding: 10px 16px;
+            font-size: 0.85rem;
+        }
+        
+        .scroll-prompt-icon {
+            font-size: 20px;
+        }
+    }
+    
     /* Ensure footer is visible on mobile - prevent any hiding */
     .site-footer,
     .footer-section {
