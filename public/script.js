@@ -1348,7 +1348,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             comparisonText += ', and superior risk-adjusted metrics (Sharpe & Sortino).</div>';
             winnerDiv.innerHTML += comparisonText;
         } else if (sortedTokens.length > 2) {
-            // Get other assets for comparison text - format as x/y/z/a
+            // Get other assets for comparison text - format as "x and y and z"
             const otherAssets = sortedTokens
                 .filter(t => t.id !== winner.id)
                 .map(t => t.id.toUpperCase());
