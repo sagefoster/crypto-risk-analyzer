@@ -4,6 +4,38 @@
     box-sizing: border-box;
 }
 
+/* Global text wrapping rules - prevent hyphenation and orphans */
+* {
+    hyphens: none;
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    word-break: normal;
+    overflow-wrap: break-word; /* Only break long unbreakable strings */
+}
+
+/* Prevent single words on their own line (orphans/widows) */
+p, span, div, label, small, .overview, .form-intro, .interpretation-text, 
+.summary-stat, .winner-comparison, .card, .info-card, .summary-title,
+.overview-context, .tap-hint, .winner-header {
+    orphans: 2;
+    widows: 2;
+}
+
+/* Text elements - prevent word breaks within words */
+p, .overview, .form-intro, .interpretation-text, .interpretation-details,
+.summary-stat, .winner-comparison, label, small, .card {
+    word-break: normal;
+    overflow-wrap: break-word; /* Only for very long unbreakable strings */
+    white-space: normal;
+}
+
+/* Ensure proper line balancing */
+.overview, .form-intro, .interpretation-text {
+    text-align: left;
+    line-height: 1.6;
+}
+
 :root {
     --bg-primary: #0d1117;
     --bg-secondary: #161b22;
@@ -400,6 +432,10 @@ header h1 {
     line-height: 1.7;
     margin-bottom: 1rem;
     font-size: 1.05rem;
+    word-break: normal;
+    overflow-wrap: break-word;
+    orphans: 2;
+    widows: 2;
 }
 
 .features-list {
@@ -563,6 +599,10 @@ header h1 {
     color: var(--text-secondary);
     font-size: 0.95rem;
     line-height: 1.6;
+    word-break: normal;
+    overflow-wrap: break-word;
+    orphans: 2;
+    widows: 2;
 }
 
 .form-intro strong {
@@ -710,6 +750,11 @@ label {
     font-weight: 500;
     color: var(--text-primary);
     font-size: 0.9rem;
+    word-break: normal;
+    overflow-wrap: break-word;
+    orphans: 2;
+    widows: 2;
+    line-height: 1.4;
 }
 
 input[type="text"],
@@ -761,6 +806,11 @@ small {
     margin-top: 4px;
     color: var(--text-secondary);
     font-size: 0.85rem;
+    word-break: normal;
+    overflow-wrap: break-word;
+    orphans: 2;
+    widows: 2;
+    line-height: 1.5;
 }
 
 .timeframe-note {
@@ -1296,6 +1346,10 @@ small {
     padding: 12px 20px;
     background: var(--bg-tertiary);
     border-radius: 8px;
+    word-break: normal;
+    overflow-wrap: break-word;
+    orphans: 2;
+    widows: 2;
     border-left: 3px solid var(--accent-primary);
 }
 
@@ -2146,7 +2200,10 @@ small {
     * {
         word-wrap: break-word;
         overflow-wrap: break-word;
-        hyphens: auto;
+        hyphens: none;
+        -webkit-hyphens: none;
+        -moz-hyphens: none;
+        word-break: normal;
     }
 
     header h1 {
@@ -2800,15 +2857,17 @@ body, .card, .overview, .interpretation-text, .interpretation-details,
 .summary-card, .winner, .form-intro, .tip, .table-context {
     word-wrap: break-word;
     overflow-wrap: break-word;
-    hyphens: auto;
+    hyphens: none;
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
     text-rendering: optimizeLegibility;
 }
 
-/* Prevent orphaned words - better line breaks */
+/* Prevent orphaned words - better line breaks (minimum 2 words per line) */
 p, .overview, .interpretation-text, .interpretation-details p,
 .summary-stat, .winner-comparison, .form-intro {
-    orphans: 3;
-    widows: 3;
+    orphans: 2;
+    widows: 2;
 }
 
 /* Responsive text sizing for better wrapping */
