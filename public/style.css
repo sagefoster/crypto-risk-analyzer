@@ -793,6 +793,7 @@ header h1 {
 .token-input-optional {
     border: 1px solid var(--border-color) !important;
     background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
     transition: all 0.3s ease;
     animation: subtleInputPulse 3s ease-in-out infinite;
 }
@@ -919,6 +920,7 @@ header h1 {
     flex: 1;
     border: none !important;
     background: transparent !important;
+    color: var(--text-primary) !important;
     padding: 12px 14px !important;
     padding-right: 40px !important; /* Make room for the x button */
     box-shadow: none !important;
