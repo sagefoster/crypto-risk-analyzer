@@ -424,8 +424,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             e.stopPropagation();
             
-            // Random crypto options: XRP, DOGE, SOL
-            const randomCryptos = ['ripple', 'dogecoin', 'solana'];
+            // Random crypto options: DOGE, XRP, SOL, LINK, ZEC, BNB, TRX, LTC
+            const randomCryptos = ['dogecoin', 'ripple', 'solana', 'chainlink', 'zcash', 'binancecoin', 'tron', 'litecoin'];
             const randomCrypto = randomCryptos[Math.floor(Math.random() * randomCryptos.length)];
             
             // Get the third input (token2)
@@ -1179,6 +1179,24 @@ document.addEventListener('DOMContentLoaded', async () => {
         const winnerName = winner.id.toUpperCase();
         const timeframeText = getTimeframeText(timeframeDays);
         
+        // Get other assets for comparison text
+        const otherAssets = sortedTokens
+            .filter(t => t.id !== winner.id)
+            .map(t => t.id.toUpperCase());
+        
+        let comparisonText = '';
+        if (otherAssets.length > 0) {
+            if (otherAssets.length === 1) {
+                comparisonText = ` compared to ${otherAssets[0]}`;
+            } else if (otherAssets.length === 2) {
+                comparisonText = ` compared to ${otherAssets[0]} and ${otherAssets[1]}`;
+            } else {
+                const lastAsset = otherAssets[otherAssets.length - 1];
+                const otherAssetsList = otherAssets.slice(0, -1).join(', ');
+                comparisonText = ` compared to ${otherAssetsList}, and ${lastAsset}`;
+            }
+        }
+        
         // Format all metrics for winner - use period return for simple holding period return
         const winnerReturn = (winner.periodReturn * 100).toFixed(2);
         const winnerVol = (winner.volatility * 100).toFixed(2);
@@ -1202,7 +1220,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const winnerDiv = document.createElement('div');
         winnerDiv.className = 'winner higher';
         winnerDiv.innerHTML = `
-            <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance over ${timeframeText}</div>
+            <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance over ${timeframeText}${comparisonText}</div>
             <div class="winner-price-range">
                 <div class="price-range-line-1">
                     <span class="price-label">${winnerRangeLabel}</span>
