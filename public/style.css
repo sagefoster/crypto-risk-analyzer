@@ -810,6 +810,7 @@ header h1 {
 .token-input-optional:focus {
     border-color: var(--accent-primary) !important;
     background: var(--bg-secondary) !important;
+    color: var(--text-primary) !important;
     box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2) !important;
     animation: none; /* Stop pulse on focus */
 }
