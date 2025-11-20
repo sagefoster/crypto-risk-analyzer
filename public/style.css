@@ -2413,3 +2413,73 @@ select:focus {
     50% { transform: translateY(-3px) scale(1.02); }
 }
 
+/* Improved text wrapping to prevent awkward line breaks */
+body, .card, .overview, .interpretation-text, .interpretation-details, 
+.summary-card, .winner, .form-intro, .tip, .table-context {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+    text-rendering: optimizeLegibility;
+}
+
+/* Prevent orphaned words - better line breaks */
+p, .overview, .interpretation-text, .interpretation-details p,
+.summary-stat, .winner-comparison, .form-intro {
+    orphans: 3;
+    widows: 3;
+}
+
+/* Responsive text sizing for better wrapping */
+@media (max-width: 768px) {
+    .overview, .interpretation-text, .interpretation-details {
+        font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+        line-height: 1.6;
+    }
+    
+    .form-intro {
+        font-size: clamp(0.8rem, 2.5vw, 0.85rem);
+        line-height: 1.5;
+    }
+    
+    .winner-header, .summary-title {
+        font-size: clamp(1rem, 3vw, 1.2rem);
+        line-height: 1.4;
+    }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+    .overview, .interpretation-text {
+        font-size: clamp(0.9rem, 1.2vw, 1rem);
+    }
+}
+
+/* Site Footer */
+.site-footer {
+    margin-top: 60px;
+    padding: 30px 20px;
+    border-top: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.footer-text {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--text-tertiary);
+    max-width: 800px;
+    margin: 0 auto;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    .site-footer {
+        margin-top: 40px;
+        padding: 20px 16px;
+    }
+    
+    .footer-text {
+        font-size: 0.7rem;
+        line-height: 1.5;
+        text-align: left;
+    }
+}
+
