@@ -727,9 +727,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }, 200);
         }, { capture: true }); // Use capture phase to ensure it fires
-    } else {
-        console.error('randomCryptoBtn not found when trying to attach event listener');
     }
+    }
+    
+    // Call the setup function immediately
+    setupRandomCryptoButton();
+    
+    // Also retry after a delay to ensure it's set up even if DOM loads late
+    setTimeout(setupRandomCryptoButton, 500);
 
     // Setup autocomplete and clear buttons for existing inputs (including first input)
     document.querySelectorAll('.token-input-group').forEach(group => {
