@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         btnLoading.style.display = 'none'; // Double ensure
     }
     
-    let tokenIndex = 1; // Start at 1 since we already have token0
+    let tokenIndex = 3; // Start at 3 since we already have token0, token1, token2
 
     // Function to add a new token input
     // @param {boolean} shouldFocus - Whether to focus the new input (default: true)
@@ -39,14 +39,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         tokenGroup.className = 'token-input-group';
         tokenGroup.setAttribute('data-token-index', tokenIndex);
         
+        const assetNumber = tokenIndex + 1; // Display number (1-indexed)
         tokenGroup.innerHTML = `
             <div class="form-group">
-                <label for="token${tokenIndex}">Token</label>
+                <label for="token${tokenIndex}">Digital Asset ${assetNumber}</label>
                 <div class="token-input-wrapper">
                     <input type="text" class="token-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="e.g., bitcoin, BTC, ethereum, ETH" required>
                     <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                 </div>
-                <small>Token name, ticker symbol, or CoinGecko ID (e.g., bitcoin, BTC, ethereum, ETH)</small>
+                <small>Asset name, ticker symbol, or CoinGecko ID (e.g., bitcoin, BTC, ethereum, ETH)</small>
             </div>
         `;
         
@@ -383,7 +384,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tokens = collectTokens();
         
         if (tokens.length === 0) {
-            showError('Please enter at least one token (name, ticker symbol, or ID)');
+            showError('Please enter at least one digital asset (name, ticker symbol, or ID)');
+            return;
+        }
+        
+        if (tokens.length < 2) {
+            showError('Please enter at least two digital assets to compare');
             return;
         }
 
@@ -394,7 +400,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         analyzeBtn.style.display = 'none';
         btnLoading.classList.remove('hidden');
         btnLoading.style.display = '';
-        loadingDetails.textContent = 'Validating token IDs...';
+        loadingDetails.textContent = 'Validating digital assets...';
 
         try {
             // Validate tokens first
@@ -450,7 +456,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 clearInterval(messageInterval);
             }
             console.error('Error:', error);
-            showError(error.message || 'An error occurred while analyzing the tokens. Please check your API key and token names/symbols.');
+            showError(error.message || 'An error occurred while analyzing the digital assets. Please check your API key and asset names/symbols.');
         } finally {
             // Hide loading state, show button
             if (btnLoading) {
@@ -1054,10 +1060,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         const winnerSortino = winner.sortinoRatio >= 999 ? '∞' : winner.sortinoRatio.toFixed(3);
         const winnerCalmar = winner.calmarRatio !== null && isFinite(winner.calmarRatio) ? winner.calmarRatio.toFixed(3) : 'N/A';
 
-        // Format price data (with fallbacks for backwards compatibility)
-        const winnerLow = winner.lowPrice ? winner.lowPrice.toFixed(2) : 'N/A';
-        const winnerHigh = winner.highPrice ? winner.highPrice.toFixed(2) : 'N/A';
-        const winnerCurrent = winner.currentPrice ? winner.currentPrice.toFixed(2) : 'N/A';
+        // Format price data with appropriate decimals for low values
+        const winnerLow = formatPriceDisplay(winner.lowPrice);
+        const winnerHigh = formatPriceDisplay(winner.highPrice);
+        const winnerCurrent = formatPriceDisplay(winner.currentPrice);
 
         // Determine range label for winner section
         const winnerRangeLabel = timeframeText === '1 year' ? '52-Week High/Low' : `${timeframeText} Range`;
@@ -1171,9 +1177,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             const mdd = (tokenData.maxDrawdown * 100).toFixed(2);
             const mddDisplay = tokenData.maxDrawdown > 0 ? `-${mdd}` : mdd;
             
-            // Format price data (with fallbacks for backwards compatibility)
-            const lowPrice = tokenData.lowPrice ? tokenData.lowPrice.toFixed(2) : 'N/A';
-            const highPrice = tokenData.highPrice ? tokenData.highPrice.toFixed(2) : 'N/A';
+            // Format price data with appropriate decimals for low values
+            const lowPrice = formatPriceDisplay(tokenData.lowPrice);
+            const highPrice = formatPriceDisplay(tokenData.highPrice);
             
             const performanceClass = tokenData.sharpeRatio > 1 ? 'excellent' : tokenData.sharpeRatio > 0 ? 'good' : 'poor';
             
@@ -1258,6 +1264,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const timeframeDays = data.timeframe || 365;
         const isSingle = tokenResults.length === 1;
         const isMultiple = tokenResults.length > 1;
+
+        // Helper function to format prices with appropriate decimals for low values
+        const formatPriceDisplay = (price) => {
+            if (!price || price === null || price === undefined || isNaN(price)) return 'N/A';
+            if (price >= 1000) return price.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+            if (price >= 1) return price.toFixed(2);
+            if (price >= 0.01) return price.toFixed(4);
+            if (price >= 0.0001) return price.toFixed(6);
+            return price.toFixed(8); // Very low values get 8 decimals
+        };
 
         // STEP 1: Show winner/conclusion first (if multiple tokens)
         if (isMultiple) {

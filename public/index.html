@@ -15,7 +15,7 @@
 
         <div class="card info-card">
             <p class="overview">
-                Compare up to 5 crypto assets using traditional risk metrics: Beta-weighting, Sharpe Ratio, Max Drawdown, and more.
+                Compare up to 5 digital assets using traditional risk metrics: Beta-weighting, Sharpe Ratio, Max Drawdown, and more.
             </p>
         </div>
 
@@ -26,12 +26,32 @@
                 <div id="tokensContainer">
                     <div class="token-input-group" data-token-index="0">
                         <div class="form-group">
-                            <label for="token0">Token</label>
+                            <label for="token0">Digital Asset 1</label>
                             <div class="token-input-wrapper">
-                                <input type="text" class="token-input" id="token0" name="token0" placeholder="e.g., bitcoin, BTC, ethereum, ETH" required>
+                                <input type="text" class="token-input" id="token0" name="token0" value="bitcoin" placeholder="e.g., bitcoin, BTC, ethereum, ETH" required>
                                 <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                             </div>
-                            <small>Token name, ticker symbol, or CoinGecko ID (e.g., bitcoin, BTC, ethereum, ETH)</small>
+                            <small>Asset name, ticker symbol, or CoinGecko ID (e.g., bitcoin, BTC, ethereum, ETH)</small>
+                        </div>
+                    </div>
+                    <div class="token-input-group" data-token-index="1">
+                        <div class="form-group">
+                            <label for="token1">Digital Asset 2</label>
+                            <div class="token-input-wrapper">
+                                <input type="text" class="token-input" id="token1" name="token1" value="ethereum" placeholder="e.g., bitcoin, BTC, ethereum, ETH" required>
+                                <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+                            </div>
+                            <small>Asset name, ticker symbol, or CoinGecko ID (e.g., bitcoin, BTC, ethereum, ETH)</small>
+                        </div>
+                    </div>
+                    <div class="token-input-group" data-token-index="2">
+                        <div class="form-group">
+                            <label for="token2">Digital Asset 3 (Optional)</label>
+                            <div class="token-input-wrapper">
+                                <input type="text" class="token-input" id="token2" name="token2" placeholder="e.g., bitcoin, BTC, ethereum, ETH">
+                                <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+                            </div>
+                            <small>Optional: Add a third asset or leave blank to analyze with 2 assets</small>
                         </div>
                     </div>
                 </div>
