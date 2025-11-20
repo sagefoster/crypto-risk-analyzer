@@ -711,6 +711,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        // Hide scroll prompt when analyze is pressed
+        const scrollPrompt = document.querySelector('.scroll-prompt');
+        if (scrollPrompt) {
+            scrollPrompt.classList.remove('visible');
+            setTimeout(() => {
+                if (scrollPrompt.parentNode) {
+                    scrollPrompt.remove();
+                }
+            }, 300);
+        }
+        scrollPromptShown = false; // Reset flag so it can show again if needed
+        
         // Add exciting click feedback animation
         analyzeBtn.style.animation = 'analyzeClick 0.6s ease';
         analyzeBtn.style.transform = 'scale(1.05)';
@@ -1524,6 +1536,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Format price data with appropriate decimals for low values
             const lowPrice = formatPriceDisplay(tokenData.lowPrice);
             const highPrice = formatPriceDisplay(tokenData.highPrice);
+            const currentPrice = formatPriceDisplay(tokenData.currentPrice);
             
             const performanceClass = tokenData.sharpeRatio > 1 ? 'excellent' : tokenData.sharpeRatio > 0 ? 'good' : 'poor';
             
@@ -1536,6 +1549,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             summaryHTML += `
                 <div class="summary-card ${performanceClass} clickable" data-token="${tokenId}" role="button" tabindex="0" aria-label="View detailed analysis for ${tokenName}">
                     <h4>${tokenName}</h4>
+                    <div class="current-price-summary">
+                        <span class="price-label">Current Price:</span>
+                        <span class="price-value">$${currentPrice}</span>
+                    </div>
                     <div class="price-range-summary">
                         <span class="range-label">${rangeLabel}:</span>
                         <span class="range-value">$${highPrice} - $${lowPrice}</span>

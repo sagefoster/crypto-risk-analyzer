@@ -1899,6 +1899,34 @@ small {
     color: var(--text-primary);
 }
 
+.current-price-summary {
+    text-align: center;
+    padding: 10px 0;
+    margin-bottom: 8px;
+    border-bottom: 2px solid var(--accent-primary);
+    background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(102, 126, 234, 0.05));
+    border-radius: 6px;
+    margin: 0 -8px 8px -8px;
+    padding: 10px 8px;
+}
+
+.current-price-summary .price-label {
+    display: block;
+    color: var(--text-tertiary);
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.current-price-summary .price-value {
+    color: var(--accent-primary);
+    font-size: 1.3rem;
+    font-weight: 700;
+    display: block;
+}
+
 .price-range-summary {
     text-align: center;
     padding: 8px 0;
