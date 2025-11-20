@@ -645,8 +645,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     let randomCryptoIndex = 0; // Track current position in rotation
     
     // Get random crypto button once (will be used later for scroll prompt too)
-    const randomCryptoBtn = document.getElementById('randomCryptoBtn');
-    if (randomCryptoBtn) {
+    // Use a function to ensure button is available when called
+    function setupRandomCryptoButton() {
+        const randomCryptoBtn = document.getElementById('randomCryptoBtn');
+        if (!randomCryptoBtn) {
+            console.warn('randomCryptoBtn not found, will retry...');
+            // Retry after a short delay in case DOM isn't ready
+            setTimeout(setupRandomCryptoButton, 100);
+            return;
+        }
+        
+        // Remove any existing listeners to avoid duplicates
+        const newBtn = randomCryptoBtn.cloneNode(true);
+        randomCryptoBtn.parentNode.replaceChild(newBtn, randomCryptoBtn);
+        const randomCryptoBtnClean = document.getElementById('randomCryptoBtn');
+        
+    if (randomCryptoBtnClean) {
         // Use a more robust click handler
         randomCryptoBtn.addEventListener('click', function(e) {
             e.preventDefault();
