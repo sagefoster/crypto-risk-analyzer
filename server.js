@@ -852,11 +852,14 @@ app.get('/api/search-tokens', async (req, res) => {
       return res.json({ results: [] });
     }
 
-    try {
-      const response = await axios.get(`https://pro-api.coingecko.com/api/v3/search`, {
+    const makeSearchRequest = async (isPro) => {
+      const baseUrl = isPro ? 'https://pro-api.coingecko.com/api/v3' : 'https://api.coingecko.com/api/v3';
+      const apiKeyParam = isPro ? 'x_cg_pro_api_key' : 'x_cg_demo_api_key';
+      
+      const searchResponse = await axios.get(`${baseUrl}/search`, {
         params: {
           query: query,
-          x_cg_pro_api_key: apiKey
+          [apiKeyParam]: apiKey
         },
         headers: {
           'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
@@ -865,44 +868,106 @@ app.get('/api/search-tokens', async (req, res) => {
         validateStatus: (status) => status < 500
       });
 
-      if (response.data && response.data.error_code === 10011) {
+      if (searchResponse.data && searchResponse.data.error_code === 10011) {
+        throw new Error('DEMO_KEY_DETECTED');
+      }
+
+      if (searchResponse.status === 200 && searchResponse.data.coins && searchResponse.data.coins.length > 0) {
+        // Get top 15 results to fetch market data
+        const topCoins = searchResponse.data.coins.slice(0, 15);
+        const coinIds = topCoins.map(coin => coin.id).join(',');
+
+        // Fetch market data for these coins
+        try {
+          const marketResponse = await axios.get(`${baseUrl}/coins/markets`, {
+            params: {
+              vs_currency: 'usd',
+              ids: coinIds,
+              order: 'market_cap_desc',
+              per_page: 15,
+              page: 1,
+              sparkline: false,
+              [apiKeyParam]: apiKey
+            },
+            headers: {
+              'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+              'Accept': 'application/json'
+            },
+            validateStatus: (status) => status < 500
+          });
+
+          if (marketResponse.status === 200 && marketResponse.data) {
+            // Create a map of market data by coin ID
+            const marketDataMap = {};
+            marketResponse.data.forEach(coin => {
+              marketDataMap[coin.id] = {
+                current_price: coin.current_price,
+                market_cap: coin.market_cap,
+                market_cap_rank: coin.market_cap_rank
+              };
+            });
+
+            // Merge search results with market data, sort by market cap
+            const enrichedResults = topCoins
+              .map(coin => ({
+                id: coin.id,
+                name: coin.name,
+                symbol: coin.symbol,
+                thumb: coin.thumb,
+                large: coin.large,
+                market_cap: marketDataMap[coin.id]?.market_cap || 0,
+                current_price: marketDataMap[coin.id]?.current_price || null,
+                market_cap_rank: marketDataMap[coin.id]?.market_cap_rank || 999999
+              }))
+              .sort((a, b) => {
+                // Sort by market cap (highest first), then by name
+                if (b.market_cap !== a.market_cap) {
+                  return b.market_cap - a.market_cap;
+                }
+                return a.name.localeCompare(b.name);
+              })
+              .slice(0, 10); // Return top 10
+
+            return enrichedResults;
+          }
+        } catch (marketError) {
+          console.log('Market data fetch failed, returning search results without market data');
+          // If market data fails, return search results sorted by name
+          return topCoins
+            .map(coin => ({
+              id: coin.id,
+              name: coin.name,
+              symbol: coin.symbol,
+              thumb: coin.thumb,
+              large: coin.large,
+              market_cap: 0,
+              current_price: null,
+              market_cap_rank: 999999
+            }))
+            .sort((a, b) => a.name.localeCompare(b.name))
+            .slice(0, 10);
+        }
+      }
+
+      return [];
+    };
+
+    try {
+      // Try Pro API first
+      const results = await makeSearchRequest(true);
+      return res.json({ results });
+    } catch (proError) {
+      if (proError.message === 'DEMO_KEY_DETECTED' || proError.response?.status === 401) {
         // Try demo API
-        const demoResponse = await axios.get(`https://api.coingecko.com/api/v3/search`, {
-          params: {
-            query: query,
-            x_cg_demo_api_key: apiKey
-          },
-          headers: {
-            'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
-            'Accept': 'application/json'
-          }
-        });
-        return res.json({ results: demoResponse.data.coins?.slice(0, 10) || [] });
+        try {
+          const results = await makeSearchRequest(false);
+          return res.json({ results });
+        } catch (demoError) {
+          return res.status(500).json({ error: 'Search failed', details: demoError.message });
+        }
       }
-
-      if (response.status === 200 && response.data.coins) {
-        return res.json({ results: response.data.coins.slice(0, 10) });
-      }
-    } catch (error) {
-      // Try demo API as fallback
-      try {
-        const demoResponse = await axios.get(`https://api.coingecko.com/api/v3/search`, {
-          params: {
-            query: query,
-            x_cg_demo_api_key: apiKey
-          },
-          headers: {
-            'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
-            'Accept': 'application/json'
-          }
-        });
-        return res.json({ results: demoResponse.data.coins?.slice(0, 10) || [] });
-      } catch (demoError) {
-        return res.status(500).json({ error: 'Search failed', details: demoError.message });
-      }
+      throw proError;
     }
-
-    res.json({ results: [] });
   } catch (error) {
     res.status(500).json({ error: 'Search failed', details: error.message });
   }

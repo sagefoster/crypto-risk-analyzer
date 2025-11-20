@@ -185,12 +185,39 @@ document.addEventListener('DOMContentLoaded', async () => {
                         autocompleteDiv = document.createElement('div');
                         autocompleteDiv.className = 'autocomplete-dropdown';
                         
-                        data.results.slice(0, 8).forEach(coin => {
+                        // Helper to format market cap
+                        const formatMarketCap = (marketCap) => {
+                            if (!marketCap || marketCap === 0) return 'N/A';
+                            if (marketCap >= 1e12) return `$${(marketCap / 1e12).toFixed(2)}T`;
+                            if (marketCap >= 1e9) return `$${(marketCap / 1e9).toFixed(2)}B`;
+                            if (marketCap >= 1e6) return `$${(marketCap / 1e6).toFixed(2)}M`;
+                            return `$${marketCap.toLocaleString()}`;
+                        };
+
+                        // Helper to format price
+                        const formatPrice = (price) => {
+                            if (!price || price === null) return 'N/A';
+                            if (price >= 1000) return `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+                            if (price >= 1) return `$${price.toFixed(2)}`;
+                            if (price >= 0.01) return `$${price.toFixed(4)}`;
+                            return `$${price.toFixed(6)}`;
+                        };
+                        
+                        data.results.forEach(coin => {
                             const item = document.createElement('div');
                             item.className = 'autocomplete-item';
+                            const marketCap = formatMarketCap(coin.market_cap);
+                            const price = formatPrice(coin.current_price);
+                            
                             item.innerHTML = `
-                                <strong>${coin.name}</strong> <span class="autocomplete-symbol">${coin.symbol}</span>
-                                <small>ID: ${coin.id}</small>
+                                <div class="autocomplete-header">
+                                    <strong>${coin.name}</strong> <span class="autocomplete-symbol">${coin.symbol}</span>
+                                </div>
+                                <div class="autocomplete-details">
+                                    <span class="autocomplete-price">${price}</span>
+                                    <span class="autocomplete-marketcap">${marketCap}</span>
+                                </div>
+                                <small class="autocomplete-id">ID: ${coin.id}</small>
                             `;
                             item.addEventListener('click', () => {
                                 input.value = coin.id;

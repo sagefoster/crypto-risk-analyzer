@@ -2504,7 +2504,7 @@ p, .overview, .interpretation-text, .interpretation-details p,
     background: var(--bg-secondary);
     border: 2px solid var(--accent-primary);
     border-radius: 8px;
-    max-height: 300px;
+    max-height: 400px;
     overflow-y: auto;
     z-index: 1000;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
@@ -2513,7 +2513,7 @@ p, .overview, .interpretation-text, .interpretation-details p,
 }
 
 .autocomplete-item {
-    padding: 12px 16px;
+    padding: 14px 16px;
     cursor: pointer;
     border-bottom: 1px solid var(--border-color);
     transition: background 0.2s ease;
@@ -2527,21 +2527,43 @@ p, .overview, .interpretation-text, .interpretation-details p,
     background: var(--bg-tertiary);
 }
 
+.autocomplete-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
 .autocomplete-item strong {
     color: var(--text-primary);
-    display: block;
-    margin-bottom: 4px;
+    font-size: 0.95rem;
 }
 
 .autocomplete-symbol {
     color: var(--accent-primary);
     font-weight: 600;
     margin-left: 8px;
+    font-size: 0.9rem;
 }
 
-.autocomplete-item small {
+.autocomplete-details {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 4px;
+    font-size: 0.85rem;
+}
+
+.autocomplete-price {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.autocomplete-marketcap {
+    color: var(--text-secondary);
+}
+
+.autocomplete-id {
     color: var(--text-tertiary);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     display: block;
     margin-top: 4px;
 }
@@ -2580,12 +2602,34 @@ p, .overview, .interpretation-text, .interpretation-details p,
     }
 
     .autocomplete-dropdown {
-        max-height: 200px;
+        max-height: 300px;
         font-size: 0.85rem;
     }
 
     .autocomplete-item {
-        padding: 10px 12px;
+        padding: 12px 14px;
+    }
+
+    .autocomplete-header {
+        flex-wrap: wrap;
+    }
+
+    .autocomplete-item strong {
+        font-size: 0.9rem;
+    }
+
+    .autocomplete-symbol {
+        font-size: 0.85rem;
+    }
+
+    .autocomplete-details {
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.8rem;
+    }
+
+    .autocomplete-id {
+        font-size: 0.65rem;
     }
 }
 
