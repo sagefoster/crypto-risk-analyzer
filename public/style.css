@@ -3425,7 +3425,7 @@ p, .overview, .interpretation-text, .interpretation-details p,
     
     /* Scroll prompt animation */
     .scroll-prompt {
-        position: absolute;
+        position: fixed;
         z-index: 9999;
         pointer-events: none;
         opacity: 0;

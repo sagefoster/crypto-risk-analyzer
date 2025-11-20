@@ -1901,8 +1901,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Position near token2 input (using fixed positioning relative to viewport)
         const token2Rect = token2Input.getBoundingClientRect();
-        scrollPrompt.style.top = `${token2Rect.bottom + window.scrollY + 20}px`;
-        scrollPrompt.style.left = `${token2Rect.left + window.scrollX}px`;
+        scrollPrompt.style.position = 'fixed';
+        scrollPrompt.style.top = `${token2Rect.bottom + 20}px`;
+        scrollPrompt.style.left = `${Math.max(20, token2Rect.left)}px`;
         
         document.body.appendChild(scrollPrompt);
         
