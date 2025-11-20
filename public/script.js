@@ -471,16 +471,22 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Random crypto button functionality
+    // Random crypto button functionality - cycles through list without repeating
+    // Ordered by typical historical returns (highest first): SOL, LINK, BNB, XRP, LTC, DOGE, TRX, ZEC
+    const randomCryptos = ['solana', 'chainlink', 'binancecoin', 'ripple', 'litecoin', 'dogecoin', 'tron', 'zcash'];
+    let randomCryptoIndex = 0; // Track current position in rotation
+    
     const randomCryptoBtn = document.getElementById('randomCryptoBtn');
     if (randomCryptoBtn) {
         randomCryptoBtn.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
             
-            // Random crypto options: DOGE, XRP, SOL, LINK, ZEC, BNB, TRX, LTC
-            const randomCryptos = ['dogecoin', 'ripple', 'solana', 'chainlink', 'zcash', 'binancecoin', 'tron', 'litecoin'];
-            const randomCrypto = randomCryptos[Math.floor(Math.random() * randomCryptos.length)];
+            // Get next crypto in rotation (cycles through list)
+            const randomCrypto = randomCryptos[randomCryptoIndex];
+            
+            // Move to next index, wrap around if at end
+            randomCryptoIndex = (randomCryptoIndex + 1) % randomCryptos.length;
             
             // Get the third input (token2)
             const token2Input = document.getElementById('token2');
@@ -1328,25 +1334,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             comparisonText += ', and superior risk-adjusted metrics (Sharpe & Sortino).</div>';
             winnerDiv.innerHTML += comparisonText;
         } else if (sortedTokens.length > 2) {
-            // Get other assets for comparison text
+            // Get other assets for comparison text - format as x/y/z/a
             const otherAssets = sortedTokens
                 .filter(t => t.id !== winner.id)
                 .map(t => t.id.toUpperCase());
             
-            let comparisonText = '';
-            if (otherAssets.length > 0) {
-                if (otherAssets.length === 1) {
-                    comparisonText = ` compared to ${otherAssets[0]}`;
-                } else if (otherAssets.length === 2) {
-                    comparisonText = ` compared to ${otherAssets[0]} and ${otherAssets[1]}`;
-                } else {
-                    const lastAsset = otherAssets[otherAssets.length - 1];
-                    const otherAssetsList = otherAssets.slice(0, -1).join(', ');
-                    comparisonText = ` compared to ${otherAssetsList}, and ${lastAsset}`;
-                }
-            }
+            // Format as "x/y/z/a" style
+            const assetsList = otherAssets.join('/');
             
-            winnerDiv.innerHTML += `<div class="winner-comparison">Outperforms ${sortedTokens.length - 1} other asset${sortedTokens.length - 1 > 1 ? 's' : ''} over the past ${timeframeText}${comparisonText} based on risk-adjusted return metrics.</div>`;
+            winnerDiv.innerHTML += `<div class="winner-comparison">Outperformed ${assetsList} over the past ${timeframeText} based on risk-adjusted return metrics.</div>`;
         }
 
         return winnerDiv;
