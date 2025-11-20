@@ -657,6 +657,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (token2Input) {
                 token2Input.value = randomCrypto;
                 
+                // Update default value styling
+                updateDefaultValueStyle(token2Input);
+                
+                // Trigger input event to update autocomplete and other listeners
+                const inputEvent = new Event('input', { bubbles: true });
+                token2Input.dispatchEvent(inputEvent);
+                
                 // Add a brief highlight animation
                 token2Input.style.animation = 'none';
                 setTimeout(() => {
