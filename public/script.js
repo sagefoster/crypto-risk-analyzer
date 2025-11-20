@@ -655,12 +655,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         
-        // Remove any existing listeners to avoid duplicates
-        const newBtn = randomCryptoBtn.cloneNode(true);
-        randomCryptoBtn.parentNode.replaceChild(newBtn, randomCryptoBtn);
-        const randomCryptoBtnClean = document.getElementById('randomCryptoBtn');
-        
-    if (randomCryptoBtnClean) {
+    if (randomCryptoBtn) {
         // Use a more robust click handler
         randomCryptoBtn.addEventListener('click', function(e) {
             e.preventDefault();
