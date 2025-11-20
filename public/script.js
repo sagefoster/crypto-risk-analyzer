@@ -1671,31 +1671,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         errorDiv.classList.remove('hidden');
     }
 
-    // Initialize with default example tokens
-    function initializeDefaultTokens() {
-        // Get first token input and set to bitcoin
-        const firstInput = document.getElementById('token0');
-        if (firstInput) {
-            firstInput.value = 'bitcoin';
-        }
-
-        // Add ethereum as second token (don't focus to prevent scroll)
-        addTokenInput(false);
-        const secondInput = document.getElementById('token1');
-        if (secondInput) {
-            secondInput.value = 'ethereum';
-        }
-
-        // Add zcash as third token (don't focus to prevent scroll)
-        addTokenInput(false);
-        const thirdInput = document.getElementById('token2');
-        if (thirdInput) {
-            thirdInput.value = 'zcash';
-        }
-    }
-
-    // Initialize defaults on page load
-    initializeDefaultTokens();
+    // Default tokens are already set in HTML (bitcoin, ethereum, blank)
+    // No need to initialize - HTML has the correct structure
 
     // Ensure page starts at the top - more robust approach
     // Immediate scroll
