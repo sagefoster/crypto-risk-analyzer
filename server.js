@@ -550,9 +550,12 @@ app.post('/api/analyze', async (req, res) => {
     const tokenValidationResults = await Promise.allSettled(
       tokenArray.map(async (tokenId) => {
         try {
+          console.log(`Validating token: ${tokenId}`);
           const response = await makeApiRequest(tokenId);
+          console.log(`Token ${tokenId} validated successfully`);
           return { tokenId, valid: true, data: response };
         } catch (error) {
+          console.error(`Token ${tokenId} validation failed:`, error.message);
           return { tokenId, valid: false, error: error.message || 'Unknown error' };
         }
       })
@@ -577,7 +580,7 @@ app.post('/api/analyze', async (req, res) => {
     if (invalidTokens.length > 0) {
       const invalidList = invalidTokens.map(t => `"${t.tokenId}" (${t.error})`).join(', ');
       return res.status(400).json({
-        error: `Invalid or unavailable token ID(s): ${invalidList}. Please check the token IDs and try again. Common IDs: "bitcoin", "ethereum", "cardano", etc.`,
+        error: `Invalid or unavailable token ID(s): ${invalidList}. Please check the token IDs and try again. Tip: Use the autocomplete feature (start typing) to find the correct token ID. Common IDs: "bitcoin", "ethereum", "usd-coin", "cardano", etc.`,
         invalidTokens: invalidTokens.map(t => t.tokenId)
       });
     }

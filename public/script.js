@@ -496,7 +496,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
 
             if (!response.ok) {
-                throw new Error(data.error || 'Analysis failed');
+                // Show detailed error message from server
+                const errorMsg = data.error || 'Analysis failed';
+                console.error('Server error:', errorMsg);
+                console.error('Response data:', data);
+                throw new Error(errorMsg);
             }
 
             // Clear message rotation
@@ -1670,6 +1674,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     function showError(message) {
         errorDiv.textContent = message;
         errorDiv.classList.remove('hidden');
+        errorDiv.style.display = 'block';
+        
+        // Scroll to error message so user can see it
+        setTimeout(() => {
+            errorDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
     }
 
     // Default tokens are already set in HTML (bitcoin, ethereum, blank)
