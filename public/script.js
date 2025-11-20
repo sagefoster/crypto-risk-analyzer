@@ -436,10 +436,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                     autocompleteDiv.style.maxWidth = `${viewportWidth - 24}px`;
                     autocompleteDiv.style.zIndex = '10000';
                 } else {
-                    autocompleteDiv.style.position = 'absolute';
-                    autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
-                    autocompleteDiv.style.left = `${inputRect.left}px`;
-                    autocompleteDiv.style.width = `${inputRect.width}px`;
+                    // Desktop: use absolute positioning relative to wrapper parent
+                    const wrapper = input.closest('.token-input-wrapper');
+                    const wrapperParent = wrapper ? wrapper.parentNode : null;
+                    
+                    if (wrapperParent) {
+                        const parentRect = wrapperParent.getBoundingClientRect();
+                        // Calculate position relative to parent container
+                        const relativeTop = inputRect.bottom - parentRect.top + 4;
+                        const relativeLeft = inputRect.left - parentRect.left;
+                        
+                        autocompleteDiv.style.position = 'absolute';
+                        autocompleteDiv.style.top = `${relativeTop}px`;
+                        autocompleteDiv.style.left = `${relativeLeft}px`;
+                        autocompleteDiv.style.width = `${inputRect.width}px`;
+                    } else {
+                        // Fallback to viewport positioning if parent not found
+                        autocompleteDiv.style.position = 'absolute';
+                        autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
+                        autocompleteDiv.style.left = `${inputRect.left}px`;
+                        autocompleteDiv.style.width = `${inputRect.width}px`;
+                    }
                 }
                 
                 const wrapper = input.closest('.token-input-wrapper');
@@ -583,11 +600,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 autocompleteDiv.style.maxHeight = `${maxHeight}px`;
                                 autocompleteDiv.style.zIndex = '10000';
                             } else {
-                                // Desktop: use absolute positioning
-                                autocompleteDiv.style.position = 'absolute';
-                                autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
-                                autocompleteDiv.style.left = `${inputRect.left}px`;
-                                autocompleteDiv.style.width = `${inputRect.width}px`;
+                                // Desktop: use absolute positioning relative to wrapper parent
+                                const wrapper = input.closest('.token-input-wrapper');
+                                const wrapperParent = wrapper ? wrapper.parentNode : null;
+                                
+                                if (wrapperParent) {
+                                    const parentRect = wrapperParent.getBoundingClientRect();
+                                    // Calculate position relative to parent container
+                                    const relativeTop = inputRect.bottom - parentRect.top + 4;
+                                    const relativeLeft = inputRect.left - parentRect.left;
+                                    
+                                    autocompleteDiv.style.position = 'absolute';
+                                    autocompleteDiv.style.top = `${relativeTop}px`;
+                                    autocompleteDiv.style.left = `${relativeLeft}px`;
+                                    autocompleteDiv.style.width = `${inputRect.width}px`;
+                                } else {
+                                    // Fallback to viewport positioning if parent not found
+                                    autocompleteDiv.style.position = 'absolute';
+                                    autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
+                                    autocompleteDiv.style.left = `${inputRect.left}px`;
+                                    autocompleteDiv.style.width = `${inputRect.width}px`;
+                                }
                             }
                         }
 
