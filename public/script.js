@@ -1321,52 +1321,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
         `;
         
-        // Add comparison text for multiple tokens
-        if (sortedTokens.length === 2) {
-            const second = sortedTokens[1];
-            const secondName = second.id.toUpperCase();
-            const secondReturn = (second.periodReturn * 100).toFixed(2);
-            const secondMDD = (second.maxDrawdown * 100).toFixed(2);
-            
-            const returnDiff = Math.abs(parseFloat(winnerReturn) - parseFloat(secondReturn)).toFixed(2);
-            const mddDiff = Math.abs(parseFloat(winnerMDD) - parseFloat(secondMDD)).toFixed(2);
-            
-            let comparisonText = `<div class="winner-comparison">Compared to ${secondName}: `;
-            
-            if (parseFloat(winnerReturn) > parseFloat(secondReturn)) {
-                comparisonText += `${returnDiff}% higher return, `;
-            } else if (parseFloat(winnerReturn) < parseFloat(secondReturn)) {
-                comparisonText += `${returnDiff}% lower return but `;
-            }
-            
-            if (parseFloat(winnerMDD) < parseFloat(secondMDD)) {
-                comparisonText += `${mddDiff}% smaller max drawdown`;
-            } else {
-                comparisonText += `${mddDiff}% larger max drawdown`;
-            }
-            
-            comparisonText += ', and superior risk-adjusted metrics (Sharpe & Sortino).</div>';
-            winnerDiv.innerHTML += comparisonText;
-        } else if (sortedTokens.length > 2) {
-            // Get other assets for comparison text - format as "x and y and z"
-            const otherAssets = sortedTokens
-                .filter(t => t.id !== winner.id)
-                .map(t => t.id.toUpperCase());
-            
-            // Format as "x and y and z" style
-            let assetsList = '';
-            if (otherAssets.length === 1) {
-                assetsList = otherAssets[0];
-            } else if (otherAssets.length === 2) {
-                assetsList = `${otherAssets[0]} and ${otherAssets[1]}`;
-            } else {
-                const lastAsset = otherAssets[otherAssets.length - 1];
-                const otherAssetsList = otherAssets.slice(0, -1).join(', ');
-                assetsList = `${otherAssetsList}, and ${lastAsset}`;
-            }
-            
-            winnerDiv.innerHTML += `<div class="winner-comparison">${winnerName} outperformed ${assetsList} over the past ${timeframeText} based on risk-adjusted return metrics.</div>`;
-        }
+        // Removed winner-comparison footer text as it repeats the header information
 
         return winnerDiv;
     }
@@ -1402,6 +1357,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     function createSummarySection(tokenResults, riskFreeRate, timeframeDays) {
         const summaryDiv = document.createElement('div');
         summaryDiv.className = 'summary-section';
+        summaryDiv.id = 'quickOverviewSection';
         
         const timeframeText = getTimeframeText(timeframeDays);
         
@@ -1482,6 +1438,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // Add highlight animation
                         targetCard.classList.add('highlighted');
                         setTimeout(() => targetCard.classList.remove('highlighted'), 2000);
+                        
+                        // Show floating scroll-up button
+                        showScrollUpButton();
                     }
                 };
                 
@@ -1922,6 +1881,52 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.scrollTo({ top: 0, behavior: 'instant' });
     }, 100);
 
+    // Floating scroll-up button functionality
+    let scrollUpButton = null;
+    
+    function showScrollUpButton() {
+        // Remove existing button if present
+        if (scrollUpButton) {
+            scrollUpButton.remove();
+        }
+        
+        // Create floating scroll-up button
+        scrollUpButton = document.createElement('button');
+        scrollUpButton.className = 'scroll-up-button';
+        scrollUpButton.innerHTML = '↑<br><span>Back to<br>Overview</span>';
+        scrollUpButton.setAttribute('aria-label', 'Scroll back to Quick Overview');
+        
+        // Add click handler
+        scrollUpButton.addEventListener('click', () => {
+            const quickOverview = document.getElementById('quickOverviewSection');
+            if (quickOverview) {
+                quickOverview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+            // Hide button after scrolling
+            setTimeout(() => {
+                if (scrollUpButton) {
+                    scrollUpButton.classList.add('fade-out');
+                    setTimeout(() => {
+                        if (scrollUpButton) {
+                            scrollUpButton.remove();
+                            scrollUpButton = null;
+                        }
+                    }, 300);
+                }
+            }, 500);
+        });
+        
+        // Add to body
+        document.body.appendChild(scrollUpButton);
+        
+        // Fade in animation
+        setTimeout(() => {
+            if (scrollUpButton) {
+                scrollUpButton.classList.add('visible');
+            }
+        }, 100);
+    }
+    
     // Make tooltip work on click/tap for mobile devices
     const tooltipElement = document.getElementById('riskFreeTooltip');
     const tooltipText = document.getElementById('tooltipText');

@@ -3349,6 +3349,80 @@ p, .overview, .interpretation-text, .interpretation-details p,
         font-size: 0.7rem;
     }
     
+    /* Floating scroll-up button */
+    .scroll-up-button {
+        position: fixed;
+        right: 20px;
+        bottom: 80px;
+        width: 60px;
+        height: 60px;
+        background: var(--accent-gradient);
+        border: none;
+        border-radius: 50%;
+        color: white;
+        font-size: 20px;
+        font-weight: 600;
+        cursor: pointer;
+        box-shadow: 
+            0 8px 24px rgba(102, 126, 234, 0.5),
+            0 0 20px rgba(88, 166, 255, 0.3),
+            0 4px 12px rgba(0, 0, 0, 0.3);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        transition: all 0.3s ease;
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+        line-height: 1.2;
+    }
+    
+    .scroll-up-button.visible {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+    
+    .scroll-up-button.fade-out {
+        opacity: 0;
+        transform: translateY(20px) scale(0.8);
+    }
+    
+    .scroll-up-button:hover {
+        transform: translateY(-4px) scale(1.05);
+        box-shadow: 
+            0 12px 32px rgba(102, 126, 234, 0.7),
+            0 0 30px rgba(88, 166, 255, 0.5),
+            0 6px 16px rgba(0, 0, 0, 0.4);
+        filter: brightness(1.1);
+    }
+    
+    .scroll-up-button:active {
+        transform: translateY(-2px) scale(0.98);
+    }
+    
+    .scroll-up-button span {
+        font-size: 9px;
+        font-weight: 500;
+        text-align: center;
+        line-height: 1.1;
+    }
+    
+    @media (max-width: 768px) {
+        .scroll-up-button {
+            right: 16px;
+            bottom: 70px;
+            width: 56px;
+            height: 56px;
+            font-size: 18px;
+        }
+        
+        .scroll-up-button span {
+            font-size: 8px;
+        }
+    }
+    
     /* Ensure footer is visible on mobile - prevent any hiding */
     .site-footer,
     .footer-section {
