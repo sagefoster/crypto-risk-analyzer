@@ -1353,10 +1353,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 .filter(t => t.id !== winner.id)
                 .map(t => t.id.toUpperCase());
             
-            // Format as "x/y/z/a" style
-            const assetsList = otherAssets.join('/');
+            // Format as "x and y and z" style
+            let assetsList = '';
+            if (otherAssets.length === 1) {
+                assetsList = otherAssets[0];
+            } else if (otherAssets.length === 2) {
+                assetsList = `${otherAssets[0]} and ${otherAssets[1]}`;
+            } else {
+                const lastAsset = otherAssets[otherAssets.length - 1];
+                const otherAssetsList = otherAssets.slice(0, -1).join(', ');
+                assetsList = `${otherAssetsList}, and ${lastAsset}`;
+            }
             
-            winnerDiv.innerHTML += `<div class="winner-comparison">Outperformed ${assetsList} over the past ${timeframeText} based on risk-adjusted return metrics.</div>`;
+            winnerDiv.innerHTML += `<div class="winner-comparison">${winnerName} outperformed ${assetsList} over the past ${timeframeText} based on risk-adjusted return metrics.</div>`;
         }
 
         return winnerDiv;
