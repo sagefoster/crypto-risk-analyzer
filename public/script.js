@@ -647,62 +647,84 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Get random crypto button once (will be used later for scroll prompt too)
     const randomCryptoBtn = document.getElementById('randomCryptoBtn');
     if (randomCryptoBtn) {
-        randomCryptoBtn.addEventListener('click', (e) => {
+        // Use a more robust click handler
+        randomCryptoBtn.addEventListener('click', function(e) {
             e.preventDefault();
             e.stopPropagation();
             
+            console.log('Random crypto button clicked'); // Debug log
+            
             // Get next crypto in rotation (cycles through list)
             const randomCrypto = randomCryptos[randomCryptoIndex];
+            console.log('Selected crypto:', randomCrypto); // Debug log
             
             // Move to next index, wrap around if at end
             randomCryptoIndex = (randomCryptoIndex + 1) % randomCryptos.length;
             
             // Get the third input (token2)
             const token2Input = document.getElementById('token2');
-            if (token2Input) {
-                // Close any existing autocomplete dropdowns first
-                const existingDropdown = document.querySelector('.autocomplete-dropdown');
-                if (existingDropdown) {
-                    existingDropdown.remove();
-                }
-                
-                // Set a flag to prevent autocomplete from triggering
-                token2Input.setAttribute('data-programmatic-set', 'true');
-                
-                // Set the value
-                token2Input.value = randomCrypto;
-                
-                // Update default value styling
-                updateDefaultValueStyle(token2Input);
-                
-                // Remove the flag after a short delay
-                setTimeout(() => {
-                    token2Input.removeAttribute('data-programmatic-set');
-                }, 100);
-                
-                // Trigger change event (but not input event to avoid autocomplete)
-                const changeEvent = new Event('change', { bubbles: true });
-                token2Input.dispatchEvent(changeEvent);
-                
-                // Add a brief highlight animation
-                token2Input.style.animation = 'none';
-                setTimeout(() => {
-                    token2Input.style.animation = 'highlightPulse 0.6s ease';
-                }, 10);
-                
-                // Focus the input
-                setTimeout(() => {
-                    token2Input.focus();
-                }, 100);
-                
-                // Check if scroll prompt should be shown after value is set
-                setTimeout(() => {
-                    if (!scrollPromptShown && checkAllInputsFilled()) {
-                        setTimeout(showScrollPrompt, 800);
-                    }
-                }, 200);
+            if (!token2Input) {
+                console.error('token2 input not found');
+                return;
             }
-        });
+            
+            console.log('Setting value to:', randomCrypto); // Debug log
+            
+            // Close any existing autocomplete dropdowns first
+            const existingDropdown = document.querySelector('.autocomplete-dropdown');
+            if (existingDropdown) {
+                existingDropdown.remove();
+            }
+            
+            // Set a flag to prevent autocomplete from triggering
+            token2Input.setAttribute('data-programmatic-set', 'true');
+            
+            // Set the value directly - use both value property and setAttribute for maximum compatibility
+            token2Input.value = randomCrypto;
+            token2Input.setAttribute('value', randomCrypto);
+            
+            // Force update the display
+            const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+            nativeInputValueSetter.call(token2Input, randomCrypto);
+            
+            // Trigger input event to ensure React/Vue frameworks see the change
+            const inputEvent = new Event('input', { bubbles: true, cancelable: true });
+            token2Input.dispatchEvent(inputEvent);
+            
+            // Update default value styling
+            updateDefaultValueStyle(token2Input);
+            
+            // Remove the flag after a short delay
+            setTimeout(() => {
+                token2Input.removeAttribute('data-programmatic-set');
+            }, 100);
+            
+            // Trigger change event
+            const changeEvent = new Event('change', { bubbles: true, cancelable: true });
+            token2Input.dispatchEvent(changeEvent);
+            
+            console.log('Value set, current value:', token2Input.value); // Debug log
+            
+            // Add a brief highlight animation
+            token2Input.style.animation = 'none';
+            setTimeout(() => {
+                token2Input.style.animation = 'highlightPulse 0.6s ease';
+            }, 10);
+            
+            // Focus the input
+            setTimeout(() => {
+                token2Input.focus();
+            }, 100);
+            
+            // Check if scroll prompt should be shown after value is set
+            setTimeout(() => {
+                if (!scrollPromptShown && checkAllInputsFilled()) {
+                    setTimeout(showScrollPrompt, 800);
+                }
+            }, 200);
+        }, { capture: true }); // Use capture phase to ensure it fires
+    } else {
+        console.error('randomCryptoBtn not found when trying to attach event listener');
     }
 
     // Setup autocomplete and clear buttons for existing inputs (including first input)
