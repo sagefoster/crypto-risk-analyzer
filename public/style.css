@@ -2321,6 +2321,30 @@ small {
     gap: 8px;
 }
 
+.price-range-line-current {
+    margin-bottom: 16px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid var(--border-color);
+    text-align: center;
+}
+
+.price-range-line-current .price-label {
+    display: block;
+    color: var(--text-tertiary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 6px;
+}
+
+.price-range-line-current .price-value-large {
+    display: block;
+    color: var(--accent-primary);
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
 .winner-price-range .price-label {
     color: var(--text-secondary);
     font-size: 0.9rem;
