@@ -1192,6 +1192,38 @@ small {
     cursor: not-allowed;
 }
 
+/* Analyze button glow when in view */
+.btn-primary.in-view {
+    animation: analyzeButtonGlow 2s ease-in-out infinite;
+    box-shadow: 
+        0 16px 48px rgba(102, 126, 234, 0.8),
+        0 0 50px rgba(88, 166, 255, 0.6),
+        0 0 80px rgba(88, 166, 255, 0.4),
+        0 8px 24px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    filter: brightness(1.15);
+    transform: translateY(-2px) scale(1.02);
+}
+
+@keyframes analyzeButtonGlow {
+    0%, 100% {
+        box-shadow: 
+            0 16px 48px rgba(102, 126, 234, 0.8),
+            0 0 50px rgba(88, 166, 255, 0.6),
+            0 0 80px rgba(88, 166, 255, 0.4),
+            0 8px 24px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+    50% {
+        box-shadow: 
+            0 20px 60px rgba(102, 126, 234, 1),
+            0 0 70px rgba(88, 166, 255, 0.8),
+            0 0 100px rgba(88, 166, 255, 0.6),
+            0 12px 32px rgba(0, 0, 0, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    }
+}
+
 /* Button Loading State */
 .btn-loading {
     width: 100%;
@@ -3493,11 +3525,12 @@ p, .overview, .interpretation-text, .interpretation-details p,
     .scroll-prompt {
         position: fixed;
         z-index: 9999;
-        pointer-events: none;
+        pointer-events: auto;
         opacity: 0;
         transform: translateY(-10px);
         transition: all 0.4s ease;
         max-width: 200px;
+        cursor: pointer;
     }
     
     .scroll-prompt.visible {
@@ -3521,6 +3554,19 @@ p, .overview, .interpretation-text, .interpretation-details p,
         font-weight: 600;
         font-size: 0.95rem;
         line-height: 1.4;
+        transition: all 0.3s ease;
+    }
+    
+    .scroll-prompt:hover .scroll-prompt-content {
+        transform: scale(1.05);
+        box-shadow: 
+            0 12px 32px rgba(102, 126, 234, 0.7),
+            0 0 30px rgba(88, 166, 255, 0.5),
+            0 6px 16px rgba(0, 0, 0, 0.4);
+    }
+    
+    .scroll-prompt:active .scroll-prompt-content {
+        transform: scale(0.98);
     }
     
     .scroll-prompt-icon {

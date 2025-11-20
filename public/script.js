@@ -2069,6 +2069,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             scrollPrompt.style.left = `${Math.max(20, (window.innerWidth - 220) / 2)}px`;
         }
         
+        // Make scroll prompt clickable - scroll to center analyze button
+        scrollPrompt.addEventListener('click', () => {
+            if (analyzeBtn) {
+                const analyzeBtnRect = analyzeBtn.getBoundingClientRect();
+                const scrollY = window.scrollY + analyzeBtnRect.top - (window.innerHeight / 2) + (analyzeBtnRect.height / 2);
+                
+                window.scrollTo({
+                    top: scrollY,
+                    behavior: 'smooth'
+                });
+                
+                // Hide prompt after clicking
+                scrollPrompt.classList.remove('visible');
+                setTimeout(() => {
+                    if (scrollPrompt.parentNode) {
+                        scrollPrompt.remove();
+                    }
+                }, 300);
+            }
+        });
+        
         document.body.appendChild(scrollPrompt);
         
         // Animate in
@@ -2132,6 +2153,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }, 200);
         });
+    }
+    
+    // Make analyze button glow when it's in view
+    if (analyzeBtn) {
+        const observerOptions = {
+            root: null,
+            rootMargin: '-20% 0px -20% 0px', // Trigger when button is in center 60% of viewport
+            threshold: 0.5
+        };
+        
+        const analyzeButtonObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    analyzeBtn.classList.add('in-view');
+                } else {
+                    analyzeBtn.classList.remove('in-view');
+                }
+            });
+        }, observerOptions);
+        
+        analyzeButtonObserver.observe(analyzeBtn);
     }
     
     // Default tokens are already set in HTML (bitcoin, ethereum, blank)
