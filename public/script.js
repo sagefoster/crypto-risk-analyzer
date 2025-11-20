@@ -1528,109 +1528,166 @@ document.addEventListener('DOMContentLoaded', async () => {
         interpretationsSection.appendChild(interpretationsTitle);
         
         tokenResults.forEach((tokenData, index) => {
-            const tokenName = tokenData.id.toUpperCase();
-            const annualizedReturnPct = (tokenData.annualizedReturn * 100).toFixed(2);
-            const volatilityPct = (tokenData.volatility * 100).toFixed(2);
-            const downsideVolPct = (tokenData.downsideVolatility * 100).toFixed(2);
+            try {
+                const tokenName = tokenData.id.toUpperCase();
+                const annualizedReturnPct = (tokenData.annualizedReturn * 100).toFixed(2);
+                const volatilityPct = (tokenData.volatility * 100).toFixed(2);
+                const downsideVolPct = (tokenData.downsideVolatility * 100).toFixed(2);
 
-            // Create expandable card for this asset
-            const assetCard = document.createElement('div');
-            assetCard.className = 'asset-interpretation-card';
-            assetCard.dataset.token = tokenData.id.toLowerCase();
-            
-            assetCard.innerHTML = `
-                <div class="asset-card-header" data-asset-index="${index}">
-                    <h4>${tokenName}</h4>
-                    <button class="expand-asset-btn">
-                        <span class="expand-text">Expand Analysis</span>
-                        <span class="expand-icon">▼</span>
-                    </button>
-                </div>
-                <div class="asset-card-content collapsed" id="assetContent${index}">
-                    <p class="interpretation-intro">Detailed written analysis for ${tokenName} over ${timeframeText}</p>
-                </div>
-            `;
+                // Create expandable card for this asset
+                const assetCard = document.createElement('div');
+                assetCard.className = 'asset-interpretation-card';
+                assetCard.dataset.token = tokenData.id.toLowerCase();
+                
+                assetCard.innerHTML = `
+                    <div class="asset-card-header" data-asset-index="${index}">
+                        <h4>${tokenName}</h4>
+                        <button class="expand-asset-btn">
+                            <span class="expand-text">Expand Analysis</span>
+                            <span class="expand-icon">▼</span>
+                        </button>
+                    </div>
+                    <div class="asset-card-content collapsed" id="assetContent${index}">
+                        <p class="interpretation-intro">Detailed written analysis for ${tokenName} over ${timeframeText}</p>
+                    </div>
+                `;
 
-            interpretationsSection.appendChild(assetCard);
+                interpretationsSection.appendChild(assetCard);
 
-            // Add interpretations to the content area
-            const contentArea = assetCard.querySelector(`#assetContent${index}`);
-            
-            // Return metrics interpretation
-            contentArea.appendChild(getReturnMetricsInterpretation(
-                tokenData.periodReturn,
-                tokenData.cagr,
-                tokenData.annualizedReturn,
-                tokenName,
-                timeframeText
-            ));
-            
-            // Volatility interpretation
-            contentArea.appendChild(getVolatilityInterpretation(
-                tokenData.volatility,
-                tokenName,
-                volatilityPct,
-                timeframeText
-            ));
-            
-            // Sharpe interpretation
-            contentArea.appendChild(getSharpeInterpretation(
-                tokenData.sharpeRatio,
-                tokenName,
-                annualizedReturnPct,
-                volatilityPct,
-                data.riskFreeRate,
-                timeframeText
-            ));
-            
-            // Maximum Drawdown interpretation
-            contentArea.appendChild(getMaxDrawdownInterpretation(
-                tokenData.maxDrawdown,
-                tokenName,
-                timeframeText
-            ));
-            
-            // Sortino interpretation
-            contentArea.appendChild(getSortinoInterpretation(
-                tokenData.sortinoRatio,
-                tokenName,
-                annualizedReturnPct,
-                downsideVolPct,
-                data.riskFreeRate,
-                tokenData.sharpeRatio,
-                timeframeText
-            ));
-            
-            // Calmar interpretation
-            contentArea.appendChild(getCalmarInterpretation(
-                tokenData.calmarRatio,
-                tokenName,
-                tokenData.annualizedReturn,
-                tokenData.maxDrawdown,
-                timeframeText
-            ));
-            
-            // Beta interpretation (if data available)
-            const isBitcoin = tokenData.id.toLowerCase() === 'bitcoin';
-            if ((tokenData.betaToSP500 !== null && tokenData.betaToSP500 !== undefined) || 
-                (tokenData.betaToBitcoin !== null && tokenData.betaToBitcoin !== undefined)) {
-                contentArea.appendChild(getBetaInterpretation(
-                    tokenData.betaToBitcoin,
-                    tokenData.betaToSP500,
-                    tokenName,
-                    isBitcoin,
-                    timeframeText
-                ));
+                // Add interpretations to the content area
+                const contentArea = assetCard.querySelector(`#assetContent${index}`);
+                
+                if (!contentArea) {
+                    console.error(`Content area not found for asset ${index}: ${tokenName}`);
+                    return;
+                }
+                
+                // Return metrics interpretation
+                try {
+                    contentArea.appendChild(getReturnMetricsInterpretation(
+                        tokenData.periodReturn,
+                        tokenData.cagr,
+                        tokenData.annualizedReturn,
+                        tokenName,
+                        timeframeText
+                    ));
+                } catch (e) {
+                    console.error(`Error adding return metrics for ${tokenName}:`, e);
+                }
+                
+                // Volatility interpretation
+                try {
+                    contentArea.appendChild(getVolatilityInterpretation(
+                        tokenData.volatility,
+                        tokenName,
+                        volatilityPct,
+                        timeframeText
+                    ));
+                } catch (e) {
+                    console.error(`Error adding volatility interpretation for ${tokenName}:`, e);
+                }
+                
+                // Sharpe interpretation
+                try {
+                    contentArea.appendChild(getSharpeInterpretation(
+                        tokenData.sharpeRatio,
+                        tokenName,
+                        annualizedReturnPct,
+                        volatilityPct,
+                        data.riskFreeRate,
+                        timeframeText
+                    ));
+                } catch (e) {
+                    console.error(`Error adding Sharpe interpretation for ${tokenName}:`, e);
+                }
+                
+                // Maximum Drawdown interpretation
+                try {
+                    contentArea.appendChild(getMaxDrawdownInterpretation(
+                        tokenData.maxDrawdown,
+                        tokenName,
+                        timeframeText
+                    ));
+                } catch (e) {
+                    console.error(`Error adding Max Drawdown interpretation for ${tokenName}:`, e);
+                }
+                
+                // Sortino interpretation
+                try {
+                    contentArea.appendChild(getSortinoInterpretation(
+                        tokenData.sortinoRatio,
+                        tokenName,
+                        annualizedReturnPct,
+                        downsideVolPct,
+                        data.riskFreeRate,
+                        tokenData.sharpeRatio,
+                        timeframeText
+                    ));
+                } catch (e) {
+                    console.error(`Error adding Sortino interpretation for ${tokenName}:`, e);
+                }
+                
+                // Calmar interpretation
+                try {
+                    contentArea.appendChild(getCalmarInterpretation(
+                        tokenData.calmarRatio,
+                        tokenName,
+                        tokenData.annualizedReturn,
+                        tokenData.maxDrawdown,
+                        timeframeText
+                    ));
+                } catch (e) {
+                    console.error(`Error adding Calmar interpretation for ${tokenName}:`, e);
+                }
+                
+                // Beta interpretation (if data available)
+                try {
+                    const isBitcoin = tokenData.id.toLowerCase() === 'bitcoin';
+                    if ((tokenData.betaToSP500 !== null && tokenData.betaToSP500 !== undefined) || 
+                        (tokenData.betaToBitcoin !== null && tokenData.betaToBitcoin !== undefined)) {
+                        contentArea.appendChild(getBetaInterpretation(
+                            tokenData.betaToBitcoin,
+                            tokenData.betaToSP500,
+                            tokenName,
+                            isBitcoin,
+                            timeframeText
+                        ));
+                    }
+                } catch (e) {
+                    console.error(`Error adding Beta interpretation for ${tokenName}:`, e);
+                }
+                
+                // Correlation interpretation (if data available)
+                try {
+                    if ((tokenData.correlationToSP500 !== null && tokenData.correlationToSP500 !== undefined) || 
+                        (tokenData.correlationToBitcoin !== null && tokenData.correlationToBitcoin !== undefined)) {
+                        contentArea.appendChild(getCorrelationInterpretation(
+                            tokenData.correlationToSP500,
+                            tokenData.correlationToBitcoin,
+                            tokenName,
+                            timeframeText
+                        ));
+                    }
+                } catch (e) {
+                    console.error(`Error adding Correlation interpretation for ${tokenName}:`, e);
+                }
+                
+                // Add click handler for expand/collapse
+                const headerBtn = assetCard.querySelector('.expand-asset-btn');
+                if (headerBtn) {
+                    headerBtn.addEventListener('click', () => {
+                        contentArea.classList.toggle('collapsed');
+                        const isCollapsed = contentArea.classList.contains('collapsed');
+                        const expandText = headerBtn.querySelector('.expand-text');
+                        const expandIcon = headerBtn.querySelector('.expand-icon');
+                        if (expandText) expandText.textContent = isCollapsed ? 'Expand Analysis' : 'Collapse Analysis';
+                        if (expandIcon) expandIcon.textContent = isCollapsed ? '▼' : '▲';
+                    });
+                }
+            } catch (error) {
+                console.error(`Error processing asset ${index} (${tokenData.id}):`, error);
+                // Continue processing other assets even if one fails
             }
-            
-            // Add click handler for expand/collapse
-            const headerBtn = assetCard.querySelector('.expand-asset-btn');
-            headerBtn.addEventListener('click', () => {
-                contentArea.classList.toggle('collapsed');
-                const isCollapsed = contentArea.classList.contains('collapsed');
-                headerBtn.querySelector('.expand-text').textContent = isCollapsed ? 'Expand Analysis' : 'Collapse Analysis';
-                headerBtn.querySelector('.expand-icon').textContent = isCollapsed ? '▼' : '▲';
-            });
         });
 
         detailedContent.appendChild(interpretationsSection);
