@@ -103,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <input type="text" class="token-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="bitcoin, BTC, ethereum, ETH" required>
                     <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                 </div>
-                <small>Name, ticker, or CoinGecko ID</small>
+                <small>Enter ticker symbol or token's name</small>
             </div>
         `;
         
