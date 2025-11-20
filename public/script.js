@@ -540,8 +540,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         });
 
                         // Position dropdown - mobile-first positioning with viewport awareness
-                        // Only reposition if not already positioned (from loading state)
-                        if (!autocompleteDiv.style.position || autocompleteDiv.style.position === 'static' || autocompleteDiv.style.position === '') {
+                        // Always recalculate position to ensure correct alignment
+                        {
                             const inputRect = input.getBoundingClientRect();
                             const viewportHeight = window.innerHeight;
                             const viewportWidth = window.innerWidth;
