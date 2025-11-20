@@ -376,6 +376,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         updateDefaultValueStyle(input);
 
         input.addEventListener('input', async (e) => {
+            // Skip autocomplete if value was set programmatically (e.g., by random crypto button)
+            if (e.target.getAttribute('data-programmatic-set') === 'true') {
+                return;
+            }
+            
             const query = e.target.value.trim().toLowerCase();
             
             // Update default value styling
@@ -655,16 +660,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Get the third input (token2)
             const token2Input = document.getElementById('token2');
             if (token2Input) {
+                // Close any existing autocomplete dropdowns first
+                const existingDropdown = document.querySelector('.autocomplete-dropdown');
+                if (existingDropdown) {
+                    existingDropdown.remove();
+                }
+                
+                // Set a flag to prevent autocomplete from triggering
+                token2Input.setAttribute('data-programmatic-set', 'true');
+                
+                // Set the value
                 token2Input.value = randomCrypto;
                 
                 // Update default value styling
                 updateDefaultValueStyle(token2Input);
                 
-                // Trigger input event to update autocomplete and other listeners
-                const inputEvent = new Event('input', { bubbles: true });
-                token2Input.dispatchEvent(inputEvent);
+                // Remove the flag after a short delay
+                setTimeout(() => {
+                    token2Input.removeAttribute('data-programmatic-set');
+                }, 100);
                 
-                // Trigger change event as well
+                // Trigger change event (but not input event to avoid autocomplete)
                 const changeEvent = new Event('change', { bubbles: true });
                 token2Input.dispatchEvent(changeEvent);
                 
