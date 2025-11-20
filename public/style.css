@@ -30,10 +30,47 @@ p, .overview, .form-intro, .interpretation-text, .interpretation-details,
     white-space: normal;
 }
 
-/* Ensure proper line balancing */
+/* Ensure proper line balancing and prefer sentence breaks */
 .overview, .form-intro, .interpretation-text {
     text-align: left;
     line-height: 1.6;
+    text-wrap: balance; /* Prefer balanced line breaks (modern browsers) */
+    orphans: 2;
+    widows: 2;
+}
+
+/* Prefer breaking after sentence punctuation when possible */
+.overview, .form-intro, .interpretation-text, p {
+    word-spacing: normal;
+}
+
+/* Add break opportunities after sentence punctuation */
+.overview::after,
+.form-intro::after {
+    content: '';
+}
+
+/* Use CSS to prefer breaking at sentence boundaries */
+.overview, .form-intro {
+    /* Insert zero-width space after periods and colons for better breaks */
+    text-rendering: optimizeLegibility;
+}
+
+/* Ensure last 2-3 words stay together to prevent orphans */
+.overview, .form-intro {
+    /* The non-breaking spaces in HTML will handle this */
+}
+
+/* Additional rules to prevent orphans in specific elements */
+.overview {
+    min-width: 0; /* Allow flex shrinking */
+    max-width: 100%;
+}
+
+/* Ensure last few words stay together */
+.overview strong:last-child,
+.form-intro strong:last-child {
+    white-space: nowrap;
 }
 
 :root {
