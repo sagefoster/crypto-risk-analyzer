@@ -635,7 +635,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             ${tokenResults.map(t => `<td class="metric-value">${(t.annualizedReturn * 100).toFixed(2)}%</td>`).join('')}
                         </tr>
                         <tr>
-                            ${createMetricNameCell('Volatility', 'volatility')}
+                            ${createMetricNameCell('Volatility (standard deviation)', 'volatility')}
                             ${tokenResults.map(t => `<td class="metric-value">${(t.volatility * 100).toFixed(2)}%</td>`).join('')}
                         </tr>
                         <tr>
@@ -1202,68 +1202,68 @@ document.addEventListener('DOMContentLoaded', async () => {
             periodReturn: {
                 title: 'Period Return',
                 content: val ? 
-                    `Total return from start to end of the period. ${valPct} means if you invested $100 at the start, you'd have $${(100 * (1 + valNum/100)).toFixed(2)} at the end. This is the actual price change you experienced.` :
-                    `Total return from start to end of the period. If you invested $100 at the start, this shows what you'd have at the end. This is the actual price change you experienced.`
+                    `Total return from start to end of the period. ${valPct} means if you invested $100 at the start, you'd have $${(100 * (1 + valNum/100)).toFixed(2)} at the end. This is the actual price change you experienced. <strong>Example:</strong> SPY (S&P 500 ETF) typically has 8-12% annual returns over long periods.` :
+                    `Total return from start to end of the period. If you invested $100 at the start, this shows what you'd have at the end. This is the actual price change you experienced. <strong>Example:</strong> SPY (S&P 500 ETF) typically has 8-12% annual returns over long periods.`
             },
             annualizedReturn: {
                 title: 'Annualized Return',
                 content: val ? 
-                    `The arithmetic mean of daily returns multiplied by 252 trading days: ${valPct}. Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag. See detailed analysis for full explanation.` :
-                    `The arithmetic mean of daily returns multiplied by 252 trading days. Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag.`
+                    `The arithmetic mean of daily returns multiplied by 252 trading days: ${valPct}. Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag. See detailed analysis for full explanation. <strong>Example:</strong> SPY's annualized return is typically 8-12% over long periods, though actual returns vary year-to-year.` :
+                    `The arithmetic mean of daily returns multiplied by 252 trading days. Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag. <strong>Example:</strong> SPY's annualized return is typically 8-12% over long periods, though actual returns vary year-to-year.`
             },
             volatility: {
                 title: 'Volatility (Standard Deviation)',
                 content: val ? 
-                    `Measures price consistency. ${valPct} annualized volatility means daily returns typically vary by this much from the average. Higher = more price swings and risk. About 68% of returns fall within ±${valPct} in a typical year.` :
-                    `Measures price consistency. Annualized volatility shows how much daily returns typically vary from the average. Higher = more price swings and risk.`
+                    `Measures price consistency. ${valPct} annualized volatility means daily returns typically vary by this much from the average. Higher = more price swings and risk. About 68% of returns fall within ±${valPct} in a typical year. <strong>Example:</strong> SPY typically has 15-20% annual volatility, while individual stocks can range from 20-40%.` :
+                    `Measures price consistency. Annualized volatility shows how much daily returns typically vary from the average. Higher = more price swings and risk. <strong>Example:</strong> SPY typically has 15-20% annual volatility, while individual stocks can range from 20-40%.`
             },
             maxDrawdown: {
                 title: 'Maximum Drawdown',
                 content: val ? 
-                    `Largest peak-to-trough decline: ${valPct}. If you bought at the absolute worst time (the peak), this is how much you'd have lost at the lowest point before any recovery. Shows worst-case scenario risk.` :
-                    `Largest peak-to-trough decline. If you bought at the absolute worst time (the peak), this shows how much you'd have lost at the lowest point before any recovery. Shows worst-case scenario risk.`
+                    `Largest peak-to-trough decline: ${valPct}. If you bought at the absolute worst time (the peak), this is how much you'd have lost at the lowest point before any recovery. Shows worst-case scenario risk. <strong>Example:</strong> SPY's worst drawdown was ~50% during the 2008 financial crisis. Tech stocks often see 60-80% drawdowns.` :
+                    `Largest peak-to-trough decline. If you bought at the absolute worst time (the peak), this shows how much you'd have lost at the lowest point before any recovery. Shows worst-case scenario risk. <strong>Example:</strong> SPY's worst drawdown was ~50% during the 2008 financial crisis. Tech stocks often see 60-80% drawdowns.`
             },
             sharpe: {
                 title: 'Sharpe Ratio',
                 content: val ? 
-                    `Risk-adjusted return metric: ${val}. Calculated as (Return - Risk-Free Rate) ÷ Volatility. Higher is better. >1 = good, >2 = very good, >3 = excellent. Measures return per unit of total risk.` :
-                    `Risk-adjusted return metric. Calculated as (Return - Risk-Free Rate) ÷ Volatility. Higher is better. >1 = good, >2 = very good, >3 = excellent. Measures return per unit of total risk.`
+                    `Risk-adjusted return metric: ${val}. Calculated as (Return - Risk-Free Rate) ÷ Volatility. Higher is better. >1 = good, >2 = very good, >3 = excellent. Measures return per unit of total risk. <strong>Example:</strong> SPY typically has a Sharpe ratio of 0.5-1.0. Hedge funds aim for >1.5.` :
+                    `Risk-adjusted return metric. Calculated as (Return - Risk-Free Rate) ÷ Volatility. Higher is better. >1 = good, >2 = very good, >3 = excellent. Measures return per unit of total risk. <strong>Example:</strong> SPY typically has a Sharpe ratio of 0.5-1.0. Hedge funds aim for >1.5.`
             },
             sortino: {
                 title: 'Sortino Ratio',
                 content: val ? 
-                    `Like Sharpe but only penalizes downside volatility: ${val}. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains).` :
-                    `Like Sharpe but only penalizes downside volatility. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains).`
+                    `Like Sharpe but only penalizes downside volatility: ${val}. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains). <strong>Example:</strong> SPY's Sortino ratio is typically 0.8-1.2, higher than its Sharpe ratio since it doesn't penalize upside volatility.` :
+                    `Like Sharpe but only penalizes downside volatility. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains). <strong>Example:</strong> SPY's Sortino ratio is typically 0.8-1.2, higher than its Sharpe ratio since it doesn't penalize upside volatility.`
             },
             calmar: {
                 title: 'Calmar Ratio',
                 content: val ? 
-                    `Return-to-drawdown metric: ${val}. Calculated as Annualized Return ÷ |Max Drawdown|. Higher is better. Shows how much return you get per unit of worst-case loss. Popular for hedge funds and trend-following strategies. >3 = excellent, >1 = good.` :
-                    `Return-to-drawdown metric. Calculated as Annualized Return ÷ |Max Drawdown|. Higher is better. Shows how much return you get per unit of worst-case loss. Popular for hedge funds and trend-following strategies. >3 = excellent, >1 = good.`
+                    `Return-to-drawdown metric: ${val}. Calculated as Annualized Return ÷ |Max Drawdown|. Higher is better. Shows how much return you get per unit of worst-case loss. Popular for hedge funds and trend-following strategies. >3 = excellent, >1 = good. <strong>Example:</strong> SPY's Calmar ratio is typically 0.2-0.4 over long periods. Successful hedge funds often achieve >1.0.` :
+                    `Return-to-drawdown metric. Calculated as Annualized Return ÷ |Max Drawdown|. Higher is better. Shows how much return you get per unit of worst-case loss. Popular for hedge funds and trend-following strategies. >3 = excellent, >1 = good. <strong>Example:</strong> SPY's Calmar ratio is typically 0.2-0.4 over long periods. Successful hedge funds often achieve >1.0.`
             },
             betaSP500: {
                 title: 'Beta to S&P 500',
                 content: val ? 
-                    `Measures sensitivity to S&P 500 movements: ${val}. Beta=1 means moves with market, >1 = more volatile than market, <1 = less volatile. Important: Beta assumes diversification. Single crypto assets are NOT diversified, so interpret cautiously. Best for portfolios.` :
-                    `Measures sensitivity to S&P 500 movements. Beta=1 means moves with market, >1 = more volatile than market, <1 = less volatile. Important: Beta assumes diversification. Single crypto assets are NOT diversified, so interpret cautiously.`
+                    `Measures sensitivity to S&P 500 movements: ${val}. Beta=1 means moves with market, >1 = more volatile than market, <1 = less volatile. Important: Beta assumes diversification. Single crypto assets are NOT diversified, so interpret cautiously. Best for portfolios. <strong>Example:</strong> SPY itself has Beta=1.0. Tech stocks often have Beta 1.2-1.5. Utilities typically have Beta 0.5-0.7.` :
+                    `Measures sensitivity to S&P 500 movements. Beta=1 means moves with market, >1 = more volatile than market, <1 = less volatile. Important: Beta assumes diversification. Single crypto assets are NOT diversified, so interpret cautiously. <strong>Example:</strong> SPY itself has Beta=1.0. Tech stocks often have Beta 1.2-1.5. Utilities typically have Beta 0.5-0.7.`
             },
             betaBTC: {
                 title: 'Beta to Bitcoin',
                 content: val ? 
-                    `Measures sensitivity to Bitcoin movements: ${val}. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics.` :
-                    `Measures sensitivity to Bitcoin movements. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead.`
+                    `Measures sensitivity to Bitcoin movements: ${val}. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics. <strong>Example:</strong> Similar to how tech stocks have Beta >1 to SPY, altcoins often have Beta >1 to Bitcoin.` :
+                    `Measures sensitivity to Bitcoin movements. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics. <strong>Example:</strong> Similar to how tech stocks have Beta >1 to SPY, altcoins often have Beta >1 to Bitcoin.`
             },
             correlationSP500: {
                 title: 'Correlation to S&P 500',
                 content: val ? 
-                    `Measures how closely this asset moves with the S&P 500 stock index. Range: -1 to +1. Current value: ${val}. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification potential.` :
-                    `Measures how closely this asset moves with the S&P 500 stock index. Range: -1 to +1. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification potential.`
+                    `Measures how closely this asset moves with the S&P 500 stock index. Range: -1 to +1. Current value: ${val}. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification potential. <strong>Example:</strong> SPY has correlation 1.0 to itself. Tech stocks typically 0.7-0.9 to SPY. Gold often 0.0-0.3 (low correlation).` :
+                    `Measures how closely this asset moves with the S&P 500 stock index. Range: -1 to +1. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification potential. <strong>Example:</strong> SPY has correlation 1.0 to itself. Tech stocks typically 0.7-0.9 to SPY. Gold often 0.0-0.3 (low correlation).`
             },
             correlationBTC: {
                 title: 'Correlation to Bitcoin',
                 content: val ? 
-                    `Measures how closely this asset moves with Bitcoin. Range: -1 to +1. Current value: ${val}. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification within crypto.` :
-                    `Measures how closely this asset moves with Bitcoin. Range: -1 to +1. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification within crypto.`
+                    `Measures how closely this asset moves with Bitcoin. Range: -1 to +1. Current value: ${val}. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification within crypto. <strong>Example:</strong> Similar to how different sectors have varying correlations to SPY, crypto assets have different correlations to Bitcoin.` :
+                    `Measures how closely this asset moves with Bitcoin. Range: -1 to +1. +1 = perfect positive correlation (moves together), 0 = no relationship, -1 = perfect negative correlation (moves opposite). Lower correlation = better diversification within crypto. <strong>Example:</strong> Similar to how different sectors have varying correlations to SPY, crypto assets have different correlations to Bitcoin.`
             }
         };
 
