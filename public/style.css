@@ -2313,7 +2313,8 @@ small {
 
 .winner-price-range .price-range-line-1,
 .winner-price-range .price-range-line-2,
-.winner-price-range .price-range-line-3 {
+.winner-price-range .price-range-line-3,
+.winner-price-range .price-range-line-current {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -3661,10 +3662,10 @@ p, .overview, .interpretation-text, .interpretation-details p,
     
     @keyframes scrollPromptBounce {
         0%, 100% {
-            transform: translateY(0);
+            transform: translateY(-50%) translateX(0);
         }
         50% {
-            transform: translateY(-8px);
+            transform: translateY(-50%) translateX(-8px);
         }
     }
     
