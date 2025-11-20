@@ -3543,11 +3543,11 @@ p, .overview, .interpretation-text, .interpretation-details p,
         line-height: 1.2;
     }
     
-    /* Desktop: ensure button stays on right side */
+    /* Desktop: ensure button stays on right side with proper spacing */
     @media (min-width: 769px) {
         .scroll-up-button {
-            right: 20px;
-            bottom: 80px;
+            right: 24px;
+            bottom: 24px;
         }
     }
     
