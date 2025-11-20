@@ -38,8 +38,15 @@ p, .overview, .form-intro, .interpretation-text, .interpretation-details,
     widows: 2;
 }
 
-/* Left-align overview and form-intro for better readability */
-.overview, .form-intro {
+/* Center overview for professional balanced look */
+.overview {
+    text-align: center;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Left-align form-intro for better readability */
+.form-intro {
     text-align: left;
 }
 
@@ -453,22 +460,21 @@ header h1 {
     }
 }
 
-/* Info Card Styles */
-.info-card {
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
-    border: 1px solid rgba(102, 126, 234, 0.2);
-    border-radius: 12px;
-    padding: 18px 20px;
-    margin-bottom: 20px;
-    text-align: left;
+/* Info Card Styles - minimal, no box - override .card styles */
+.card.info-card {
+    background: transparent !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: -8px 0 24px 0 !important;
+    text-align: center !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
 }
 
 /* Mobile: adjust info-card */
 @media (max-width: 768px) {
-    .info-card {
-        padding: 12px 14px;
-        margin-bottom: 16px;
-        border-radius: 10px;
+    .card.info-card {
+        margin: -4px 0 20px 0 !important;
     }
 }
 
@@ -482,23 +488,28 @@ header h1 {
 
 .overview {
     color: var(--text-secondary);
-    line-height: 1.6;
+    line-height: 1.7;
     margin: 0;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     word-break: normal;
     overflow-wrap: break-word;
     orphans: 2;
     widows: 2;
-    text-align: left;
+    text-align: center;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Mobile: adjust overview */
 @media (max-width: 768px) {
     .overview {
         font-size: 0.85rem;
-        line-height: 1.5;
-        margin: 0;
+        line-height: 1.6;
+        margin: 0 auto;
         padding: 0;
+        text-align: center;
+        max-width: 100%;
     }
 }
 
@@ -701,26 +712,10 @@ header h1 {
     animation: slideIn 0.3s ease;
 }
 
-/* Optional input group (Digital Asset 3) - more appealing */
+/* Optional input group (Digital Asset 3) - subtle animation only */
 .token-input-group-optional {
     position: relative;
-    padding: 16px;
-    background: linear-gradient(135deg, rgba(88, 166, 255, 0.05), rgba(102, 126, 234, 0.05));
-    border: 2px solid rgba(88, 166, 255, 0.3);
-    border-radius: 12px;
-    animation: gentlePulse 3s ease-in-out infinite, slideIn 0.3s ease;
-    margin-bottom: 20px;
-}
-
-@keyframes gentlePulse {
-    0%, 100% {
-        border-color: rgba(88, 166, 255, 0.3);
-        box-shadow: 0 0 0 0 rgba(88, 166, 255, 0.2);
-    }
-    50% {
-        border-color: rgba(88, 166, 255, 0.5);
-        box-shadow: 0 0 0 4px rgba(88, 166, 255, 0.1);
-    }
+    animation: slideIn 0.3s ease;
 }
 
 .token-input-wrapper-optional {
@@ -728,15 +723,26 @@ header h1 {
 }
 
 .token-input-optional {
-    border: 2px solid rgba(88, 166, 255, 0.4) !important;
-    background: rgba(88, 166, 255, 0.03) !important;
+    border: 1px solid var(--border-color) !important;
+    background: var(--bg-secondary) !important;
     transition: all 0.3s ease;
+    animation: subtleInputPulse 3s ease-in-out infinite;
+}
+
+@keyframes subtleInputPulse {
+    0%, 100% {
+        border-color: var(--border-color);
+    }
+    50% {
+        border-color: rgba(88, 166, 255, 0.4);
+    }
 }
 
 .token-input-optional:focus {
     border-color: var(--accent-primary) !important;
-    background: rgba(88, 166, 255, 0.08) !important;
-    box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.2) !important;
+    background: var(--bg-secondary) !important;
+    box-shadow: 0 0 0 2px rgba(88, 166, 255, 0.2) !important;
+    animation: none; /* Stop pulse on focus */
 }
 
 /* Random crypto button */
@@ -799,8 +805,7 @@ header h1 {
 /* Mobile adjustments for optional input */
 @media (max-width: 768px) {
     .token-input-group-optional {
-        padding: 14px;
-        margin-bottom: 18px;
+        margin-bottom: 16px;
     }
     
     .btn-random-crypto {
