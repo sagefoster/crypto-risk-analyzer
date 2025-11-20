@@ -6,27 +6,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Function to completely remove loader and show main content
     function removeLoaderAndShowContent() {
+        console.log('Removing loader...');
+        
+        // Show main content first
+        if (mainContent) {
+            mainContent.style.opacity = '1';
+            mainContent.style.visibility = 'visible';
+            mainContent.style.display = 'block';
+            mainContent.style.zIndex = '1';
+        }
+        
         // Remove loader completely from DOM
         if (initialLoader) {
+            // Set all hiding styles
             initialLoader.style.display = 'none';
             initialLoader.style.visibility = 'hidden';
             initialLoader.style.opacity = '0';
             initialLoader.style.pointerEvents = 'none';
             initialLoader.style.zIndex = '-1';
             initialLoader.classList.add('hidden');
-            // Remove from DOM after animation
-            setTimeout(() => {
-                if (initialLoader && initialLoader.parentNode) {
-                    initialLoader.remove();
-                }
-            }, 500);
-        }
-        
-        // Show main content
-        if (mainContent) {
-            mainContent.style.opacity = '1';
-            mainContent.style.visibility = 'visible';
-            mainContent.style.zIndex = '1';
+            
+            // Force remove from DOM immediately
+            if (initialLoader.parentNode) {
+                initialLoader.remove();
+            }
         }
         
         // Scroll to top and then to inputs
@@ -44,6 +47,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         initialLoader.style.display = 'flex';
         initialLoader.classList.remove('hidden');
         initialLoader.style.zIndex = '10000';
+        initialLoader.style.visibility = 'visible';
+        initialLoader.style.opacity = '1';
     }
     
     // Hide main content initially
@@ -52,47 +57,145 @@ document.addEventListener('DOMContentLoaded', async () => {
         mainContent.style.visibility = 'hidden';
     }
     
-    // Hide enter button initially
+    // Hide enter button initially with inline styles to override CSS
     if (enterButton) {
         enterButton.classList.add('hidden');
+        enterButton.style.display = 'none';
+        enterButton.style.opacity = '0';
+        enterButton.style.visibility = 'hidden';
+        enterButton.style.pointerEvents = 'none';
     }
     
-    // Simulate loading progress
+    // Simulate loading progress - complete in 2 seconds
     const progressBar = document.querySelector('.loader-progress-bar');
+    let progressComplete = false;
+    let progressInterval = null;
+    
+    const showEnterButton = () => {
+        if (enterButton && !progressComplete) {
+            progressComplete = true;
+            console.log('Showing enter button...');
+            
+            // Remove hidden class
+            enterButton.classList.remove('hidden');
+            
+            // Force show with inline styles to override CSS !important
+            enterButton.style.display = 'block';
+            enterButton.style.opacity = '1';
+            enterButton.style.visibility = 'visible';
+            enterButton.style.pointerEvents = 'auto';
+            enterButton.style.zIndex = '10001';
+            
+            // Ensure button is centered
+            enterButton.style.marginLeft = 'auto';
+            enterButton.style.marginRight = 'auto';
+            enterButton.style.marginTop = '40px';
+            
+            // Add animation class if needed
+            enterButton.style.animation = 'enterButtonAppear 0.6s ease forwards';
+        }
+    };
+    
+    // Animate progress bar with error handling
     if (progressBar) {
         let progress = 0;
-        const interval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress > 100) {
-                progress = 100;
-                clearInterval(interval);
+        const targetProgress = 100;
+        const duration = 2000; // 2 seconds
+        const intervalTime = 50; // Update every 50ms
+        const increment = (targetProgress / duration) * intervalTime;
+        
+        try {
+            progressInterval = setInterval(() => {
+                progress += increment;
+                if (progress >= targetProgress) {
+                    progress = targetProgress;
+                    clearInterval(progressInterval);
+                    progressBar.style.width = '100%';
+                    console.log('Progress bar complete');
+                    // Show enter button when progress completes
+                    showEnterButton();
+                } else {
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, intervalTime);
+        } catch (error) {
+            console.error('Error animating progress bar:', error);
+            // Fallback: show button immediately on error
+            if (progressBar) {
                 progressBar.style.width = '100%';
-                
-                // Show enter button after progress completes
-                setTimeout(() => {
-                    if (enterButton) {
-                        enterButton.classList.remove('hidden');
-                        enterButton.style.display = 'block';
-                    }
-                }, 300);
-            } else {
-                progressBar.style.width = `${progress}%`;
             }
-        }, 100);
+            showEnterButton();
+        }
     } else {
-        // Fallback: show enter button after 2 seconds
+        console.warn('Progress bar element not found');
+        // If progress bar doesn't exist, show button after short delay
         setTimeout(() => {
+            showEnterButton();
+        }, 500);
+    }
+    
+    // Multiple fallback mechanisms to ensure button shows
+    // Fallback 1: After 2.2 seconds
+    setTimeout(() => {
+        if (!progressComplete) {
+            console.log('Fallback 1: Showing enter button after 2.2s');
+            if (progressBar) {
+                progressBar.style.width = '100%';
+            }
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+            showEnterButton();
+        }
+    }, 2200);
+    
+    // Fallback 2: After 3 seconds (ultimate fallback)
+    setTimeout(() => {
+        if (!progressComplete || enterButton.classList.contains('hidden')) {
+            console.log('Fallback 2: Force showing enter button after 3s');
+            if (progressBar) {
+                progressBar.style.width = '100%';
+            }
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+            // Force show regardless of progressComplete flag
             if (enterButton) {
                 enterButton.classList.remove('hidden');
                 enterButton.style.display = 'block';
+                enterButton.style.opacity = '1';
+                enterButton.style.visibility = 'visible';
+                enterButton.style.pointerEvents = 'auto';
+                enterButton.style.zIndex = '10001';
+                // Ensure button is centered
+                enterButton.style.marginLeft = 'auto';
+                enterButton.style.marginRight = 'auto';
+                enterButton.style.marginTop = '40px';
             }
-        }, 2000);
-    }
+        }
+    }, 3000);
     
     // Enter button click handler
     if (enterButton) {
         enterButton.addEventListener('click', () => {
             removeLoaderAndShowContent();
+        });
+    }
+    
+    // Keyboard support: Enter key to dismiss loader
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && initialLoader && !initialLoader.classList.contains('hidden')) {
+            removeLoaderAndShowContent();
+        }
+    });
+    
+    // Click outside loader to dismiss (backup)
+    if (initialLoader) {
+        initialLoader.addEventListener('click', (e) => {
+            // Only dismiss if clicking on the loader background, not on content
+            if (e.target === initialLoader) {
+                removeLoaderAndShowContent();
+            }
         });
     }
     
@@ -517,6 +620,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const randomCryptos = ['solana', 'zcash', 'monero', 'litecoin', 'dogecoin', 'tron', 'chainlink', 'internet-computer', 'fetch-ai', 'uniswap'];
     let randomCryptoIndex = 0; // Track current position in rotation
     
+    // Get random crypto button once (will be used later for scroll prompt too)
     const randomCryptoBtn = document.getElementById('randomCryptoBtn');
     if (randomCryptoBtn) {
         randomCryptoBtn.addEventListener('click', (e) => {
@@ -2019,8 +2123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     setupScrollPromptListener(document.getElementById('token1'));
     setupScrollPromptListener(document.getElementById('token2'));
     
-    // Also check when random crypto button is clicked
-    const randomCryptoBtn = document.getElementById('randomCryptoBtn');
+    // Also check when random crypto button is clicked (reuse the same button reference)
     if (randomCryptoBtn) {
         randomCryptoBtn.addEventListener('click', () => {
             setTimeout(() => {
