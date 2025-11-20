@@ -616,8 +616,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Random crypto button functionality - cycles through list without repeating
-    // Ordered list: SOL, ZEC, XMR, LTC, DOGE, TRX, LINK, ICP, FET, UNI
-    const randomCryptos = ['solana', 'zcash', 'monero', 'litecoin', 'dogecoin', 'tron', 'chainlink', 'internet-computer', 'fetch-ai', 'uniswap'];
+    // Ordered by 1-year returns (best first): XRP, SOL, LINK, UNI, ICP, FET, TRX, LTC, DOGE, ZEC, XMR
+    const randomCryptos = ['ripple', 'solana', 'chainlink', 'uniswap', 'internet-computer', 'fetch-ai', 'tron', 'litecoin', 'dogecoin', 'zcash', 'monero'];
     let randomCryptoIndex = 0; // Track current position in rotation
     
     // Get random crypto button once (will be used later for scroll prompt too)
