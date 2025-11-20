@@ -69,6 +69,8 @@ body::before {
     margin: 0 auto;
     overflow-x: hidden;
     width: 100%;
+    padding-bottom: 20px;
+    min-height: 100vh;
 }
 
 header {
@@ -2453,12 +2455,38 @@ p, .overview, .interpretation-text, .interpretation-details p,
     }
 }
 
+/* Disclosure Section */
+.disclosure-section {
+    margin-top: 60px;
+    padding: 24px 20px;
+    background: rgba(255, 193, 7, 0.08);
+    border-top: 2px solid rgba(255, 193, 7, 0.3);
+    border-bottom: 1px solid var(--border-color);
+}
+
+.disclosure-text {
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: left;
+}
+
+.disclosure-text strong {
+    color: var(--warning);
+    font-weight: 600;
+}
+
 /* Site Footer */
 .site-footer {
-    margin-top: 60px;
-    padding: 30px 20px;
+    margin-top: 0;
+    padding: 30px 20px 40px;
     border-top: 1px solid var(--border-color);
     text-align: center;
+    position: relative;
+    z-index: 1;
+    background: var(--bg-primary);
 }
 
 .footer-text {
@@ -2471,15 +2499,34 @@ p, .overview, .interpretation-text, .interpretation-details p,
 }
 
 @media (max-width: 768px) {
-    .site-footer {
+    .disclosure-section {
         margin-top: 40px;
         padding: 20px 16px;
+    }
+    
+    .disclosure-text {
+        font-size: 0.7rem;
+        line-height: 1.5;
+    }
+    
+    .site-footer {
+        margin-top: 0;
+        padding: 24px 16px 40px;
+        min-height: auto;
     }
     
     .footer-text {
         font-size: 0.7rem;
         line-height: 1.5;
         text-align: left;
+    }
+    
+    /* Ensure footer is visible on mobile - prevent any hiding */
+    .site-footer,
+    .disclosure-section {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
     }
 }
 
