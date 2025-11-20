@@ -98,11 +98,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const assetNumber = tokenIndex + 1; // Display number (1-indexed)
         tokenGroup.innerHTML = `
             <div class="form-group">
-                <label for="token${tokenIndex}">Digital Asset ${assetNumber} <span class="info-icon-small" data-tooltip="Enter asset name, ticker (BTC), or CoinGecko ID. Autocomplete available.">ⓘ</span></label>
+                <label for="token${tokenIndex}">Digital Asset ${assetNumber} <span class="info-icon-small" data-tooltip="Autocomplete available as you type">ⓘ</span></label>
                 <div class="token-input-wrapper">
                     <input type="text" class="token-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="bitcoin, BTC, ethereum, ETH" required>
                     <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                 </div>
+                <small>Name, ticker, or CoinGecko ID</small>
             </div>
         `;
         
@@ -1230,6 +1231,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         let summaryHTML = `
             <h3 class="summary-title">Quick Overview</h3>
+            <p class="overview-context">Analysis period: <strong>${timeframeText}</strong> | Risk-free rate: ${riskFreeRate.toFixed(2)}%</p>
             <p class="tap-hint">💡 Tap any card for details</p>
             <div class="summary-cards">
         `;
