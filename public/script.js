@@ -62,11 +62,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         tokenIndex++;
         updateRemoveButtons();
         
+        // Setup autocomplete for new input
+        const newInput = tokenGroup.querySelector('.token-input');
+        if (newInput) {
+            setupAutocomplete(newInput);
+        }
+
         // Focus the newly created input to keep keyboard open on mobile (only when user clicks add button)
         // Use setTimeout to ensure DOM is fully updated
         if (shouldFocus) {
             setTimeout(() => {
-                const newInput = tokenGroup.querySelector('.token-input');
                 if (newInput) {
                     newInput.focus();
                 }
@@ -115,6 +120,132 @@ document.addEventListener('DOMContentLoaded', async () => {
         return tokens;
     }
 
+    // Function to validate tokens before analysis
+    async function validateTokens(tokens) {
+        try {
+            const response = await fetch('/api/validate-tokens', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ tokens })
+            });
+
+            const data = await response.json();
+            
+            if (!response.ok) {
+                throw new Error(data.error || 'Validation failed');
+            }
+
+            const invalidTokens = data.results.filter(r => !r.valid);
+            if (invalidTokens.length > 0) {
+                const invalidList = invalidTokens.map(t => `"${t.tokenId}"`).join(', ');
+                const errors = invalidTokens.map(t => t.error || 'Invalid token').join(', ');
+                throw new Error(`Invalid token ID(s): ${invalidList}. ${errors}`);
+            }
+
+            return true;
+        } catch (error) {
+            throw error;
+        }
+    }
+
+    // Autocomplete functionality for token inputs
+    function setupAutocomplete(input) {
+        let autocompleteDiv = null;
+        let searchTimeout = null;
+
+        input.addEventListener('input', async (e) => {
+            const query = e.target.value.trim().toLowerCase();
+            
+            // Clear existing autocomplete
+            if (autocompleteDiv) {
+                autocompleteDiv.remove();
+                autocompleteDiv = null;
+            }
+
+            // Clear timeout
+            if (searchTimeout) {
+                clearTimeout(searchTimeout);
+            }
+
+            // Don't search if query is too short or empty
+            if (query.length < 2) {
+                return;
+            }
+
+            // Debounce search
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const response = await fetch(`/api/search-tokens?query=${encodeURIComponent(query)}`);
+                    const data = await response.json();
+
+                    if (data.results && data.results.length > 0) {
+                        // Create autocomplete dropdown
+                        autocompleteDiv = document.createElement('div');
+                        autocompleteDiv.className = 'autocomplete-dropdown';
+                        
+                        data.results.slice(0, 8).forEach(coin => {
+                            const item = document.createElement('div');
+                            item.className = 'autocomplete-item';
+                            item.innerHTML = `
+                                <strong>${coin.name}</strong> <span class="autocomplete-symbol">${coin.symbol}</span>
+                                <small>ID: ${coin.id}</small>
+                            `;
+                            item.addEventListener('click', () => {
+                                input.value = coin.id;
+                                if (autocompleteDiv) {
+                                    autocompleteDiv.remove();
+                                    autocompleteDiv = null;
+                                }
+                                input.focus();
+                            });
+                            autocompleteDiv.appendChild(item);
+                        });
+
+                        // Position dropdown
+                        const inputRect = input.getBoundingClientRect();
+                        autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
+                        autocompleteDiv.style.left = `${inputRect.left}px`;
+                        autocompleteDiv.style.width = `${inputRect.width}px`;
+
+                        // Insert after input wrapper
+                        const wrapper = input.closest('.token-input-wrapper');
+                        wrapper.parentNode.insertBefore(autocompleteDiv, wrapper.nextSibling);
+
+                        // Close on outside click
+                        setTimeout(() => {
+                            document.addEventListener('click', function closeAutocomplete(e) {
+                                if (!autocompleteDiv.contains(e.target) && e.target !== input) {
+                                    autocompleteDiv.remove();
+                                    autocompleteDiv = null;
+                                    document.removeEventListener('click', closeAutocomplete);
+                                }
+                            });
+                        }, 100);
+                    }
+                } catch (error) {
+                    console.error('Autocomplete error:', error);
+                }
+            }, 300);
+        });
+
+        // Remove autocomplete when input loses focus (after a delay to allow clicks)
+        input.addEventListener('blur', () => {
+            setTimeout(() => {
+                if (autocompleteDiv) {
+                    autocompleteDiv.remove();
+                    autocompleteDiv = null;
+                }
+            }, 200);
+        });
+    }
+
+    // Setup autocomplete for existing inputs
+    document.querySelectorAll('.token-input').forEach(input => {
+        setupAutocomplete(input);
+    });
+
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
         
@@ -135,36 +266,40 @@ document.addEventListener('DOMContentLoaded', async () => {
             showError('Please enter at least one token ID');
             return;
         }
-        
-        // Hide button, show loading state
+
+        // Validate tokens before analysis
         const btnLoading = document.getElementById('btnLoading');
         const loadingDetails = document.getElementById('loadingDetails');
         analyzeBtn.classList.add('hidden');
         analyzeBtn.style.display = 'none';
         btnLoading.classList.remove('hidden');
-        btnLoading.style.display = ''; // Remove inline style to use CSS
-        
-        // Loading messages to rotate through
-        const loadingMessages = [
-            'Fetching price data from CoinGecko...',
-            'Retrieving S&P 500 data...',
-            'Calculating daily returns...',
-            'Computing volatility metrics...',
-            'Analyzing risk-adjusted ratios...',
-            'Calculating maximum drawdown...',
-            'Computing correlation & beta...',
-            'Finalizing analysis...'
-        ];
-        
-        let messageIndex = 0;
-        const messageInterval = setInterval(() => {
-            messageIndex = (messageIndex + 1) % loadingMessages.length;
-            loadingDetails.textContent = loadingMessages[messageIndex];
-        }, 1500);
-
-        const timeframe = document.getElementById('timeframe').value;
+        btnLoading.style.display = '';
+        loadingDetails.textContent = 'Validating token IDs...';
 
         try {
+            // Validate tokens first
+            await validateTokens(tokens);
+            
+            // Loading messages to rotate through
+            const loadingMessages = [
+                'Fetching price data from CoinGecko...',
+                'Retrieving S&P 500 data...',
+                'Calculating daily returns...',
+                'Computing volatility metrics...',
+                'Analyzing risk-adjusted ratios...',
+                'Calculating maximum drawdown...',
+                'Computing correlation & beta...',
+                'Finalizing analysis...'
+            ];
+            
+            let messageIndex = 0;
+            let messageInterval = setInterval(() => {
+                messageIndex = (messageIndex + 1) % loadingMessages.length;
+                loadingDetails.textContent = loadingMessages[messageIndex];
+            }, 1500);
+
+            const timeframe = document.getElementById('timeframe').value;
+
             const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: {
@@ -183,13 +318,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Clear message rotation
-            clearInterval(messageInterval);
+            if (messageInterval) {
+                clearInterval(messageInterval);
+            }
             
             // Display results
             displayResults(data);
             
         } catch (error) {
-            clearInterval(messageInterval);
+            if (typeof messageInterval !== 'undefined' && messageInterval) {
+                clearInterval(messageInterval);
+            }
             console.error('Error:', error);
             showError(error.message || 'An error occurred while analyzing the tokens. Please check your API key and token IDs.');
         } finally {
@@ -222,7 +361,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             interpretation = `High volatility. ${tokenName}'s ${volatilityPct}% standard deviation over ${timeframeText} indicates significant price swings. Daily returns varied widely from the average, meaning prices could move dramatically up or down in short periods.`;
             interpretationClass = 'warning';
         } else {
-            interpretation = `Extreme volatility. With a standard deviation of ${volatilityPct}% over ${timeframeText}, ${tokenName} experienced severe price fluctuations. This level of volatility means prices regularly moved far from the average—expect large gains or losses.`;
+            interpretation = `Extreme volatility. With a standard deviation of ${volatilityPct}% over ${timeframeText}, ${tokenName} experienced severe price fluctuations. This level of volatility means prices regularly moved far from the average - expect large gains or losses.`;
             interpretationClass = 'poor';
         }
         
@@ -275,10 +414,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             metricsHTML = `
                 <p><strong>Period Return: ${periodReturnPct}%</strong><br>
-                This is your actual return—what really happened to your investment from start to end over ${timeframeText}.</p>
+                This is your actual return-what really happened to your investment from start to end over ${timeframeText}.</p>
                 
                 <p><strong>Annualized Return (Arithmetic): ${annualizedReturnPct}%</strong><br>
-                The average daily return × 252 trading days. Used in Sharpe/Sortino calculations. ${hasMeaningfulDifference ? `Differs from Period Return due to <em>volatility drag</em>—when prices swing daily, the arithmetic average doesn't match the geometric result.` : 'Similar to Period Return for this low-volatility period.'}</p>
+                The average daily return × 252 trading days. Used in Sharpe/Sortino calculations. ${hasMeaningfulDifference ? `Differs from Period Return due to <em>volatility drag</em>-when prices swing daily, the arithmetic average doesn't match the geometric result.` : 'Similar to Period Return for this low-volatility period.'}</p>
             `;
         } else {
             // For multi-year periods: Show all three metrics
@@ -287,10 +426,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 Your total return from start to end over ${timeframeText}.</p>
                 
                 <p><strong>CAGR: ${cagrPct}%</strong><br>
-                Compound Annual Growth Rate—the smoothed yearly return if growth was consistent. Formula: ((Ending ÷ Starting)^(1 ÷ Years)) - 1</p>
+                Compound Annual Growth Rate-the smoothed yearly return if growth was consistent. Formula: ((Ending ÷ Starting)^(1 ÷ Years)) - 1</p>
                 
                 <p><strong>Annualized Return (Arithmetic): ${annualizedReturnPct}%</strong><br>
-                Average daily return × 252 trading days. Used in Sharpe/Sortino ratios. This arithmetic mean differs from CAGR's geometric calculation—higher volatility creates a bigger gap.</p>
+                Average daily return × 252 trading days. Used in Sharpe/Sortino ratios. This arithmetic mean differs from CAGR's geometric calculation-higher volatility creates a bigger gap.</p>
             `;
         }
         
@@ -414,7 +553,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             interpretation = `Calmar Ratio cannot be calculated due to zero or near-zero maximum drawdown. This means ${tokenName} had no significant peak-to-trough decline during ${timeframeText}, which is unusual for crypto assets.`;
             interpretationClass = 'moderate';
         } else if (calmarRatio > 3) {
-            interpretation = `Excellent risk-adjusted returns. ${tokenName}'s Calmar Ratio of ${calmarRatio.toFixed(3)} over ${timeframeText} is exceptional. This means you're getting ${calmarRatio.toFixed(2)}x return for every 1% of maximum drawdown—a highly efficient return profile.`;
+            interpretation = `Excellent risk-adjusted returns. ${tokenName}'s Calmar Ratio of ${calmarRatio.toFixed(3)} over ${timeframeText} is exceptional. This means you're getting ${calmarRatio.toFixed(2)}x return for every 1% of maximum drawdown-a highly efficient return profile.`;
             interpretationClass = 'excellent';
         } else if (calmarRatio > 1) {
             interpretation = `Good risk-adjusted returns. With a Calmar Ratio of ${calmarRatio.toFixed(3)} over ${timeframeText}, ${tokenName} delivers solid returns relative to its worst drawdown. You're earning more in returns than you risk losing in drawdowns.`;
@@ -423,7 +562,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             interpretation = `Modest risk-adjusted returns. ${tokenName}'s Calmar Ratio of ${calmarRatio.toFixed(3)} over ${timeframeText} indicates that drawdown risk is high relative to returns. Returns aren't fully compensating for worst-case losses.`;
             interpretationClass = 'moderate';
         } else {
-            interpretation = `Negative Calmar Ratio. ${tokenName} had negative returns (${annRetPct}%) with a ${mddPct}% max drawdown over ${timeframeText}. This represents poor performance—losses combined with significant drawdown risk.`;
+            interpretation = `Negative Calmar Ratio. ${tokenName} had negative returns (${annRetPct}%) with a ${mddPct}% max drawdown over ${timeframeText}. This represents poor performance-losses combined with significant drawdown risk.`;
             interpretationClass = 'poor';
         }
         
@@ -481,9 +620,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <li><strong>Beta ≈ 0:</strong> No relationship to benchmark</li>
                     <li><strong>Beta < 0:</strong> Moves opposite to benchmark (rare)</li>
                 </ul>
-                ${betaToBTC !== null ? `<p><strong>Bitcoin Beta (${betaToBTC.toFixed(3)}):</strong> ${betaToBTC > 1.2 ? `${tokenName} is more volatile than Bitcoin—when BTC moves 1%, ${tokenName} tends to move ${betaToBTC.toFixed(1)}%.` : betaToBTC < 0.8 ? `${tokenName} is less volatile than Bitcoin—provides some diversification benefit within crypto.` : `${tokenName} moves closely with Bitcoin—limited diversification benefit.`}</p>` : ''}
-                ${betaToSP500 !== null ? `<p><strong>S&P 500 Beta (${betaToSP500.toFixed(3)}):</strong> ${betaToSP500 > 1 ? `Higher volatility than traditional stocks—crypto-specific risks dominate.` : betaToSP500 < 0.5 ? `Low correlation to traditional markets—potential portfolio diversifier.` : `Moderate correlation to traditional markets.`}</p>` : ''}
-                <p class="context-note"><strong>⚠️ Important Caveat:</strong> Beta assumes the asset is part of a <em>diversified portfolio</em>. Individual crypto assets are NOT diversified—they have idiosyncratic (asset-specific) risks that Beta doesn't capture. Use Beta cautiously for single assets. It's most useful for understanding relative movements, not absolute risk.</p>
+                ${betaToBTC !== null ? `<p><strong>Bitcoin Beta (${betaToBTC.toFixed(3)}):</strong> ${betaToBTC > 1.2 ? `${tokenName} is more volatile than Bitcoin-when BTC moves 1%, ${tokenName} tends to move ${betaToBTC.toFixed(1)}%.` : betaToBTC < 0.8 ? `${tokenName} is less volatile than Bitcoin-provides some diversification benefit within crypto.` : `${tokenName} moves closely with Bitcoin-limited diversification benefit.`}</p>` : ''}
+                ${betaToSP500 !== null ? `<p><strong>S&P 500 Beta (${betaToSP500.toFixed(3)}):</strong> ${betaToSP500 > 1 ? `Higher volatility than traditional stocks-crypto-specific risks dominate.` : betaToSP500 < 0.5 ? `Low correlation to traditional markets-potential portfolio diversifier.` : `Moderate correlation to traditional markets.`}</p>` : ''}
+                <p class="context-note"><strong>⚠️ Important Caveat:</strong> Beta assumes the asset is part of a <em>diversified portfolio</em>. Individual crypto assets are NOT diversified-they have idiosyncratic (asset-specific) risks that Beta doesn't capture. Use Beta cautiously for single assets. It's most useful for understanding relative movements, not absolute risk.</p>
             </div>
             <div class="interpretation-separator"></div>
         `;
@@ -547,16 +686,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             let sp500Class = '';
             
             if (Math.abs(corrValue) < 0.3) {
-                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> — Moves independently from stocks. Great diversification.`;
+                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> - Moves independently from stocks. Great diversification.`;
                 sp500Class = 'excellent';
             } else if (Math.abs(corrValue) < 0.5) {
-                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> — Some relationship with stocks. Good diversification.`;
+                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> - Some relationship with stocks. Good diversification.`;
                 sp500Class = 'good';
             } else if (Math.abs(corrValue) < 0.7) {
-                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> — Tends to move with stocks. Limited diversification.`;
+                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> - Tends to move with stocks. Limited diversification.`;
                 sp500Class = 'moderate';
             } else {
-                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> — Moves closely with stocks. Minimal diversification.`;
+                sp500Text = `<strong>${corrValue.toFixed(2)}</strong> - Moves closely with stocks. Minimal diversification.`;
                 sp500Class = 'poor';
             }
             
@@ -570,16 +709,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             let btcClass = '';
             
             if (Math.abs(corrValue) < 0.3) {
-                btcText = `<strong>${corrValue.toFixed(2)}</strong> — Independent from Bitcoin. Unique price drivers.`;
+                btcText = `<strong>${corrValue.toFixed(2)}</strong> - Independent from Bitcoin. Unique price drivers.`;
                 btcClass = 'excellent';
             } else if (Math.abs(corrValue) < 0.5) {
-                btcText = `<strong>${corrValue.toFixed(2)}</strong> — Some Bitcoin influence. Maintains independence.`;
+                btcText = `<strong>${corrValue.toFixed(2)}</strong> - Some Bitcoin influence. Maintains independence.`;
                 btcClass = 'good';
             } else if (Math.abs(corrValue) < 0.7) {
-                btcText = `<strong>${corrValue.toFixed(2)}</strong> — Follows Bitcoin trends closely.`;
+                btcText = `<strong>${corrValue.toFixed(2)}</strong> - Follows Bitcoin trends closely.`;
                 btcClass = 'moderate';
             } else {
-                btcText = `<strong>${corrValue.toFixed(2)}</strong> — Highly dependent on Bitcoin price action.`;
+                btcText = `<strong>${corrValue.toFixed(2)}</strong> - Highly dependent on Bitcoin price action.`;
                 btcClass = 'poor';
             }
             

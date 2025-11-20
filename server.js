@@ -546,11 +546,45 @@ app.post('/api/analyze', async (req, res) => {
       }
     };
 
-    // Fetch data for all tokens and S&P 500 in parallel
-    const [sp500Data, ...tokenDataArray] = await Promise.all([
-      fetchSP500Data(),
-      ...tokenArray.map(tokenId => makeApiRequest(tokenId))
-    ]);
+    // Validate all tokens before fetching data
+    const tokenValidationResults = await Promise.allSettled(
+      tokenArray.map(async (tokenId) => {
+        try {
+          const response = await makeApiRequest(tokenId);
+          return { tokenId, valid: true, data: response };
+        } catch (error) {
+          return { tokenId, valid: false, error: error.message || 'Unknown error' };
+        }
+      })
+    );
+
+    // Check for invalid tokens
+    const invalidTokens = [];
+    const validTokenData = [];
+    
+    tokenValidationResults.forEach((result, index) => {
+      if (result.status === 'fulfilled' && result.value.valid) {
+        validTokenData.push(result.value.data);
+      } else {
+        const tokenId = tokenArray[index];
+        const errorMsg = result.status === 'fulfilled' 
+          ? result.value.error 
+          : result.reason?.message || 'Failed to fetch data';
+        invalidTokens.push({ tokenId, error: errorMsg });
+      }
+    });
+
+    if (invalidTokens.length > 0) {
+      const invalidList = invalidTokens.map(t => `"${t.tokenId}" (${t.error})`).join(', ');
+      return res.status(400).json({
+        error: `Invalid or unavailable token ID(s): ${invalidList}. Please check the token IDs and try again. Common IDs: "bitcoin", "ethereum", "cardano", etc.`,
+        invalidTokens: invalidTokens.map(t => t.tokenId)
+      });
+    }
+
+    // Fetch S&P 500 data
+    const sp500Data = await fetchSP500Data();
+    const tokenDataArray = validTokenData;
 
     // Extract Bitcoin prices for correlation (if Bitcoin is in the list)
     const bitcoinIndex = tokenArray.findIndex(id => id.toLowerCase() === 'bitcoin');
@@ -691,7 +725,7 @@ app.post('/api/analyze', async (req, res) => {
       } else if (status === 429) {
         errorMessage = 'Rate limit exceeded. Please wait a moment and try again.';
       } else if (status === 404) {
-        errorMessage = 'Token not found. Please check the token IDs (e.g., "bitcoin", "ethereum").';
+        errorMessage = 'One or more tokens not found. Please check the token IDs (e.g., "bitcoin", "ethereum").';
       } else {
         errorMessage = error.response.data?.error || error.response.data?.message || 'API request failed';
       }
@@ -722,6 +756,156 @@ app.get('/api/config', (req, res) => {
   res.json({
     hasApiKey: !!process.env.COINGECKO_API_KEY
   });
+});
+
+// Endpoint to validate token IDs and search for tokens
+app.post('/api/validate-tokens', async (req, res) => {
+  try {
+    const { tokens, apiKey } = req.body;
+    const effectiveApiKey = apiKey || process.env.COINGECKO_API_KEY;
+
+    if (!effectiveApiKey) {
+      return res.status(400).json({ error: 'API key required' });
+    }
+
+    if (!tokens || !Array.isArray(tokens) || tokens.length === 0) {
+      return res.status(400).json({ error: 'Tokens array required' });
+    }
+
+    const makeApiRequest = async (tokenId) => {
+      try {
+        const response = await axios.get(`https://pro-api.coingecko.com/api/v3/coins/${tokenId}`, {
+          params: {
+            x_cg_pro_api_key: effectiveApiKey
+          },
+          headers: {
+            'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+            'Accept': 'application/json'
+          },
+          validateStatus: (status) => status < 500
+        });
+
+        if (response.data && response.data.error_code === 10011) {
+          // Try demo API
+          const demoResponse = await axios.get(`https://api.coingecko.com/api/v3/coins/${tokenId}`, {
+            params: {
+              x_cg_demo_api_key: effectiveApiKey
+            },
+            headers: {
+              'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+              'Accept': 'application/json'
+            }
+          });
+          return { valid: true, name: demoResponse.data.name, symbol: demoResponse.data.symbol };
+        }
+
+        if (response.status === 200 && response.data.id) {
+          return { valid: true, name: response.data.name, symbol: response.data.symbol };
+        }
+        throw new Error('Invalid response');
+      } catch (error) {
+        if (error.response && error.response.status === 404) {
+          return { valid: false, error: 'Token not found' };
+        }
+        // Try demo API as fallback
+        try {
+          const demoResponse = await axios.get(`https://api.coingecko.com/api/v3/coins/${tokenId}`, {
+            params: {
+              x_cg_demo_api_key: effectiveApiKey
+            },
+            headers: {
+              'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+              'Accept': 'application/json'
+            }
+          });
+          return { valid: true, name: demoResponse.data.name, symbol: demoResponse.data.symbol };
+        } catch (demoError) {
+          return { valid: false, error: demoError.response?.status === 404 ? 'Token not found' : 'API error' };
+        }
+      }
+    };
+
+    const results = await Promise.all(
+      tokens.map(async (tokenId) => {
+        const result = await makeApiRequest(tokenId);
+        return { tokenId, ...result };
+      })
+    );
+
+    res.json({ results });
+  } catch (error) {
+    res.status(500).json({ error: 'Validation failed', details: error.message });
+  }
+});
+
+// Endpoint to search for tokens (for autocomplete)
+app.get('/api/search-tokens', async (req, res) => {
+  try {
+    const { query } = req.query;
+    const apiKey = process.env.COINGECKO_API_KEY;
+
+    if (!apiKey) {
+      return res.status(400).json({ error: 'API key required' });
+    }
+
+    if (!query || query.length < 2) {
+      return res.json({ results: [] });
+    }
+
+    try {
+      const response = await axios.get(`https://pro-api.coingecko.com/api/v3/search`, {
+        params: {
+          query: query,
+          x_cg_pro_api_key: apiKey
+        },
+        headers: {
+          'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+          'Accept': 'application/json'
+        },
+        validateStatus: (status) => status < 500
+      });
+
+      if (response.data && response.data.error_code === 10011) {
+        // Try demo API
+        const demoResponse = await axios.get(`https://api.coingecko.com/api/v3/search`, {
+          params: {
+            query: query,
+            x_cg_demo_api_key: apiKey
+          },
+          headers: {
+            'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+            'Accept': 'application/json'
+          }
+        });
+        return res.json({ results: demoResponse.data.coins?.slice(0, 10) || [] });
+      }
+
+      if (response.status === 200 && response.data.coins) {
+        return res.json({ results: response.data.coins.slice(0, 10) });
+      }
+    } catch (error) {
+      // Try demo API as fallback
+      try {
+        const demoResponse = await axios.get(`https://api.coingecko.com/api/v3/search`, {
+          params: {
+            query: query,
+            x_cg_demo_api_key: apiKey
+          },
+          headers: {
+            'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+            'Accept': 'application/json'
+          }
+        });
+        return res.json({ results: demoResponse.data.coins?.slice(0, 10) || [] });
+      } catch (demoError) {
+        return res.status(500).json({ error: 'Search failed', details: demoError.message });
+      }
+    }
+
+    res.json({ results: [] });
+  } catch (error) {
+    res.status(500).json({ error: 'Search failed', details: error.message });
+  }
 });
 
 // Serve frontend
