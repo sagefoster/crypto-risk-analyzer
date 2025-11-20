@@ -3120,35 +3120,23 @@ p, .overview, .interpretation-text, .interpretation-details p,
     background: var(--bg-primary);
 }
 
-/* Disclosure Section (inside footer) */
-.site-footer .disclosure-section {
-    margin-top: 0;
-    padding: 20px 18px;
-    background: rgba(255, 193, 7, 0.08);
-    border-bottom: 1px solid var(--border-color);
-}
-
-.disclosure-text {
-    font-size: 0.75rem;
-    line-height: 1.6;
-    color: var(--text-secondary);
-    max-width: 900px;
-    margin: 0 auto;
-    text-align: left;
-}
-
-.disclosure-text strong {
-    color: var(--warning);
-    font-weight: 600;
-}
-
-.footer-about {
+/* Footer Sections (Disclaimer and About) */
+.footer-section {
     max-width: 800px;
     margin: 0 auto;
     padding: 24px 20px 16px;
+    border-bottom: 1px solid var(--border-color);
 }
 
-.footer-about-title {
+.footer-section:first-child {
+    padding-top: 24px;
+}
+
+.footer-section:last-of-type {
+    border-bottom: none;
+}
+
+.footer-section-title {
     font-size: 0.85rem;
     font-weight: 600;
     color: var(--text-primary);
@@ -3300,20 +3288,11 @@ p, .overview, .interpretation-text, .interpretation-details p,
         margin-top: 40px;
     }
     
-    .site-footer .disclosure-section {
-        padding: 18px 14px;
-    }
-    
-    .disclosure-text {
-        font-size: 0.7rem;
-        line-height: 1.5;
-    }
-    
-    .footer-about {
+    .footer-section {
         padding: 20px 14px 12px;
     }
     
-    .footer-about-title {
+    .footer-section-title {
         font-size: 0.8rem;
         margin-bottom: 10px;
     }
@@ -3335,7 +3314,7 @@ p, .overview, .interpretation-text, .interpretation-details p,
     
     /* Ensure footer is visible on mobile - prevent any hiding */
     .site-footer,
-    .site-footer .disclosure-section {
+    .footer-section {
         display: block !important;
         visibility: visible !important;
         opacity: 1 !important;
