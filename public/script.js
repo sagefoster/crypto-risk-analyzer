@@ -472,8 +472,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Random crypto button functionality - cycles through list without repeating
-    // Ordered by typical historical returns (highest first): SOL, LINK, BNB, XRP, LTC, DOGE, TRX, ZEC
-    const randomCryptos = ['solana', 'chainlink', 'binancecoin', 'ripple', 'litecoin', 'dogecoin', 'tron', 'zcash'];
+    // Ordered list: SOL, ZEC, XMR, LTC, DOGE, TRX, LINK, ICP, FET, UNI
+    const randomCryptos = ['solana', 'zcash', 'monero', 'litecoin', 'dogecoin', 'tron', 'chainlink', 'internet-computer', 'fetch-ai', 'uniswap'];
     let randomCryptoIndex = 0; // Track current position in rotation
     
     const randomCryptoBtn = document.getElementById('randomCryptoBtn');
@@ -566,14 +566,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
+        // Add exciting click feedback animation
+        analyzeBtn.style.animation = 'analyzeClick 0.6s ease';
+        analyzeBtn.style.transform = 'scale(1.05)';
+        
+        // Reset animation after it completes
+        setTimeout(() => {
+            analyzeBtn.style.animation = 'gentleSwell 3s ease-in-out infinite';
+            analyzeBtn.style.transform = '';
+        }, 600);
+        
         // Validate tokens before analysis
         const btnLoading = document.getElementById('btnLoading');
         const loadingDetails = document.getElementById('loadingDetails');
-        analyzeBtn.classList.add('hidden');
-        analyzeBtn.style.display = 'none';
-        btnLoading.classList.remove('hidden');
-        btnLoading.style.display = '';
-        loadingDetails.textContent = 'Validating digital assets...';
+        
+        // Small delay before showing loading state for better UX
+        setTimeout(() => {
+            analyzeBtn.classList.add('hidden');
+            analyzeBtn.style.display = 'none';
+            btnLoading.classList.remove('hidden');
+            btnLoading.style.display = '';
+            loadingDetails.textContent = 'Validating digital assets...';
+        }, 300);
 
         try {
             // Validate tokens first
