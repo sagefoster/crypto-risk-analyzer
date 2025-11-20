@@ -2915,6 +2915,21 @@ small {
         margin-bottom: 16px;
     }
 
+    .current-price-summary {
+        margin: 0 -6px 8px -6px;
+        padding: 8px 6px;
+    }
+    
+    .current-price-summary .price-value {
+        font-size: 1.1rem;
+    }
+    
+    .price-range-summary {
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+        line-height: 1.4;
+    }
+
     label {
         font-size: 0.95rem;
         margin-bottom: 6px;
