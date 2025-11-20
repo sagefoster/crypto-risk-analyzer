@@ -1505,10 +1505,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         detailedSection.innerHTML = `
             <div class="detailed-header">
                 <h3>Detailed Analysis</h3>
-                <button class="toggle-details-btn" id="toggleDetailsBtn">
-                    <span class="toggle-text">Hide Details</span>
-                    <span class="toggle-icon">▲</span>
-                </button>
             </div>
             <div class="detailed-content" id="detailedContent">
             </div>
@@ -1640,17 +1636,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         detailedContent.appendChild(interpretationsSection);
 
         // Add toggle functionality for detailed section
-        const toggleBtn = document.getElementById('toggleDetailsBtn');
-        const toggleText = toggleBtn.querySelector('.toggle-text');
-        const toggleIcon = toggleBtn.querySelector('.toggle-icon');
-        
-        toggleBtn.addEventListener('click', () => {
-            detailedContent.classList.toggle('collapsed');
-            const isCollapsed = detailedContent.classList.contains('collapsed');
-            toggleText.textContent = isCollapsed ? 'Show Details' : 'Hide Details';
-            toggleIcon.textContent = isCollapsed ? '▼' : '▲';
-        });
-
         // Show results
         results.classList.remove('hidden');
         

@@ -3142,17 +3142,55 @@ p, .overview, .interpretation-text, .interpretation-details p,
     font-weight: 600;
 }
 
+.footer-about {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px 20px 16px;
+}
+
+.footer-about-title {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+    text-align: left;
+}
+
 .footer-text {
     font-size: 0.75rem;
     line-height: 1.6;
     color: var(--text-tertiary);
-    max-width: 800px;
-    margin: 0 auto;
-    padding: 24px 20px 32px;
+    margin: 0;
     font-style: italic;
     text-align: left;
     orphans: 2;
     widows: 2;
+}
+
+.footer-contact {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 20px 32px;
+    text-align: center;
+    border-top: 1px solid var(--border-color);
+    padding-top: 16px;
+}
+
+.footer-contact-text {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.footer-contact-link {
+    color: var(--accent-primary);
+    text-decoration: none;
+    transition: color 0.2s ease;
+}
+
+.footer-contact-link:hover {
+    color: var(--accent-secondary);
+    text-decoration: underline;
 }
 
 /* Autocomplete Dropdown */
@@ -3271,11 +3309,28 @@ p, .overview, .interpretation-text, .interpretation-details p,
         line-height: 1.5;
     }
     
+    .footer-about {
+        padding: 20px 14px 12px;
+    }
+    
+    .footer-about-title {
+        font-size: 0.8rem;
+        margin-bottom: 10px;
+    }
+    
     .footer-text {
         font-size: 0.7rem;
         line-height: 1.5;
         text-align: left;
-        padding: 20px 14px 32px;
+        padding: 0;
+    }
+    
+    .footer-contact {
+        padding: 12px 14px 24px;
+    }
+    
+    .footer-contact-text {
+        font-size: 0.7rem;
     }
     
     /* Ensure footer is visible on mobile - prevent any hiding */
