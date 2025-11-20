@@ -357,13 +357,29 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
+    // Function to update default value styling
+    function updateDefaultValueStyle(input) {
+        const value = input.value.trim().toLowerCase();
+        if (value === 'bitcoin' || value === 'ethereum') {
+            input.classList.add('default-value');
+        } else {
+            input.classList.remove('default-value');
+        }
+    }
+
     // Autocomplete functionality for token inputs
     function setupAutocomplete(input) {
         let autocompleteDiv = null;
         let searchTimeout = null;
 
+        // Check initial value and update style
+        updateDefaultValueStyle(input);
+
         input.addEventListener('input', async (e) => {
             const query = e.target.value.trim().toLowerCase();
+            
+            // Update default value styling
+            updateDefaultValueStyle(e.target);
             
             // Clear existing autocomplete
             if (autocompleteDiv) {
@@ -598,6 +614,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Remove autocomplete when input loses focus (after a delay to allow clicks)
         input.addEventListener('blur', () => {
+            // Update default value styling on blur
+            updateDefaultValueStyle(input);
+            
             setTimeout(() => {
                 if (autocompleteDiv) {
                     autocompleteDiv.remove();
@@ -1688,7 +1707,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         </button>
                     </div>
                     <div class="asset-card-content collapsed" id="assetContent${index}">
-                        <p class="interpretation-intro">Detailed written analysis for ${tokenName} over ${timeframeText}</p>
                     </div>
                 `;
 

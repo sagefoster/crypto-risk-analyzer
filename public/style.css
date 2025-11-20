@@ -1002,7 +1002,7 @@ label {
     margin-bottom: 8px;
     font-weight: 500;
     color: var(--text-primary);
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     word-break: normal;
     overflow-wrap: break-word;
     orphans: 2;
@@ -1017,6 +1017,13 @@ select {
     padding: 12px 16px;
     background: var(--bg-tertiary);
     border: 1px solid var(--border-color);
+}
+
+/* Gray out default values to show they're editable */
+.token-input.default-value {
+    color: var(--text-tertiary);
+    font-style: italic;
+}
     border-radius: 8px;
     color: var(--text-primary);
     font-size: 1rem;
