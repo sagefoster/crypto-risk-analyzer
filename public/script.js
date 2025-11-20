@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Handle initial page load screen
     const initialLoader = document.getElementById('initialLoader');
     const mainContent = document.getElementById('mainContent');
-    const progressBar = document.querySelector('.loader-progress-bar');
     
     // Show loader immediately
     if (initialLoader) {
@@ -15,45 +14,44 @@ document.addEventListener('DOMContentLoaded', async () => {
         mainContent.style.opacity = '0';
     }
     
-    // Function to hide loader and show main content
-    function hideLoaderAndShowContent() {
-        if (initialLoader) {
-            initialLoader.classList.add('hidden');
-            setTimeout(() => {
-                initialLoader.style.display = 'none';
-            }, 500);
-        }
-        if (mainContent) {
-            mainContent.style.opacity = '1';
-        }
-        
-        // Scroll to top and then to inputs section
-        window.scrollTo({ top: 0, behavior: 'instant' });
-        setTimeout(() => {
-            const inputsSection = document.querySelector('.card');
-            if (inputsSection) {
-                inputsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    // Simulate loading progress (can be replaced with actual loading logic)
+    const progressBar = document.querySelector('.loader-progress-bar');
+    if (progressBar) {
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 100) {
+                progress = 100;
+                clearInterval(interval);
+                
+                // Hide loader after a brief delay
+                setTimeout(() => {
+                    if (initialLoader) {
+                        initialLoader.classList.add('hidden');
+                        setTimeout(() => {
+                            initialLoader.style.display = 'none';
+                        }, 800);
+                    }
+                    if (mainContent) {
+                        mainContent.style.opacity = '1';
+                    }
+                }, 300);
+            } else {
+                progressBar.style.width = `${progress}%`;
             }
         }, 100);
-    }
-    
-    // Listen for CSS animation completion (2 seconds)
-    if (progressBar) {
-        progressBar.addEventListener('animationend', () => {
-            // Animation completes, hide loader immediately
-            hideLoaderAndShowContent();
-        }, { once: true });
-        
-        // Fallback: hide after 2.5 seconds if animation event doesn't fire
-        setTimeout(() => {
-            if (initialLoader && !initialLoader.classList.contains('hidden')) {
-                hideLoaderAndShowContent();
-            }
-        }, 2500);
     } else {
-        // Fallback: hide loader after 2 seconds if no progress bar
+        // Fallback: hide loader after 2 seconds
         setTimeout(() => {
-            hideLoaderAndShowContent();
+            if (initialLoader) {
+                initialLoader.classList.add('hidden');
+                setTimeout(() => {
+                    initialLoader.style.display = 'none';
+                }, 800);
+            }
+            if (mainContent) {
+                mainContent.style.opacity = '1';
+            }
         }, 2000);
     }
     
@@ -1881,13 +1879,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('load', ensureAnalyzeButtonVisible);
     setTimeout(ensureAnalyzeButtonVisible, 500);
     
-    // Scroll prompt when 3rd asset is entered
+    // Scroll prompt when all 3 assets are entered
     let scrollPromptShown = false;
+    function checkAllInputsFilled() {
+        const token0Input = document.getElementById('token0');
+        const token1Input = document.getElementById('token1');
+        const token2Input = document.getElementById('token2');
+        
+        // Check if all 3 inputs have values
+        const allFilled = token0Input && token0Input.value.trim() &&
+                         token1Input && token1Input.value.trim() &&
+                         token2Input && token2Input.value.trim();
+        
+        return allFilled;
+    }
+    
     function showScrollPrompt() {
         if (scrollPromptShown) return;
         
-        const token2Input = document.getElementById('token2');
-        if (!token2Input || !token2Input.value.trim()) return;
+        // Only show if all 3 inputs are filled
+        if (!checkAllInputsFilled()) return;
         
         scrollPromptShown = true;
         
@@ -1901,11 +1912,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
         `;
         
-        // Position near token2 input (using fixed positioning relative to viewport)
-        const token2Rect = token2Input.getBoundingClientRect();
-        scrollPrompt.style.position = 'fixed';
-        scrollPrompt.style.top = `${token2Rect.bottom + 20}px`;
-        scrollPrompt.style.left = `${Math.max(20, token2Rect.left)}px`;
+        // Position near the analyze button or last input
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const token2Input = document.getElementById('token2');
+        const targetElement = analyzeBtn || token2Input;
+        
+        if (targetElement) {
+            const targetRect = targetElement.getBoundingClientRect();
+            scrollPrompt.style.position = 'fixed';
+            scrollPrompt.style.top = `${targetRect.top - 80}px`;
+            scrollPrompt.style.left = `${Math.max(20, (window.innerWidth - 220) / 2)}px`;
+        }
         
         document.body.appendChild(scrollPrompt);
         
@@ -1937,31 +1954,36 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, { once: true });
     }
     
-    // Monitor token2 input for changes
-    const token2Input = document.getElementById('token2');
-    if (token2Input) {
+    // Monitor all token inputs for changes
+    function setupScrollPromptListener(input) {
+        if (!input) return;
+        
         // Check on input change
-        token2Input.addEventListener('input', () => {
-            if (token2Input.value.trim() && !scrollPromptShown) {
+        input.addEventListener('input', () => {
+            if (!scrollPromptShown && checkAllInputsFilled()) {
                 setTimeout(showScrollPrompt, 500);
             }
         });
         
         // Check on autocomplete selection
-        token2Input.addEventListener('change', () => {
-            if (token2Input.value.trim() && !scrollPromptShown) {
+        input.addEventListener('change', () => {
+            if (!scrollPromptShown && checkAllInputsFilled()) {
                 setTimeout(showScrollPrompt, 500);
             }
         });
     }
     
+    // Setup listeners for all 3 inputs
+    setupScrollPromptListener(document.getElementById('token0'));
+    setupScrollPromptListener(document.getElementById('token1'));
+    setupScrollPromptListener(document.getElementById('token2'));
+    
     // Also check when random crypto button is clicked
     const randomCryptoBtn = document.getElementById('randomCryptoBtn');
     if (randomCryptoBtn) {
-        const originalHandler = randomCryptoBtn.onclick;
         randomCryptoBtn.addEventListener('click', () => {
             setTimeout(() => {
-                if (token2Input && token2Input.value.trim() && !scrollPromptShown) {
+                if (!scrollPromptShown && checkAllInputsFilled()) {
                     setTimeout(showScrollPrompt, 800);
                 }
             }, 200);
