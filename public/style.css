@@ -38,9 +38,9 @@ p, .overview, .form-intro, .interpretation-text, .interpretation-details,
     widows: 2;
 }
 
-/* Center overview and form-intro */
+/* Left-align overview and form-intro for better readability */
 .overview, .form-intro {
-    text-align: center;
+    text-align: left;
 }
 
 /* Prefer breaking after sentence punctuation when possible */
@@ -458,16 +458,16 @@ header h1 {
     background: linear-gradient(135deg, rgba(102, 126, 234, 0.08), rgba(118, 75, 162, 0.08));
     border: 1px solid rgba(102, 126, 234, 0.2);
     border-radius: 12px;
-    padding: 20px 24px;
-    margin-bottom: 24px;
-    text-align: center;
+    padding: 18px 20px;
+    margin-bottom: 20px;
+    text-align: left;
 }
 
 /* Mobile: adjust info-card */
 @media (max-width: 768px) {
     .info-card {
-        padding: 16px 20px;
-        margin-bottom: 20px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
         border-radius: 10px;
     }
 }
@@ -484,12 +484,12 @@ header h1 {
     color: var(--text-secondary);
     line-height: 1.6;
     margin: 0;
-    font-size: 0.95rem;
+    font-size: 0.9rem;
     word-break: normal;
     overflow-wrap: break-word;
     orphans: 2;
     widows: 2;
-    text-align: center;
+    text-align: left;
 }
 
 /* Mobile: adjust overview */
@@ -656,8 +656,8 @@ header h1 {
     background: rgba(88, 166, 255, 0.06);
     border: 1px solid rgba(88, 166, 255, 0.2);
     border-radius: 10px;
-    padding: 16px 20px;
-    margin: 0 0 24px 0;
+    padding: 14px 18px;
+    margin: 0 0 20px 0;
     color: var(--text-secondary);
     font-size: 0.9rem;
     line-height: 1.6;
@@ -665,15 +665,15 @@ header h1 {
     overflow-wrap: break-word;
     orphans: 2;
     widows: 2;
-    text-align: center;
+    text-align: left;
     max-width: 100%;
 }
 
 /* Mobile: adjust form-intro */
 @media (max-width: 768px) {
     .form-intro {
-        padding: 14px 16px;
-        margin: 0 0 20px 0;
+        padding: 12px 14px;
+        margin: 0 0 16px 0;
         font-size: 0.85rem;
         line-height: 1.5;
         border-radius: 8px;
@@ -2990,7 +2990,7 @@ p, .overview, .interpretation-text, .interpretation-details p,
     margin-top: 60px;
     padding: 0;
     border-top: 1px solid var(--border-color);
-    text-align: center;
+    text-align: left;
     position: relative;
     z-index: 1;
     background: var(--bg-primary);
@@ -2999,7 +2999,7 @@ p, .overview, .interpretation-text, .interpretation-details p,
 /* Disclosure Section (inside footer) */
 .site-footer .disclosure-section {
     margin-top: 0;
-    padding: 24px 20px;
+    padding: 20px 18px;
     background: rgba(255, 193, 7, 0.08);
     border-bottom: 1px solid var(--border-color);
 }
@@ -3024,8 +3024,11 @@ p, .overview, .interpretation-text, .interpretation-details p,
     color: var(--text-tertiary);
     max-width: 800px;
     margin: 0 auto;
-    padding: 30px 20px 40px;
+    padding: 24px 20px 32px;
     font-style: italic;
+    text-align: left;
+    orphans: 2;
+    widows: 2;
 }
 
 /* Autocomplete Dropdown */
@@ -3120,7 +3123,7 @@ p, .overview, .interpretation-text, .interpretation-details p,
     }
     
     .site-footer .disclosure-section {
-        padding: 20px 16px;
+        padding: 18px 14px;
     }
     
     .disclosure-text {
@@ -3132,7 +3135,7 @@ p, .overview, .interpretation-text, .interpretation-details p,
         font-size: 0.7rem;
         line-height: 1.5;
         text-align: left;
-        padding: 24px 16px 40px;
+        padding: 20px 14px 32px;
     }
     
     /* Ensure footer is visible on mobile - prevent any hiding */
