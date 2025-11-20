@@ -768,7 +768,6 @@ header h1 {
     align-items: center;
     justify-content: center;
     gap: 8px;
-    animation: subtleShift 2s ease-in-out infinite;
     -webkit-tap-highlight-color: rgba(88, 166, 255, 0.3);
 }
 
@@ -786,8 +785,9 @@ header h1 {
 
 .random-icon {
     font-size: 1.2rem;
-    animation: spin 3s linear infinite;
+    animation: spin 8s linear infinite;
     display: inline-block;
+    opacity: 0.8;
 }
 
 @keyframes spin {
@@ -3194,6 +3194,22 @@ p, .overview, .interpretation-text, .interpretation-details p,
 
 .autocomplete-item:hover {
     background: var(--bg-tertiary);
+}
+
+/* Loading state for autocomplete */
+.autocomplete-loading {
+    border-color: rgba(88, 166, 255, 0.5);
+    animation: pulseGlow 1.5s ease-in-out infinite;
+}
+
+.autocomplete-loading-item {
+    cursor: default;
+    pointer-events: none;
+    background: transparent;
+}
+
+.autocomplete-loading-item:hover {
+    background: transparent;
 }
 
 .autocomplete-header {
