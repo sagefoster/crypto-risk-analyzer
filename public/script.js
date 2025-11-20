@@ -607,8 +607,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 if (wrapperParent) {
                                     const parentRect = wrapperParent.getBoundingClientRect();
                                     // Calculate position relative to parent container
-                                    const relativeTop = inputRect.bottom - parentRect.top + 4;
-                                    const relativeLeft = inputRect.left - parentRect.left;
+                                    // Account for scroll position
+                                    const scrollY = window.scrollY || window.pageYOffset;
+                                    const scrollX = window.scrollX || window.pageXOffset;
+                                    const relativeTop = inputRect.bottom - parentRect.top + scrollY + 4;
+                                    const relativeLeft = inputRect.left - parentRect.left + scrollX;
                                     
                                     autocompleteDiv.style.position = 'absolute';
                                     autocompleteDiv.style.top = `${relativeTop}px`;
