@@ -2,6 +2,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Handle initial page load screen
     const initialLoader = document.getElementById('initialLoader');
     const mainContent = document.getElementById('mainContent');
+    const progressBar = document.querySelector('.loader-progress-bar');
     
     // Show loader immediately
     if (initialLoader) {
@@ -14,44 +15,45 @@ document.addEventListener('DOMContentLoaded', async () => {
         mainContent.style.opacity = '0';
     }
     
-    // Simulate loading progress (can be replaced with actual loading logic)
-    const progressBar = document.querySelector('.loader-progress-bar');
-    if (progressBar) {
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += Math.random() * 15;
-            if (progress > 100) {
-                progress = 100;
-                clearInterval(interval);
-                
-                // Hide loader after a brief delay
-                setTimeout(() => {
-                    if (initialLoader) {
-                        initialLoader.classList.add('hidden');
-                        setTimeout(() => {
-                            initialLoader.style.display = 'none';
-                        }, 800);
-                    }
-                    if (mainContent) {
-                        mainContent.style.opacity = '1';
-                    }
-                }, 300);
-            } else {
-                progressBar.style.width = `${progress}%`;
+    // Function to hide loader and show main content
+    function hideLoaderAndShowContent() {
+        if (initialLoader) {
+            initialLoader.classList.add('hidden');
+            setTimeout(() => {
+                initialLoader.style.display = 'none';
+            }, 500);
+        }
+        if (mainContent) {
+            mainContent.style.opacity = '1';
+        }
+        
+        // Scroll to top and then to inputs section
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        setTimeout(() => {
+            const inputsSection = document.querySelector('.card');
+            if (inputsSection) {
+                inputsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }
         }, 100);
-    } else {
-        // Fallback: hide loader after 2 seconds
+    }
+    
+    // Listen for CSS animation completion (2 seconds)
+    if (progressBar) {
+        progressBar.addEventListener('animationend', () => {
+            // Animation completes, hide loader immediately
+            hideLoaderAndShowContent();
+        }, { once: true });
+        
+        // Fallback: hide after 2.5 seconds if animation event doesn't fire
         setTimeout(() => {
-            if (initialLoader) {
-                initialLoader.classList.add('hidden');
-                setTimeout(() => {
-                    initialLoader.style.display = 'none';
-                }, 800);
+            if (initialLoader && !initialLoader.classList.contains('hidden')) {
+                hideLoaderAndShowContent();
             }
-            if (mainContent) {
-                mainContent.style.opacity = '1';
-            }
+        }, 2500);
+    } else {
+        // Fallback: hide loader after 2 seconds if no progress bar
+        setTimeout(() => {
+            hideLoaderAndShowContent();
         }, 2000);
     }
     
