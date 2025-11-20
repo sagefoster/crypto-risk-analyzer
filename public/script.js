@@ -1082,6 +1082,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         return tableWrapper;
     }
 
+    // Helper function to format prices with appropriate decimals for low values
+    // Defined at higher scope so it can be used by multiple functions
+    function formatPriceDisplay(price) {
+        if (!price || price === null || price === undefined || isNaN(price)) return 'N/A';
+        if (price >= 1000) return price.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
+        if (price >= 1) return price.toFixed(2);
+        if (price >= 0.01) return price.toFixed(4);
+        if (price >= 0.0001) return price.toFixed(6);
+        return price.toFixed(8); // Very low values get 8 decimals
+    }
+
     function createWinnerSection(tokenResults, riskFreeRate, timeframeDays) {
         // Sort tokens by composite score weighing Sharpe, Sortino, and Calmar ratios
         const sortedTokens = [...tokenResults].sort((a, b) => {
@@ -1320,16 +1331,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const timeframeDays = data.timeframe || 365;
         const isSingle = tokenResults.length === 1;
         const isMultiple = tokenResults.length > 1;
-
-        // Helper function to format prices with appropriate decimals for low values
-        const formatPriceDisplay = (price) => {
-            if (!price || price === null || price === undefined || isNaN(price)) return 'N/A';
-            if (price >= 1000) return price.toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 });
-            if (price >= 1) return price.toFixed(2);
-            if (price >= 0.01) return price.toFixed(4);
-            if (price >= 0.0001) return price.toFixed(6);
-            return price.toFixed(8); // Very low values get 8 decimals
-        };
 
         // STEP 1: Show winner/conclusion first (if multiple tokens)
         if (isMultiple) {
