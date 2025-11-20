@@ -2,19 +2,62 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Handle initial page load screen
     const initialLoader = document.getElementById('initialLoader');
     const mainContent = document.getElementById('mainContent');
+    const enterButton = document.getElementById('enterButton');
+    
+    // Function to completely remove loader and show main content
+    function removeLoaderAndShowContent() {
+        // Remove loader completely from DOM
+        if (initialLoader) {
+            initialLoader.style.display = 'none';
+            initialLoader.style.visibility = 'hidden';
+            initialLoader.style.opacity = '0';
+            initialLoader.style.pointerEvents = 'none';
+            initialLoader.style.zIndex = '-1';
+            initialLoader.classList.add('hidden');
+            // Remove from DOM after animation
+            setTimeout(() => {
+                if (initialLoader && initialLoader.parentNode) {
+                    initialLoader.remove();
+                }
+            }, 500);
+        }
+        
+        // Show main content
+        if (mainContent) {
+            mainContent.style.opacity = '1';
+            mainContent.style.visibility = 'visible';
+            mainContent.style.zIndex = '1';
+        }
+        
+        // Scroll to top and then to inputs
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        setTimeout(() => {
+            const inputsSection = document.querySelector('.card');
+            if (inputsSection) {
+                inputsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }, 100);
+    }
     
     // Show loader immediately
     if (initialLoader) {
         initialLoader.style.display = 'flex';
         initialLoader.classList.remove('hidden');
+        initialLoader.style.zIndex = '10000';
     }
     
     // Hide main content initially
     if (mainContent) {
         mainContent.style.opacity = '0';
+        mainContent.style.visibility = 'hidden';
     }
     
-    // Simulate loading progress (can be replaced with actual loading logic)
+    // Hide enter button initially
+    if (enterButton) {
+        enterButton.classList.add('hidden');
+    }
+    
+    // Simulate loading progress
     const progressBar = document.querySelector('.loader-progress-bar');
     if (progressBar) {
         let progress = 0;
@@ -23,17 +66,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (progress > 100) {
                 progress = 100;
                 clearInterval(interval);
+                progressBar.style.width = '100%';
                 
-                // Hide loader after a brief delay
+                // Show enter button after progress completes
                 setTimeout(() => {
-                    if (initialLoader) {
-                        initialLoader.classList.add('hidden');
-                        setTimeout(() => {
-                            initialLoader.style.display = 'none';
-                        }, 800);
-                    }
-                    if (mainContent) {
-                        mainContent.style.opacity = '1';
+                    if (enterButton) {
+                        enterButton.classList.remove('hidden');
+                        enterButton.style.display = 'block';
                     }
                 }, 300);
             } else {
@@ -41,18 +80,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
         }, 100);
     } else {
-        // Fallback: hide loader after 2 seconds
+        // Fallback: show enter button after 2 seconds
         setTimeout(() => {
-            if (initialLoader) {
-                initialLoader.classList.add('hidden');
-                setTimeout(() => {
-                    initialLoader.style.display = 'none';
-                }, 800);
-            }
-            if (mainContent) {
-                mainContent.style.opacity = '1';
+            if (enterButton) {
+                enterButton.classList.remove('hidden');
+                enterButton.style.display = 'block';
             }
         }, 2000);
+    }
+    
+    // Enter button click handler
+    if (enterButton) {
+        enterButton.addEventListener('click', () => {
+            removeLoaderAndShowContent();
+        });
     }
     
     // Prevent browser from restoring scroll position
