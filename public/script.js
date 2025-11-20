@@ -41,22 +41,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         tokenGroup.innerHTML = `
             <div class="form-group">
-                <label for="token${tokenIndex}">Token ID</label>
+                <label for="token${tokenIndex}">Token</label>
                 <div class="token-input-wrapper">
-                    <input type="text" class="token-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="e.g., ethereum" required>
-                    <button type="button" class="btn-remove-token" aria-label="Remove token">×</button>
+                    <input type="text" class="token-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="e.g., bitcoin, BTC, ethereum, ETH" required>
+                    <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                 </div>
-                <small>CoinGecko token ID (e.g., bitcoin, ethereum)</small>
+                <small>Token name, ticker symbol, or CoinGecko ID (e.g., bitcoin, BTC, ethereum, ETH)</small>
             </div>
         `;
         
         tokensContainer.appendChild(tokenGroup);
         
-        // Add event listener to remove button
-        const removeBtn = tokenGroup.querySelector('.btn-remove-token');
-        removeBtn.addEventListener('click', () => {
-            tokenGroup.remove();
-            updateRemoveButtons();
+        // Add event listener to clear button (clears input, doesn't remove the input box)
+        const clearBtn = tokenGroup.querySelector('.btn-remove-token');
+        const inputField = tokenGroup.querySelector('.token-input');
+        clearBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            if (inputField) {
+                inputField.value = '';
+                inputField.focus();
+                // Close any open autocomplete dropdown
+                const existingDropdown = tokenGroup.querySelector('.autocomplete-dropdown');
+                if (existingDropdown) {
+                    existingDropdown.remove();
+                }
+            }
         });
         
         tokenIndex++;
@@ -79,18 +89,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Function to update remove button visibility and add button state
+    // Function to update clear button visibility and add button state
     function updateRemoveButtons() {
         const tokenGroups = tokensContainer.querySelectorAll('.token-input-group');
         
-        // Update remove button visibility
+        // Always show clear button (it clears input, doesn't remove the input box)
         tokenGroups.forEach((group, index) => {
-            const removeBtn = group.querySelector('.btn-remove-token');
-            if (tokenGroups.length > 1) {
-                removeBtn.classList.remove('hidden');
-            } else {
-                removeBtn.classList.add('hidden');
-            }
+            const clearBtn = group.querySelector('.btn-remove-token');
+            clearBtn.classList.remove('hidden');
         });
         
         // Update add button visibility (max 5 tokens)
@@ -219,12 +225,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 </div>
                                 <small class="autocomplete-id">ID: ${coin.id}</small>
                             `;
-                            item.addEventListener('click', () => {
+                            item.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
                                 input.value = coin.id;
+                                // Immediately close dropdown after selection
                                 if (autocompleteDiv) {
                                     autocompleteDiv.remove();
                                     autocompleteDiv = null;
                                 }
+                                // Trigger input event to clear any pending searches
+                                input.dispatchEvent(new Event('input', { bubbles: true }));
                                 input.focus();
                             });
                             autocompleteDiv.appendChild(item);
@@ -290,7 +301,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tokens = collectTokens();
         
         if (tokens.length === 0) {
-            showError('Please enter at least one token ID');
+            showError('Please enter at least one token (name, ticker symbol, or ID)');
             return;
         }
 
@@ -357,7 +368,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 clearInterval(messageInterval);
             }
             console.error('Error:', error);
-            showError(error.message || 'An error occurred while analyzing the tokens. Please check your API key and token IDs.');
+            showError(error.message || 'An error occurred while analyzing the tokens. Please check your API key and token names/symbols.');
         } finally {
             // Hide loading state, show button
             if (btnLoading) {
