@@ -252,13 +252,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const assetNumber = tokenIndex + 1; // Display number (1-indexed)
         tokenGroup.innerHTML = `
-            <div class="form-group">
-                <label for="token${tokenIndex}">Digital Asset ${assetNumber} <span class="info-icon-small" data-tooltip="Autocomplete available as you type">ⓘ</span></label>
-                <div class="token-input-wrapper">
-                    <input type="text" class="token-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="bitcoin, BTC, ethereum, ETH" required>
-                    <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+            <div class="form-group flowy-input-group">
+                <div class="asset-display-wrapper">
+                    <div class="asset-logo-container">
+                        <img class="asset-logo" id="token${tokenIndex}-logo" src="" alt="" style="display: none;">
+                    </div>
+                                <div class="asset-input-container">
+                                    <div class="token-input-wrapper flowy-wrapper">
+                                        <input type="text" class="token-input flowy-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="Enter asset name or symbol..." required>
+                                        <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+                                    </div>
+                                    <div class="asset-info-display" id="token${tokenIndex}-info" style="display: none;">
+                                        <span class="asset-ticker" id="token${tokenIndex}-ticker"></span>
+                                        <span class="asset-name" id="token${tokenIndex}-name"></span>
+                                    </div>
+                                </div>
                 </div>
-                <small>Enter ticker symbol or token's name</small>
+                <small class="input-hint">Autocomplete available as you type <span class="info-icon-small" data-tooltip="Autocomplete available as you type">ⓘ</span></small>
             </div>
         `;
         
@@ -272,6 +282,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.stopPropagation();
             if (inputField) {
                 inputField.value = '';
+                updateAssetDisplay(inputField); // Clear logo and name
                 inputField.focus();
                 // Close any open autocomplete dropdown
                 const existingDropdown = tokenGroup.querySelector('.autocomplete-dropdown');
@@ -512,6 +523,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 // Set the value
                                 input.value = coin.id;
                                 
+                                // Update logo and name display
+                                updateAssetDisplay(input, coin);
+                                
                                 // Immediately close dropdown after selection
                                 if (autocompleteDiv) {
                                     autocompleteDiv.style.display = 'none'; // Hide immediately
@@ -714,6 +728,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Update default value styling
             updateDefaultValueStyle(token2Input);
             
+            // Update logo and name display immediately
+            updateAssetDisplay(token2Input);
+            
             // Trigger change event (but NOT input event to avoid autocomplete)
             const changeEvent = new Event('change', { bubbles: true, cancelable: true });
             token2Input.dispatchEvent(changeEvent);
@@ -752,6 +769,133 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Also retry after a delay to ensure it's set up even if DOM loads late
     setTimeout(setupRandomCryptoButton, 500);
 
+    // Function to update asset display (logo, ticker, and name)
+    async function updateAssetDisplay(input, coinData = null) {
+        const inputId = input.id;
+        const logoImg = document.getElementById(`${inputId}-logo`);
+        const infoDisplay = document.getElementById(`${inputId}-info`);
+        const tickerDisplay = document.getElementById(`${inputId}-ticker`);
+        const nameDisplay = document.getElementById(`${inputId}-name`);
+        const value = input.value.trim().toLowerCase();
+        
+        if (!value) {
+            // Clear display
+            if (logoImg) {
+                logoImg.style.display = 'none';
+                logoImg.src = '';
+            }
+            if (infoDisplay) {
+                infoDisplay.style.display = 'none';
+            }
+            if (tickerDisplay) {
+                tickerDisplay.textContent = '';
+            }
+            if (nameDisplay) {
+                nameDisplay.textContent = '';
+            }
+            return;
+        }
+        
+        // Helper function to update display with coin data
+        const updateDisplay = (coin) => {
+            if (!coin) return;
+            
+            if (logoImg && coin.thumb) {
+                logoImg.src = coin.thumb;
+                logoImg.alt = coin.name || value;
+                logoImg.style.display = 'block';
+                logoImg.onerror = () => {
+                    logoImg.style.display = 'none';
+                };
+            }
+            
+            if (tickerDisplay && coin.symbol) {
+                tickerDisplay.textContent = coin.symbol.toUpperCase();
+            }
+            
+            if (nameDisplay && coin.name) {
+                nameDisplay.textContent = coin.name;
+            }
+            
+            if (infoDisplay && (coin.symbol || coin.name)) {
+                infoDisplay.style.display = 'flex';
+            }
+        };
+        
+        // If coinData is provided (from autocomplete), use it
+        if (coinData && coinData.thumb) {
+            updateDisplay(coinData);
+            return;
+        }
+        
+        // Otherwise, try to fetch coin data
+        // First try direct coin lookup by ID (most reliable), then fallback to search
+        try {
+            // Try direct coin lookup by ID first (most accurate)
+            try {
+                const coinResponse = await fetch(`/api/coin/${encodeURIComponent(value)}`);
+                if (coinResponse.ok) {
+                    const coinData = await coinResponse.json();
+                    if (coinData && coinData.id && coinData.id.toLowerCase() === value.toLowerCase()) {
+                        // Verify it's the correct coin before using it
+                        updateDisplay(coinData);
+                        return; // Success, exit early
+                    } else if (coinResponse.status === 404) {
+                        // Coin not found, fall through to search
+                        console.log('Coin not found via direct lookup, trying search');
+                    }
+                } else if (coinResponse.status === 404) {
+                    // Coin not found, fall through to search
+                    console.log('Coin not found via direct lookup, trying search');
+                }
+            } catch (directError) {
+                // If direct lookup fails, fall through to search
+                console.log('Direct coin lookup failed, trying search:', directError);
+            }
+            
+            // Fallback: try search API to find exact match
+            const response = await fetch(`/api/search-tokens?query=${encodeURIComponent(value)}`);
+            const data = await response.json();
+            
+            if (data.results && data.results.length > 0) {
+                // Find exact match by ID (case-insensitive) - this is critical
+                const exactMatch = data.results.find(coin => coin.id.toLowerCase() === value.toLowerCase());
+                
+                if (exactMatch) {
+                    // Only use exact match - don't use partial matches
+                    updateDisplay(exactMatch);
+                } else {
+                    // No exact match found - try to find by symbol (exact symbol match only)
+                    const symbolMatch = data.results.find(coin => 
+                        coin.symbol.toLowerCase() === value.toLowerCase()
+                    );
+                    
+                    if (symbolMatch) {
+                        updateDisplay(symbolMatch);
+                    } else {
+                        // If no exact match at all, don't show wrong coin - just log and return
+                        console.log('No exact match found for', value, 'in search results. Not displaying incorrect coin.');
+                        // Don't update display with wrong coin
+                    }
+                }
+            }
+        } catch (error) {
+            console.log('Could not fetch logo for', value, error);
+        }
+    }
+    
+        // Initialize asset displays for default values
+        document.querySelectorAll('.token-input').forEach(input => {
+            if (input.value) {
+                updateAssetDisplay(input);
+            }
+            
+            // Update on change
+            input.addEventListener('change', () => {
+                updateAssetDisplay(input);
+            });
+        });
+
     // Setup autocomplete and clear buttons for existing inputs (including first input)
     document.querySelectorAll('.token-input-group').forEach(group => {
         const input = group.querySelector('.token-input');
@@ -768,6 +912,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.preventDefault();
                 e.stopPropagation();
                 input.value = '';
+                updateAssetDisplay(input); // Clear logo and name
                 input.focus();
                 // Close any open autocomplete dropdown
                 const existingDropdown = group.querySelector('.autocomplete-dropdown');

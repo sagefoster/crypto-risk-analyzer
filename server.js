@@ -842,6 +842,77 @@ app.post('/api/validate-tokens', async (req, res) => {
 });
 
 // Endpoint to search for tokens (for autocomplete)
+// API endpoint to get coin data by ID (for logo fetching)
+app.get('/api/coin/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const apiKey = process.env.COINGECKO_API_KEY;
+
+    if (!apiKey) {
+      return res.status(400).json({ error: 'API key required' });
+    }
+
+    if (!id) {
+      return res.status(400).json({ error: 'Coin ID required' });
+    }
+
+    const makeCoinRequest = async (isPro) => {
+      const baseUrl = isPro ? 'https://pro-api.coingecko.com/api/v3' : 'https://api.coingecko.com/api/v3';
+      const apiKeyParam = isPro ? 'x_cg_pro_api_key' : 'x_cg_demo_api_key';
+      
+      try {
+        const coinResponse = await axios.get(`${baseUrl}/coins/${id}`, {
+          params: {
+            [apiKeyParam]: apiKey,
+            localization: false,
+            tickers: false,
+            market_data: false,
+            community_data: false,
+            developer_data: false,
+            sparkline: false
+          },
+          headers: {
+            'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+            'Accept': 'application/json'
+          },
+          validateStatus: (status) => status < 500
+        });
+
+        if (coinResponse.status === 200 && coinResponse.data) {
+          return {
+            id: coinResponse.data.id,
+            name: coinResponse.data.name,
+            symbol: coinResponse.data.symbol,
+            thumb: coinResponse.data.image?.thumb || coinResponse.data.image?.small || null,
+            large: coinResponse.data.image?.large || coinResponse.data.image?.small || null
+          };
+        }
+      } catch (error) {
+        if (error.response?.status === 404) {
+          return null; // Coin not found
+        }
+        throw error;
+      }
+      return null;
+    };
+
+    // Try Pro API first, then fallback to Demo
+    let coinData = await makeCoinRequest(true);
+    if (!coinData) {
+      coinData = await makeCoinRequest(false);
+    }
+
+    if (coinData) {
+      return res.json(coinData);
+    } else {
+      return res.status(404).json({ error: 'Coin not found' });
+    }
+  } catch (error) {
+    console.error('Error fetching coin data:', error);
+    return res.status(500).json({ error: 'Failed to fetch coin data' });
+  }
+});
+
 app.get('/api/search-tokens', async (req, res) => {
   try {
     const { query } = req.query;
