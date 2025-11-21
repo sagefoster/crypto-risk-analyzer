@@ -266,22 +266,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 const chartWidth = canvas.width;
                                 const chartHeight = canvas.height;
                                 
-                                // Calculate positions as percentages
+                                // Calculate X positions as percentages
                                 const highXPercent = (highChartIndexFinal / (chartData.length - 1)) * 100;
                                 const lowXPercent = (lowChartIndexFinal / (chartData.length - 1)) * 100;
                                 
-                                // Get Y positions from normalized prices
-                                const highYValue = normalizedPrices[highIndex];
-                                const lowYValue = normalizedPrices[lowIndex];
+                                // Get Y values from chart data (the actual values plotted)
+                                const highYValue = chartData[highChartIndexFinal];
+                                const lowYValue = chartData[lowChartIndexFinal];
                                 
-                                // Find min/max for scaling
-                                const minValue = Math.min(...normalizedPrices);
-                                const maxValue = Math.max(...normalizedPrices);
-                                const range = maxValue - minValue;
+                                // Find min/max from chart data for accurate scaling
+                                const chartMin = Math.min(...chartData);
+                                const chartMax = Math.max(...chartData);
+                                const chartRange = chartMax - chartMin || 1; // Avoid division by zero
                                 
-                                // Calculate Y positions (inverted because canvas Y is top-to-bottom)
-                                const highYPercent = 100 - ((highYValue - minValue) / range) * 100;
-                                const lowYPercent = 100 - ((lowYValue - minValue) / range) * 100;
+                                // Calculate Y positions (inverted: 0% = top, 100% = bottom)
+                                // Add padding to keep labels visible within chart bounds
+                                const padding = 8; // percentage padding from edges
+                                const highYPercent = Math.max(padding, 100 - ((highYValue - chartMin) / chartRange) * (100 - padding * 2) - padding);
+                                const lowYPercent = Math.min(100 - padding, 100 - ((lowYValue - chartMin) / chartRange) * (100 - padding * 2) + padding);
                                 
                                 // Update labels with positioning
                                 const highLabel = chartLabelsContainer.querySelector('.chart-label-high');
@@ -290,19 +292,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 if (highLabel) {
                                     highLabel.style.position = 'absolute';
                                     highLabel.style.left = `${highXPercent}%`;
-                                    highLabel.style.top = `${Math.max(0, highYPercent - 15)}%`;
-                                    highLabel.style.transform = 'translateX(-50%)';
+                                    highLabel.style.top = `${highYPercent}%`;
+                                    highLabel.style.transform = 'translate(-50%, -100%)';
+                                    highLabel.style.marginTop = '-2px';
                                 }
                                 
                                 if (lowLabel) {
                                     lowLabel.style.position = 'absolute';
                                     lowLabel.style.left = `${lowXPercent}%`;
-                                    lowLabel.style.top = `${Math.min(100, lowYPercent + 5)}%`;
-                                    lowLabel.style.transform = 'translateX(-50%)';
+                                    lowLabel.style.top = `${lowYPercent}%`;
+                                    lowLabel.style.transform = 'translate(-50%, 0)';
+                                    lowLabel.style.marginTop = '2px';
                                 }
                                 
-                                // Make container relative for absolute positioning
-                                chartLabelsContainer.style.position = 'relative';
+                                // Ensure container is positioned correctly
+                                chartLabelsContainer.style.position = 'absolute';
+                                chartLabelsContainer.style.top = '0';
+                                chartLabelsContainer.style.left = '0';
+                                chartLabelsContainer.style.width = '100%';
                                 chartLabelsContainer.style.height = '100%';
                             }
                         }
