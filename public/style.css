@@ -942,6 +942,24 @@ header h1 {
     letter-spacing: 0.2px;
 }
 
+.asset-price-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    margin-left: 8px;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.asset-price-label {
+    font-size: 0.65rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    letter-spacing: 0.1px;
+    text-transform: uppercase;
+}
+
 .asset-price-chart {
     font-size: 0.75rem;
     font-weight: 600;
@@ -952,9 +970,6 @@ header h1 {
     padding: 2px 6px;
     border-radius: 3px;
     white-space: nowrap;
-    flex-shrink: 0;
-    margin-left: 8px;
-    align-self: center;
 }
 
 .asset-chart-container {
@@ -1010,82 +1025,102 @@ header h1 {
 /* Mobile: adjust layout for smaller screens */
 @media (max-width: 768px) {
     .asset-display-wrapper {
-        flex-direction: row;
-        align-items: center;
-        gap: 12px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 8px 12px;
+        min-height: auto;
     }
     
     .asset-left-section {
         flex: 1;
         width: 100%;
         padding-right: 0;
+        gap: 10px;
     }
     
     .asset-chart-section {
-        display: none !important;
+        flex: 1;
+        width: 100%;
+        padding-left: 0;
+        padding-top: 4px;
+        gap: 6px;
     }
     
     .asset-logo-container {
-        width: 32px;
-        height: 32px;
-        min-width: 32px;
-    }
-    
-    .asset-info-display {
-        flex-wrap: wrap;
-        gap: 8px;
-        padding: 6px 0;
-    }
-    
-    .asset-info-left {
-        gap: 6px;
-        flex-basis: 100%;
-        margin-bottom: 4px;
-    }
-    
-    .asset-ticker {
-        font-size: 0.9rem;
-    }
-    
-    .asset-name {
-        font-size: 0.85rem;
-    }
-    
-    .asset-marketcap {
-        font-size: 0.7rem;
-    }
-    
-    .asset-chart-container {
-        flex: 1;
-        height: 45px;
-        min-height: 45px;
-        min-width: 140px;
-    }
-    
-    .asset-chart {
-        height: 35px !important;
-        min-height: 35px;
-    }
-    
-    .asset-price-chart {
-        font-size: 0.7rem;
-        padding: 2px 5px;
-        margin-left: 6px;
-        align-self: center;
-    }
-    
-    .chart-labels {
-        font-size: 0.6rem;
-    }
-    
-    .chart-label-high,
-    .chart-label-low {
-        padding: 1px 3px;
-        font-size: 0.6rem;
+        width: 28px;
+        height: 28px;
+        min-width: 28px;
     }
     
     .asset-input-container {
         max-width: 100%;
+        gap: 4px;
+    }
+    
+    .flowy-input {
+        padding: 8px 10px !important;
+        font-size: 0.95rem !important;
+    }
+    
+    .asset-info-display {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding: 4px 0;
+    }
+    
+    .asset-info-left {
+        gap: 5px;
+        flex-basis: 100%;
+        margin-bottom: 2px;
+    }
+    
+    .asset-ticker {
+        font-size: 0.85rem;
+    }
+    
+    .asset-name {
+        font-size: 0.8rem;
+    }
+    
+    .asset-marketcap {
+        font-size: 0.65rem;
+    }
+    
+    .asset-chart-container {
+        flex: 1;
+        height: 40px;
+        min-height: 40px;
+        min-width: 120px;
+    }
+    
+    .asset-chart {
+        height: 32px !important;
+        min-height: 32px;
+    }
+    
+    .asset-price-wrapper {
+        margin-left: 4px;
+        gap: 1px;
+    }
+    
+    .asset-price-label {
+        font-size: 0.55rem;
+    }
+    
+    .asset-price-chart {
+        font-size: 0.65rem;
+        padding: 1px 4px;
+    }
+    
+    .chart-labels {
+        font-size: 0.55rem;
+    }
+    
+    .chart-label-high,
+    .chart-label-low {
+        padding: 1px 2px;
+        font-size: 0.55rem;
     }
 }
 
