@@ -572,13 +572,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     window.removeEventListener('resize', updatePosition);
                 };
                 
-                const wrapper = input.closest('.token-input-wrapper');
-                if (wrapper && wrapper.parentNode) {
-                    wrapper.parentNode.insertBefore(autocompleteDiv, wrapper.nextSibling);
-                } else {
-                    // Fallback: append to body
-                    document.body.appendChild(autocompleteDiv);
-                }
+                // Always append to body for fixed positioning to work correctly
+                // This ensures the dropdown is positioned relative to viewport, not parent containers
+                document.body.appendChild(autocompleteDiv);
             }
 
             // Debounce search - reduced to 300ms for faster response
@@ -799,9 +795,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                             window.removeEventListener('resize', updateResultsPosition);
                         };
 
-                        // Insert after input wrapper
-                        const wrapper = input.closest('.token-input-wrapper');
-                        wrapper.parentNode.insertBefore(autocompleteDiv, wrapper.nextSibling);
+                        // Always append to body for fixed positioning to work correctly
+                        // This ensures the dropdown is positioned relative to viewport, not parent containers
+                        if (!document.body.contains(autocompleteDiv)) {
+                            document.body.appendChild(autocompleteDiv);
+                        }
 
                         // Close on outside click - use capture phase for better reliability
                         const closeHandler = (e) => {
