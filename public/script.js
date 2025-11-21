@@ -158,11 +158,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Update current price display
+            // Update current price display (positioned on right side of chart)
             const priceDisplay = document.getElementById(`${inputId}-price`);
             if (priceDisplay && data.currentPrice) {
                 priceDisplay.textContent = formatPrice(data.currentPrice);
-                priceDisplay.style.display = 'inline';
+                priceDisplay.style.display = 'block';
             }
 
             // Update chart labels with high/low (will be positioned after chart renders)
