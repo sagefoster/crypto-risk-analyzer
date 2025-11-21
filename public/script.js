@@ -253,7 +253,27 @@ document.addEventListener('DOMContentLoaded', async () => {
                             display: false
                         },
                         y: {
-                            display: false
+                            display: false,
+                            beginAtZero: false,
+                            // Zoom in by reducing padding - use most of the vertical space
+                            min: function(context) {
+                                const chart = context.chart;
+                                const data = chart.data.datasets[0].data;
+                                const min = Math.min(...data);
+                                const max = Math.max(...data);
+                                const range = max - min;
+                                // Use only 5% padding instead of default ~10-15%
+                                return min - (range * 0.05);
+                            },
+                            max: function(context) {
+                                const chart = context.chart;
+                                const data = chart.data.datasets[0].data;
+                                const min = Math.min(...data);
+                                const max = Math.max(...data);
+                                const range = max - min;
+                                // Use only 5% padding instead of default ~10-15%
+                                return max + (range * 0.05);
+                            }
                         }
                     },
                     interaction: {
@@ -590,11 +610,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                                         <div class="asset-info-left">
                                             <span class="asset-ticker" id="token${tokenIndex}-ticker"></span>
                                             <span class="asset-name" id="token${tokenIndex}-name"></span>
-                                            <span class="asset-price" id="token${tokenIndex}-price"></span>
                                         </div>
                                         <div class="asset-chart-container">
                                             <div class="chart-labels" id="token${tokenIndex}-chart-labels"></div>
                                             <canvas id="token${tokenIndex}-chart" class="asset-chart"></canvas>
+                                            <span class="asset-price-chart" id="token${tokenIndex}-price"></span>
                                         </div>
                                     </div>
                                 </div>
