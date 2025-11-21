@@ -849,6 +849,7 @@ header h1 {
     display: flex;
     flex-direction: column;
     gap: 6px;
+    max-width: 350px;
 }
 
 .flowy-wrapper {
@@ -859,8 +860,8 @@ header h1 {
 }
 
 .flowy-input {
-    background: transparent !important;
-    border: none !important;
+    background: rgba(88, 166, 255, 0.05) !important;
+    border: 1px solid rgba(88, 166, 255, 0.15) !important;
     padding: 10px 14px !important;
     font-size: 1.05rem !important;
     color: var(--text-primary) !important;
@@ -885,9 +886,10 @@ header h1 {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 6px 14px;
+    padding: 8px 14px;
     animation: fadeInUp 0.3s ease;
     width: 100%;
+    min-height: 70px;
 }
 
 .asset-info-left {
@@ -936,9 +938,8 @@ header h1 {
 }
 
 .asset-chart-container {
-    flex: 0 0 auto;
-    width: 180px;
-    height: 50px;
+    flex: 1;
+    height: 70px;
     margin-left: 16px;
     position: relative;
     display: flex;
@@ -983,16 +984,23 @@ header h1 {
 
 .asset-chart {
     width: 100% !important;
-    height: 40px !important;
-    max-height: 40px;
+    height: 60px !important;
+    max-height: 60px;
 }
 
 /* Mobile: adjust layout for smaller screens */
 @media (max-width: 768px) {
+    .asset-logo-container {
+        width: 32px;
+        height: 32px;
+        min-width: 32px;
+    }
+    
     .asset-info-display {
         flex-wrap: wrap;
         gap: 8px;
         padding: 6px 10px;
+        min-height: auto;
     }
     
     .asset-info-left {
@@ -1014,10 +1022,10 @@ header h1 {
     }
     
     .asset-chart-container {
-        width: 140px;
+        flex: 1;
         height: 45px;
         margin-left: 0;
-        flex-shrink: 0;
+        min-width: 140px;
     }
     
     .asset-chart {
@@ -1040,6 +1048,10 @@ header h1 {
     .chart-label-low {
         padding: 1px 3px;
         font-size: 0.6rem;
+    }
+    
+    .asset-input-container {
+        max-width: 100%;
     }
 }
 
