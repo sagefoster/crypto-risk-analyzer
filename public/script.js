@@ -408,8 +408,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Update default value styling
             updateDefaultValueStyle(e.target);
             
-            // Clear existing autocomplete
+            // Clear existing autocomplete and cleanup listeners
             if (autocompleteDiv) {
+                if (autocompleteDiv._cleanup) {
+                    autocompleteDiv._cleanup();
+                }
                 autocompleteDiv.remove();
                 autocompleteDiv = null;
             }
@@ -420,44 +423,110 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Don't search if query is too short or empty
-            if (query.length < 2) {
+            if (query.length < 1) {
                 return;
             }
 
-            // Show loading state immediately after 2nd letter
-            if (query.length === 2) {
+            // Show loading state immediately after 1st character for instant feedback
+            if (query.length >= 1 && (!autocompleteDiv || !autocompleteDiv.classList.contains('autocomplete-loading'))) {
+                // Remove existing dropdown if it exists
+                if (autocompleteDiv) {
+                    autocompleteDiv.remove();
+                    autocompleteDiv = null;
+                }
+                
                 autocompleteDiv = document.createElement('div');
                 autocompleteDiv.className = 'autocomplete-dropdown autocomplete-loading';
                 const loadingItem = document.createElement('div');
                 loadingItem.className = 'autocomplete-item autocomplete-loading-item';
-                loadingItem.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">Loading suggestions...</div>';
+                loadingItem.innerHTML = `
+                    <div style="text-align: center; padding: 20px; color: var(--text-secondary); display: flex; align-items: center; justify-content: center; gap: 12px;">
+                        <div class="autocomplete-spinner"></div>
+                        <span>Loading suggestions...</span>
+                    </div>
+                `;
                 autocompleteDiv.appendChild(loadingItem);
                 
-                // Position dropdown immediately
-                const inputRect = input.getBoundingClientRect();
-                const viewportHeight = window.innerHeight;
-                const viewportWidth = window.innerWidth;
-                const isMobile = window.innerWidth <= 768;
+                // Position dropdown immediately with proper calculation
+                const positionDropdown = () => {
+                    const inputRect = input.getBoundingClientRect();
+                    const viewportHeight = window.innerHeight;
+                    const viewportWidth = window.innerWidth;
+                    const isMobile = window.innerWidth <= 768;
+                    const dropdownMaxHeight = 300;
+                    const spaceBelow = viewportHeight - inputRect.bottom;
+                    const spaceAbove = inputRect.top;
+                    
+                    autocompleteDiv.style.position = 'fixed';
+                    autocompleteDiv.style.zIndex = '10000';
+                    
+                    if (isMobile) {
+                        // Mobile: prefer below, but ensure visibility
+                        let topPosition;
+                        let maxHeight;
+                        
+                        if (spaceBelow >= 200) {
+                            // Enough space below - show below input
+                            topPosition = inputRect.bottom + 4;
+                            maxHeight = Math.min(dropdownMaxHeight, spaceBelow - 20);
+                        } else if (spaceAbove >= 200) {
+                            // Not enough space below, but enough above - show above
+                            topPosition = Math.max(8, inputRect.top - Math.min(dropdownMaxHeight, spaceAbove - 4));
+                            maxHeight = Math.min(dropdownMaxHeight, spaceAbove - 20);
+                            // Scroll input into view if dropdown is above
+                            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else {
+                            // Limited space - show in available space, prefer below
+                            if (spaceBelow > spaceAbove) {
+                                topPosition = inputRect.bottom + 4;
+                                maxHeight = Math.max(150, spaceBelow - 20);
+                            } else {
+                                topPosition = Math.max(8, inputRect.top - Math.min(dropdownMaxHeight, spaceAbove - 4));
+                                maxHeight = Math.max(150, spaceAbove - 20);
+                                // Scroll input into view if dropdown is above
+                                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                        }
+                        
+                        autocompleteDiv.style.top = `${topPosition}px`;
+                        autocompleteDiv.style.left = `${Math.max(12, inputRect.left)}px`;
+                        autocompleteDiv.style.width = `${Math.min(inputRect.width, viewportWidth - 24)}px`;
+                        autocompleteDiv.style.maxWidth = `${viewportWidth - 24}px`;
+                        autocompleteDiv.style.maxHeight = `${maxHeight}px`;
+                            } else {
+                                // Desktop: align directly below input (fixed positioning uses viewport coordinates)
+                                autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
+                                autocompleteDiv.style.left = `${inputRect.left}px`;
+                                autocompleteDiv.style.width = `${inputRect.width}px`;
+                                autocompleteDiv.style.maxWidth = `${inputRect.width}px`;
+                                autocompleteDiv.style.maxHeight = `${Math.min(dropdownMaxHeight, spaceBelow - 20)}px`;
+                            }
+                };
                 
-                if (isMobile) {
-                    autocompleteDiv.style.position = 'fixed';
-                    autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
-                    autocompleteDiv.style.left = `${Math.max(12, inputRect.left)}px`;
-                    autocompleteDiv.style.width = `${Math.min(inputRect.width, viewportWidth - 24)}px`;
-                    autocompleteDiv.style.maxWidth = `${viewportWidth - 24}px`;
-                    autocompleteDiv.style.zIndex = '10000';
-                } else {
-                    // Desktop: use fixed positioning for reliable alignment with input
-                    autocompleteDiv.style.position = 'fixed';
-                    autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
-                    autocompleteDiv.style.left = `${inputRect.left}px`;
-                    autocompleteDiv.style.width = `${inputRect.width}px`;
-                    autocompleteDiv.style.maxWidth = `${inputRect.width}px`;
-                    autocompleteDiv.style.zIndex = '10000';
-                }
+                positionDropdown();
+                
+                // Recalculate position on scroll/resize
+                const updatePosition = () => {
+                    if (autocompleteDiv && autocompleteDiv.classList.contains('autocomplete-loading')) {
+                        positionDropdown();
+                    }
+                };
+                window.addEventListener('scroll', updatePosition, { passive: true });
+                window.addEventListener('resize', updatePosition, { passive: true });
+                
+                // Store cleanup function
+                autocompleteDiv._cleanup = () => {
+                    window.removeEventListener('scroll', updatePosition);
+                    window.removeEventListener('resize', updatePosition);
+                };
                 
                 const wrapper = input.closest('.token-input-wrapper');
-                wrapper.parentNode.insertBefore(autocompleteDiv, wrapper.nextSibling);
+                if (wrapper && wrapper.parentNode) {
+                    wrapper.parentNode.insertBefore(autocompleteDiv, wrapper.nextSibling);
+                } else {
+                    // Fallback: append to body
+                    document.body.appendChild(autocompleteDiv);
+                }
             }
 
             // Debounce search - reduced to 300ms for faster response
@@ -553,35 +622,36 @@ document.addEventListener('DOMContentLoaded', async () => {
                             autocompleteDiv.appendChild(item);
                         });
 
-                        // Position dropdown - mobile-first positioning with viewport awareness
-                        // Always recalculate position to ensure correct alignment
-                        {
+                        // Position dropdown - recalculate position when results load
+                        const positionDropdownWithResults = () => {
                             const inputRect = input.getBoundingClientRect();
                             const viewportHeight = window.innerHeight;
                             const viewportWidth = window.innerWidth;
                             const spaceBelow = viewportHeight - inputRect.bottom;
                             const spaceAbove = inputRect.top;
                             const dropdownMaxHeight = 300;
-                            
-                            // Use fixed positioning on mobile for better control
                             const isMobile = window.innerWidth <= 768;
                             
+                            autocompleteDiv.style.position = 'fixed';
+                            autocompleteDiv.style.zIndex = '10000';
+                            
                             if (isMobile) {
-                                // Mobile: use fixed positioning, ensure it's always visible
-                                autocompleteDiv.style.position = 'fixed';
-                                
-                                // Calculate optimal position - prefer below, but show above if not enough space
+                                // Mobile: prefer below, but ensure visibility
                                 let topPosition;
                                 let maxHeight;
                                 
-                                if (spaceBelow >= dropdownMaxHeight + 20) {
+                                if (spaceBelow >= 200) {
                                     // Enough space below - show below input
                                     topPosition = inputRect.bottom + 4;
                                     maxHeight = Math.min(dropdownMaxHeight, spaceBelow - 20);
-                                } else if (spaceAbove >= dropdownMaxHeight + 20) {
-                                    // Not enough space below, but enough above - show above input
-                                    topPosition = Math.max(8, inputRect.top - dropdownMaxHeight - 4);
+                                } else if (spaceAbove >= 200) {
+                                    // Not enough space below, but enough above - show above
+                                    topPosition = Math.max(8, inputRect.top - Math.min(dropdownMaxHeight, spaceAbove - 4));
                                     maxHeight = Math.min(dropdownMaxHeight, spaceAbove - 20);
+                                    // Scroll input into view if dropdown is above
+                                    setTimeout(() => {
+                                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    }, 100);
                                 } else {
                                     // Limited space - show in available space, prefer below
                                     if (spaceBelow > spaceAbove) {
@@ -590,6 +660,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     } else {
                                         topPosition = Math.max(8, inputRect.top - Math.min(dropdownMaxHeight, spaceAbove - 4));
                                         maxHeight = Math.max(150, spaceAbove - 20);
+                                        // Scroll input into view if dropdown is above
+                                        setTimeout(() => {
+                                            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                        }, 100);
                                     }
                                 }
                                 
@@ -598,17 +672,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 autocompleteDiv.style.width = `${Math.min(inputRect.width, viewportWidth - 24)}px`;
                                 autocompleteDiv.style.maxWidth = `${viewportWidth - 24}px`;
                                 autocompleteDiv.style.maxHeight = `${maxHeight}px`;
-                                autocompleteDiv.style.zIndex = '10000';
                             } else {
-                                // Desktop: use fixed positioning for reliable alignment with input
-                                autocompleteDiv.style.position = 'fixed';
+                                // Desktop: align directly below input, use viewport coordinates
                                 autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
                                 autocompleteDiv.style.left = `${inputRect.left}px`;
                                 autocompleteDiv.style.width = `${inputRect.width}px`;
                                 autocompleteDiv.style.maxWidth = `${inputRect.width}px`;
-                                autocompleteDiv.style.zIndex = '10000';
+                                autocompleteDiv.style.maxHeight = `${Math.min(dropdownMaxHeight, spaceBelow - 20)}px`;
                             }
+                        };
+                        
+                        positionDropdownWithResults();
+                        
+                        // Update position on scroll/resize for results dropdown
+                        const updateResultsPosition = () => {
+                            if (autocompleteDiv && !autocompleteDiv.classList.contains('autocomplete-loading')) {
+                                positionDropdownWithResults();
+                            }
+                        };
+                        window.addEventListener('scroll', updateResultsPosition, { passive: true });
+                        window.addEventListener('resize', updateResultsPosition, { passive: true });
+                        
+                        // Store cleanup function
+                        if (autocompleteDiv._cleanup) {
+                            autocompleteDiv._cleanup();
                         }
+                        autocompleteDiv._cleanup = () => {
+                            window.removeEventListener('scroll', updateResultsPosition);
+                            window.removeEventListener('resize', updateResultsPosition);
+                        };
 
                         // Insert after input wrapper
                         const wrapper = input.closest('.token-input-wrapper');
@@ -654,6 +746,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             setTimeout(() => {
                 if (autocompleteDiv) {
+                    if (autocompleteDiv._cleanup) {
+                        autocompleteDiv._cleanup();
+                    }
                     autocompleteDiv.remove();
                     autocompleteDiv = null;
                 }
@@ -663,6 +758,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Also close on input change if value is cleared
         input.addEventListener('input', (e) => {
             if (!e.target.value.trim() && autocompleteDiv) {
+                if (autocompleteDiv._cleanup) {
+                    autocompleteDiv._cleanup();
+                }
                 autocompleteDiv.remove();
                 autocompleteDiv = null;
             }
