@@ -859,6 +859,11 @@ header h1 {
     padding: 0 !important;
 }
 
+.flowy-wrapper .flowy-input {
+    background: rgba(88, 166, 255, 0.05) !important;
+    border: 1px solid rgba(88, 166, 255, 0.15) !important;
+}
+
 .flowy-input {
     background: rgba(88, 166, 255, 0.05) !important;
     border: 1px solid rgba(88, 166, 255, 0.15) !important;
