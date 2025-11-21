@@ -888,7 +888,6 @@ header h1 {
     padding: 6px 14px;
     animation: fadeInUp 0.3s ease;
     width: 100%;
-    justify-content: space-between;
 }
 
 .asset-info-left {
@@ -896,6 +895,7 @@ header h1 {
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+    flex-shrink: 0;
 }
 
 .asset-ticker {
@@ -925,24 +925,20 @@ header h1 {
     font-weight: 600;
     color: var(--text-primary);
     letter-spacing: 0.2px;
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(4px);
     padding: 2px 6px;
     border-radius: 3px;
     white-space: nowrap;
-    z-index: 15;
+    flex-shrink: 0;
+    margin-left: 8px;
 }
 
 .asset-chart-container {
     flex: 1;
-    min-width: 150px;
-    max-width: 250px;
+    min-width: 200px;
     height: 50px;
-    margin-left: 16px;
+    margin-left: 12px;
     position: relative;
     display: flex;
     flex-direction: column;
