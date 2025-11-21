@@ -884,11 +884,18 @@ header h1 {
 .asset-info-display {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
     padding: 6px 14px;
     animation: fadeInUp 0.3s ease;
     width: 100%;
     justify-content: space-between;
+}
+
+.asset-info-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .asset-ticker {
@@ -906,17 +913,51 @@ header h1 {
     letter-spacing: 0.2px;
 }
 
+.asset-price {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    letter-spacing: 0.2px;
+}
+
 .asset-chart-container {
     flex: 1;
-    max-width: 200px;
-    height: 40px;
-    margin-left: 12px;
+    min-width: 150px;
+    max-width: 250px;
+    height: 50px;
+    margin-left: 16px;
     position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.chart-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.65rem;
+    color: var(--text-tertiary);
+    margin-bottom: 2px;
+    gap: 8px;
+}
+
+.chart-label-high,
+.chart-label-low {
+    font-weight: 500;
+}
+
+.chart-label-high {
+    color: rgba(63, 185, 80, 0.8);
+}
+
+.chart-label-low {
+    color: rgba(248, 81, 73, 0.8);
 }
 
 .asset-chart {
     width: 100% !important;
-    height: 100% !important;
+    height: 40px !important;
+    max-height: 40px;
 }
 
 /* Mobile: hide charts on small screens to save space */

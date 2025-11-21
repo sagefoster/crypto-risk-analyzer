@@ -1107,8 +1107,19 @@ app.get('/api/coin-history/:id', async (req, res) => {
     }
     
     if (response.data && response.data.prices) {
-      // Return prices array: [[timestamp, price], ...]
-      res.json({ prices: response.data.prices });
+      // Calculate current, high, and low prices
+      const prices = response.data.prices.map(p => p[1]);
+      const currentPrice = prices[prices.length - 1];
+      const highPrice = Math.max(...prices);
+      const lowPrice = Math.min(...prices);
+      
+      // Return prices array with metadata
+      res.json({ 
+        prices: response.data.prices,
+        currentPrice: currentPrice,
+        highPrice: highPrice,
+        lowPrice: lowPrice
+      });
     } else {
       res.status(404).json({ error: 'Price data not found' });
     }

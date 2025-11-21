@@ -52,9 +52,13 @@
                                         <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                                     </div>
                                     <div class="asset-info-display" id="token0-info" style="display: none;">
-                                        <span class="asset-ticker" id="token0-ticker"></span>
-                                        <span class="asset-name" id="token0-name"></span>
+                                        <div class="asset-info-left">
+                                            <span class="asset-ticker" id="token0-ticker"></span>
+                                            <span class="asset-name" id="token0-name"></span>
+                                            <span class="asset-price" id="token0-price"></span>
+                                        </div>
                                         <div class="asset-chart-container">
+                                            <div class="chart-labels" id="token0-chart-labels"></div>
                                             <canvas id="token0-chart" class="asset-chart"></canvas>
                                         </div>
                                     </div>
@@ -74,9 +78,13 @@
                                         <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                                     </div>
                                     <div class="asset-info-display" id="token1-info" style="display: none;">
-                                        <span class="asset-ticker" id="token1-ticker"></span>
-                                        <span class="asset-name" id="token1-name"></span>
+                                        <div class="asset-info-left">
+                                            <span class="asset-ticker" id="token1-ticker"></span>
+                                            <span class="asset-name" id="token1-name"></span>
+                                            <span class="asset-price" id="token1-price"></span>
+                                        </div>
                                         <div class="asset-chart-container">
+                                            <div class="chart-labels" id="token1-chart-labels"></div>
                                             <canvas id="token1-chart" class="asset-chart"></canvas>
                                         </div>
                                     </div>
@@ -96,9 +104,13 @@
                                         <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                                     </div>
                                     <div class="asset-info-display" id="token2-info" style="display: none;">
-                                        <span class="asset-ticker" id="token2-ticker"></span>
-                                        <span class="asset-name" id="token2-name"></span>
+                                        <div class="asset-info-left">
+                                            <span class="asset-ticker" id="token2-ticker"></span>
+                                            <span class="asset-name" id="token2-name"></span>
+                                            <span class="asset-price" id="token2-price"></span>
+                                        </div>
                                         <div class="asset-chart-container">
+                                            <div class="chart-labels" id="token2-chart-labels"></div>
                                             <canvas id="token2-chart" class="asset-chart"></canvas>
                                         </div>
                                     </div>
@@ -186,7 +198,7 @@
         </footer>
     </div>
 
-    <script src="script.js?v=4.0"></script>
+    <script src="script.js?v=4.1"></script>
 </body>
 </html>
 

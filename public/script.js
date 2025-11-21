@@ -121,6 +121,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                 chartInstance.destroy();
                 chartInstances.delete(chartId);
             }
+            // Clear price display
+            const priceDisplay = document.getElementById(`${inputId}-price`);
+            if (priceDisplay) {
+                priceDisplay.textContent = '';
+                priceDisplay.style.display = 'none';
+            }
+            // Clear chart labels
+            const chartLabelsContainer = document.getElementById(`${inputId}-chart-labels`);
+            if (chartLabelsContainer) {
+                chartLabelsContainer.innerHTML = '';
+                chartLabelsContainer.style.display = 'none';
+            }
             return;
         }
 
@@ -144,6 +156,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             const data = await response.json();
             if (!data.prices || data.prices.length === 0) {
                 return;
+            }
+
+            // Update current price display
+            const priceDisplay = document.getElementById(`${inputId}-price`);
+            if (priceDisplay && data.currentPrice) {
+                priceDisplay.textContent = formatPrice(data.currentPrice);
+                priceDisplay.style.display = 'inline';
+            }
+
+            // Update chart labels with high/low
+            const chartLabelsContainer = document.getElementById(`${inputId}-chart-labels`);
+            if (chartLabelsContainer && data.highPrice && data.lowPrice) {
+                chartLabelsContainer.innerHTML = `
+                    <span class="chart-label-high">H: ${formatPrice(data.highPrice)}</span>
+                    <span class="chart-label-low">L: ${formatPrice(data.lowPrice)}</span>
+                `;
+                chartLabelsContainer.style.display = 'flex';
             }
 
             // Process data: extract prices and normalize to percentage change
@@ -485,9 +514,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                 </div>
                                     <div class="asset-info-display" id="token${tokenIndex}-info" style="display: none;">
-                                        <span class="asset-ticker" id="token${tokenIndex}-ticker"></span>
-                                        <span class="asset-name" id="token${tokenIndex}-name"></span>
+                                        <div class="asset-info-left">
+                                            <span class="asset-ticker" id="token${tokenIndex}-ticker"></span>
+                                            <span class="asset-name" id="token${tokenIndex}-name"></span>
+                                            <span class="asset-price" id="token${tokenIndex}-price"></span>
+                                        </div>
                                         <div class="asset-chart-container">
+                                            <div class="chart-labels" id="token${tokenIndex}-chart-labels"></div>
                                             <canvas id="token${tokenIndex}-chart" class="asset-chart"></canvas>
                                         </div>
                                     </div>
@@ -1038,6 +1071,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             if (nameDisplay) {
                 nameDisplay.textContent = '';
+            }
+            // Clear price display
+            const priceDisplay = document.getElementById(`${inputId}-price`);
+            if (priceDisplay) {
+                priceDisplay.textContent = '';
+                priceDisplay.style.display = 'none';
             }
             // Clear chart
             await updateAssetChart(inputId, '');
