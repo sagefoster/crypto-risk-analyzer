@@ -1,4 +1,115 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // ========== HELPER FUNCTIONS (Module Scope) ==========
+    
+    // Format market cap for display
+    function formatMarketCap(marketCap) {
+        if (!marketCap || marketCap === 0) return 'N/A';
+        if (marketCap >= 1e12) return `$${(marketCap / 1e12).toFixed(2)}T`;
+        if (marketCap >= 1e9) return `$${(marketCap / 1e9).toFixed(2)}B`;
+        if (marketCap >= 1e6) return `$${(marketCap / 1e6).toFixed(2)}M`;
+        return `$${marketCap.toLocaleString()}`;
+    }
+
+    // Format price for display
+    function formatPrice(price) {
+        if (!price || price === null) return 'N/A';
+        if (price >= 1000) return `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
+        if (price >= 1) return `$${price.toFixed(2)}`;
+        if (price >= 0.01) return `$${price.toFixed(4)}`;
+        return `$${price.toFixed(6)}`;
+    }
+
+    // Shared dropdown positioning calculation
+    function calculateDropdownPosition(inputRect, isMobile, dropdownMaxHeight, autocompleteDiv, inputElement) {
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        
+        autocompleteDiv.style.position = 'fixed';
+        autocompleteDiv.style.zIndex = '10000';
+        
+        if (isMobile) {
+            // Mobile: ensure dropdown is always visible in viewport
+            if (inputRect.top < 0 || inputRect.bottom > viewportHeight) {
+                // Input is out of view - scroll it into view first
+                if (inputElement) {
+                    inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    // Return null to indicate async positioning needed
+                    return null;
+                }
+            }
+            
+            // Calculate position ensuring it's always in viewport
+            const safeInputBottom = Math.max(0, Math.min(inputRect.bottom, viewportHeight));
+            const safeInputTop = Math.max(0, Math.min(inputRect.top, viewportHeight));
+            const safeSpaceBelow = Math.max(0, viewportHeight - safeInputBottom);
+            const safeSpaceAbove = Math.max(0, safeInputTop);
+            
+            let topPosition, maxHeight;
+            
+            if (safeSpaceBelow >= 200) {
+                topPosition = safeInputBottom + 4;
+                maxHeight = Math.min(dropdownMaxHeight, safeSpaceBelow - 20);
+            } else if (safeSpaceAbove >= 200) {
+                topPosition = Math.max(8, safeInputTop - Math.min(dropdownMaxHeight, safeSpaceAbove - 4));
+                maxHeight = Math.min(dropdownMaxHeight, safeSpaceAbove - 20);
+            } else {
+                if (safeSpaceBelow > safeSpaceAbove) {
+                    topPosition = safeInputBottom + 4;
+                    maxHeight = Math.max(150, safeSpaceBelow - 20);
+                } else {
+                    topPosition = Math.max(8, safeInputTop - Math.min(dropdownMaxHeight, safeSpaceAbove - 4));
+                    maxHeight = Math.max(150, safeSpaceAbove - 20);
+                }
+            }
+            
+            topPosition = Math.max(8, Math.min(topPosition, viewportHeight - 50));
+            
+            return {
+                top: `${topPosition}px`,
+                left: `${Math.max(12, inputRect.left)}px`,
+                width: `${Math.min(inputRect.width, viewportWidth - 24)}px`,
+                maxWidth: `${viewportWidth - 24}px`,
+                maxHeight: `${maxHeight}px`
+            };
+        } else {
+            // Desktop: align directly below input
+            const spaceBelow = viewportHeight - inputRect.bottom;
+            return {
+                top: `${inputRect.bottom + 4}px`,
+                left: `${inputRect.left}px`,
+                width: `${inputRect.width}px`,
+                maxWidth: `${inputRect.width}px`,
+                maxHeight: `${Math.min(dropdownMaxHeight, spaceBelow - 20)}px`,
+                right: 'auto',
+                bottom: 'auto',
+                margin: '0',
+                transform: 'none'
+            };
+        }
+    }
+
+    // Apply calculated position to dropdown element
+    function applyDropdownPosition(autocompleteDiv, position) {
+        if (!position) return;
+        Object.keys(position).forEach(key => {
+            autocompleteDiv.style[key] = position[key];
+        });
+    }
+
+    // Cleanup autocomplete dropdown
+    function cleanupAutocomplete(autocompleteDiv) {
+        if (autocompleteDiv) {
+            if (autocompleteDiv._cleanup) {
+                autocompleteDiv._cleanup();
+            }
+            autocompleteDiv.remove();
+            return null;
+        }
+        return null;
+    }
+
+    // ========== MAIN CODE ==========
+    
     // Handle initial page load screen
     const initialLoader = document.getElementById('initialLoader');
     const mainContent = document.getElementById('mainContent');
@@ -6,7 +117,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Function to completely remove loader and show main content
     function removeLoaderAndShowContent() {
-        console.log('Removing loader...');
         
         // Show main content first
         if (mainContent) {
@@ -85,7 +195,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const showEnterButton = () => {
         if (enterButton && !progressComplete) {
             progressComplete = true;
-            console.log('Showing enter button...');
             
             // Remove hidden class
             enterButton.classList.remove('hidden');
@@ -122,7 +231,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     progress = targetProgress;
                     clearInterval(progressInterval);
                     progressBar.style.width = '100%';
-                    console.log('Progress bar complete');
                     // Show enter button when progress completes
                     showEnterButton();
                 } else {
@@ -130,7 +238,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             }, intervalTime);
         } catch (error) {
-            console.error('Error animating progress bar:', error);
             // Fallback: show button immediately on error
             if (progressBar) {
                 progressBar.style.width = '100%';
@@ -138,7 +245,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             showEnterButton();
         }
     } else {
-        console.warn('Progress bar element not found');
         // If progress bar doesn't exist, show button after short delay
         setTimeout(() => {
             showEnterButton();
@@ -149,7 +255,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Fallback 1: After 2.2 seconds
     setTimeout(() => {
         if (!progressComplete) {
-            console.log('Fallback 1: Showing enter button after 2.2s');
             if (progressBar) {
                 progressBar.style.width = '100%';
             }
@@ -163,7 +268,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Fallback 2: After 3 seconds (ultimate fallback)
     setTimeout(() => {
         if (!progressComplete || enterButton.classList.contains('hidden')) {
-            console.log('Fallback 2: Force showing enter button after 3s');
             if (progressBar) {
                 progressBar.style.width = '100%';
             }
@@ -409,13 +513,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateDefaultValueStyle(e.target);
             
             // Clear existing autocomplete and cleanup listeners
-            if (autocompleteDiv) {
-                if (autocompleteDiv._cleanup) {
-                    autocompleteDiv._cleanup();
-                }
-                autocompleteDiv.remove();
-                autocompleteDiv = null;
-            }
+            autocompleteDiv = cleanupAutocomplete(autocompleteDiv);
 
             // Clear timeout
             if (searchTimeout) {
@@ -430,10 +528,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Show loading state immediately after 1st character for instant feedback
             if (query.length >= 1 && (!autocompleteDiv || !autocompleteDiv.classList.contains('autocomplete-loading'))) {
                 // Remove existing dropdown if it exists
-                if (autocompleteDiv) {
-                    autocompleteDiv.remove();
-                    autocompleteDiv = null;
-                }
+                autocompleteDiv = cleanupAutocomplete(autocompleteDiv);
                 
                 autocompleteDiv = document.createElement('div');
                 autocompleteDiv.className = 'autocomplete-dropdown autocomplete-loading';
@@ -450,109 +545,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Position dropdown immediately with proper calculation
                 const positionDropdown = () => {
                     const inputRect = input.getBoundingClientRect();
-                    const viewportHeight = window.innerHeight;
-                    const viewportWidth = window.innerWidth;
                     const isMobile = window.innerWidth <= 768;
                     const dropdownMaxHeight = 300;
-                    const spaceBelow = viewportHeight - inputRect.bottom;
-                    const spaceAbove = inputRect.top;
                     
-                    autocompleteDiv.style.position = 'fixed';
-                    autocompleteDiv.style.zIndex = '10000';
+                    const position = calculateDropdownPosition(inputRect, isMobile, dropdownMaxHeight, autocompleteDiv, input);
                     
-                    if (isMobile) {
-                        // Mobile: ensure dropdown is always visible in viewport
-                        // First, ensure input is in viewport
-                        if (inputRect.top < 0 || inputRect.bottom > viewportHeight) {
-                            // Input is out of view - scroll it into view first
-                            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            // Recalculate after scroll
-                            setTimeout(() => {
-                                const newInputRect = input.getBoundingClientRect();
-                                const newSpaceBelow = window.innerHeight - newInputRect.bottom;
-                                const newSpaceAbove = newInputRect.top;
-                                
-                                let topPosition;
-                                let maxHeight;
-                                
-                                if (newSpaceBelow >= 200) {
-                                    topPosition = newInputRect.bottom + 4;
-                                    maxHeight = Math.min(dropdownMaxHeight, newSpaceBelow - 20);
-                                } else if (newSpaceAbove >= 200) {
-                                    topPosition = Math.max(8, newInputRect.top - Math.min(dropdownMaxHeight, newSpaceAbove - 4));
-                                    maxHeight = Math.min(dropdownMaxHeight, newSpaceAbove - 20);
-                                } else {
-                                    if (newSpaceBelow > newSpaceAbove) {
-                                        topPosition = newInputRect.bottom + 4;
-                                        maxHeight = Math.max(150, newSpaceBelow - 20);
-                                    } else {
-                                        topPosition = Math.max(8, newInputRect.top - Math.min(dropdownMaxHeight, newSpaceAbove - 4));
-                                        maxHeight = Math.max(150, newSpaceAbove - 20);
-                                    }
-                                }
-                                
-                                if (autocompleteDiv) {
-                                    autocompleteDiv.style.top = `${topPosition}px`;
-                                    autocompleteDiv.style.left = `${Math.max(12, newInputRect.left)}px`;
-                                    autocompleteDiv.style.width = `${Math.min(newInputRect.width, window.innerWidth - 24)}px`;
-                                    autocompleteDiv.style.maxWidth = `${window.innerWidth - 24}px`;
-                                    autocompleteDiv.style.maxHeight = `${maxHeight}px`;
-                                }
-                            }, 300);
-                        }
-                        
-                        // Calculate position ensuring it's always in viewport
-                        let topPosition;
-                        let maxHeight;
-                        
-                        // Ensure we use positive values and stay within viewport
-                        const safeInputBottom = Math.max(0, Math.min(inputRect.bottom, viewportHeight));
-                        const safeInputTop = Math.max(0, Math.min(inputRect.top, viewportHeight));
-                        const safeSpaceBelow = Math.max(0, viewportHeight - safeInputBottom);
-                        const safeSpaceAbove = Math.max(0, safeInputTop);
-                        
-                        if (safeSpaceBelow >= 200) {
-                            // Enough space below - show below input
-                            topPosition = safeInputBottom + 4;
-                            maxHeight = Math.min(dropdownMaxHeight, safeSpaceBelow - 20);
-                        } else if (safeSpaceAbove >= 200) {
-                            // Not enough space below, but enough above - show above
-                            topPosition = Math.max(8, safeInputTop - Math.min(dropdownMaxHeight, safeSpaceAbove - 4));
-                            maxHeight = Math.min(dropdownMaxHeight, safeSpaceAbove - 20);
-                        } else {
-                            // Limited space - show in available space, prefer below
-                            if (safeSpaceBelow > safeSpaceAbove) {
-                                topPosition = safeInputBottom + 4;
-                                maxHeight = Math.max(150, safeSpaceBelow - 20);
-                            } else {
-                                topPosition = Math.max(8, safeInputTop - Math.min(dropdownMaxHeight, safeSpaceAbove - 4));
-                                maxHeight = Math.max(150, safeSpaceAbove - 20);
+                    if (position === null) {
+                        // Async positioning needed (mobile scroll case)
+                        setTimeout(() => {
+                            const newInputRect = input.getBoundingClientRect();
+                            const newPosition = calculateDropdownPosition(newInputRect, isMobile, dropdownMaxHeight, autocompleteDiv, input);
+                            if (newPosition && autocompleteDiv) {
+                                applyDropdownPosition(autocompleteDiv, newPosition);
                             }
-                        }
-                        
-                        // Ensure topPosition is always within viewport
-                        topPosition = Math.max(8, Math.min(topPosition, viewportHeight - 50));
-                        
-                        autocompleteDiv.style.top = `${topPosition}px`;
-                        autocompleteDiv.style.left = `${Math.max(12, inputRect.left)}px`;
-                        autocompleteDiv.style.width = `${Math.min(inputRect.width, viewportWidth - 24)}px`;
-                        autocompleteDiv.style.maxWidth = `${viewportWidth - 24}px`;
-                        autocompleteDiv.style.maxHeight = `${maxHeight}px`;
-                            } else {
-                                // Desktop: align directly below input (fixed positioning uses viewport coordinates)
-                                // Ensure position is explicitly set to fixed
-                                autocompleteDiv.style.position = 'fixed';
-                                autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
-                                autocompleteDiv.style.left = `${inputRect.left}px`;
-                                autocompleteDiv.style.width = `${inputRect.width}px`;
-                                autocompleteDiv.style.maxWidth = `${inputRect.width}px`;
-                                autocompleteDiv.style.maxHeight = `${Math.min(dropdownMaxHeight, spaceBelow - 20)}px`;
-                                // Ensure no conflicting positioning
-                                autocompleteDiv.style.right = 'auto';
-                                autocompleteDiv.style.bottom = 'auto';
-                                autocompleteDiv.style.margin = '0';
-                                autocompleteDiv.style.transform = 'none';
-                            }
+                        }, 300);
+                    } else {
+                        applyDropdownPosition(autocompleteDiv, position);
+                    }
                 };
                 
                 positionDropdown();
@@ -594,25 +603,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
 
                     if (data.results && data.results.length > 0) {
-                        
-                        // Helper to format market cap
-                        const formatMarketCap = (marketCap) => {
-                            if (!marketCap || marketCap === 0) return 'N/A';
-                            if (marketCap >= 1e12) return `$${(marketCap / 1e12).toFixed(2)}T`;
-                            if (marketCap >= 1e9) return `$${(marketCap / 1e9).toFixed(2)}B`;
-                            if (marketCap >= 1e6) return `$${(marketCap / 1e6).toFixed(2)}M`;
-                            return `$${marketCap.toLocaleString()}`;
-                        };
-
-                        // Helper to format price
-                        const formatPrice = (price) => {
-                            if (!price || price === null) return 'N/A';
-                            if (price >= 1000) return `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`;
-                            if (price >= 1) return `$${price.toFixed(2)}`;
-                            if (price >= 0.01) return `$${price.toFixed(4)}`;
-                            return `$${price.toFixed(6)}`;
-                        };
-                        
                         data.results.forEach(coin => {
                             const item = document.createElement('div');
                             item.className = 'autocomplete-item';
@@ -644,11 +634,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 updateAssetDisplay(input, coin);
                                 
                                 // Immediately close dropdown after selection
-                                if (autocompleteDiv) {
-                                    autocompleteDiv.style.display = 'none'; // Hide immediately
-                                    autocompleteDiv.remove();
-                                    autocompleteDiv = null;
-                                }
+                                autocompleteDiv.style.display = 'none'; // Hide immediately
+                                autocompleteDiv = cleanupAutocomplete(autocompleteDiv);
                                 
                                 // Clear any pending search timeouts
                                 if (searchTimeout) {
@@ -673,105 +660,22 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // Position dropdown - recalculate position when results load
                         const positionDropdownWithResults = () => {
                             const inputRect = input.getBoundingClientRect();
-                            const viewportHeight = window.innerHeight;
-                            const viewportWidth = window.innerWidth;
-                            const spaceBelow = viewportHeight - inputRect.bottom;
-                            const spaceAbove = inputRect.top;
-                            const dropdownMaxHeight = 300;
                             const isMobile = window.innerWidth <= 768;
+                            const dropdownMaxHeight = 300;
                             
-                            autocompleteDiv.style.position = 'fixed';
-                            autocompleteDiv.style.zIndex = '10000';
+                            const position = calculateDropdownPosition(inputRect, isMobile, dropdownMaxHeight, autocompleteDiv, input);
                             
-                            if (isMobile) {
-                                // Mobile: ensure dropdown is always visible in viewport
-                                // First, ensure input is in viewport
-                                if (inputRect.top < 0 || inputRect.bottom > viewportHeight) {
-                                    // Input is out of view - scroll it into view first
-                                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    // Recalculate after scroll
-                                    setTimeout(() => {
-                                        const newInputRect = input.getBoundingClientRect();
-                                        const newSpaceBelow = window.innerHeight - newInputRect.bottom;
-                                        const newSpaceAbove = newInputRect.top;
-                                        
-                                        let topPosition;
-                                        let maxHeight;
-                                        
-                                        if (newSpaceBelow >= 200) {
-                                            topPosition = newInputRect.bottom + 4;
-                                            maxHeight = Math.min(dropdownMaxHeight, newSpaceBelow - 20);
-                                        } else if (newSpaceAbove >= 200) {
-                                            topPosition = Math.max(8, newInputRect.top - Math.min(dropdownMaxHeight, newSpaceAbove - 4));
-                                            maxHeight = Math.min(dropdownMaxHeight, newSpaceAbove - 20);
-                                        } else {
-                                            if (newSpaceBelow > newSpaceAbove) {
-                                                topPosition = newInputRect.bottom + 4;
-                                                maxHeight = Math.max(150, newSpaceBelow - 20);
-                                            } else {
-                                                topPosition = Math.max(8, newInputRect.top - Math.min(dropdownMaxHeight, newSpaceAbove - 4));
-                                                maxHeight = Math.max(150, newSpaceAbove - 20);
-                                            }
-                                        }
-                                        
-                                        if (autocompleteDiv) {
-                                            autocompleteDiv.style.top = `${topPosition}px`;
-                                            autocompleteDiv.style.left = `${Math.max(12, newInputRect.left)}px`;
-                                            autocompleteDiv.style.width = `${Math.min(newInputRect.width, window.innerWidth - 24)}px`;
-                                            autocompleteDiv.style.maxWidth = `${window.innerWidth - 24}px`;
-                                            autocompleteDiv.style.maxHeight = `${maxHeight}px`;
-                                        }
-                                    }, 300);
-                                }
-                                
-                                // Calculate position ensuring it's always in viewport
-                                let topPosition;
-                                let maxHeight;
-                                
-                                // Ensure we use positive values and stay within viewport
-                                const safeInputBottom = Math.max(0, Math.min(inputRect.bottom, viewportHeight));
-                                const safeInputTop = Math.max(0, Math.min(inputRect.top, viewportHeight));
-                                const safeSpaceBelow = Math.max(0, viewportHeight - safeInputBottom);
-                                const safeSpaceAbove = Math.max(0, safeInputTop);
-                                
-                                if (safeSpaceBelow >= 200) {
-                                    topPosition = safeInputBottom + 4;
-                                    maxHeight = Math.min(dropdownMaxHeight, safeSpaceBelow - 20);
-                                } else if (safeSpaceAbove >= 200) {
-                                    topPosition = Math.max(8, safeInputTop - Math.min(dropdownMaxHeight, safeSpaceAbove - 4));
-                                    maxHeight = Math.min(dropdownMaxHeight, safeSpaceAbove - 20);
-                                } else {
-                                    if (safeSpaceBelow > safeSpaceAbove) {
-                                        topPosition = safeInputBottom + 4;
-                                        maxHeight = Math.max(150, safeSpaceBelow - 20);
-                                    } else {
-                                        topPosition = Math.max(8, safeInputTop - Math.min(dropdownMaxHeight, safeSpaceAbove - 4));
-                                        maxHeight = Math.max(150, safeSpaceAbove - 20);
+                            if (position === null) {
+                                // Async positioning needed (mobile scroll case)
+                                setTimeout(() => {
+                                    const newInputRect = input.getBoundingClientRect();
+                                    const newPosition = calculateDropdownPosition(newInputRect, isMobile, dropdownMaxHeight, autocompleteDiv, input);
+                                    if (newPosition && autocompleteDiv) {
+                                        applyDropdownPosition(autocompleteDiv, newPosition);
                                     }
-                                }
-                                
-                                // Ensure topPosition is always within viewport
-                                topPosition = Math.max(8, Math.min(topPosition, viewportHeight - 50));
-                                
-                                autocompleteDiv.style.top = `${topPosition}px`;
-                                autocompleteDiv.style.left = `${Math.max(12, inputRect.left)}px`;
-                                autocompleteDiv.style.width = `${Math.min(inputRect.width, viewportWidth - 24)}px`;
-                                autocompleteDiv.style.maxWidth = `${viewportWidth - 24}px`;
-                                autocompleteDiv.style.maxHeight = `${maxHeight}px`;
+                                }, 300);
                             } else {
-                                // Desktop: align directly below input, use viewport coordinates
-                                // Ensure position is explicitly set to fixed
-                                autocompleteDiv.style.position = 'fixed';
-                                autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
-                                autocompleteDiv.style.left = `${inputRect.left}px`;
-                                autocompleteDiv.style.width = `${inputRect.width}px`;
-                                autocompleteDiv.style.maxWidth = `${inputRect.width}px`;
-                                autocompleteDiv.style.maxHeight = `${Math.min(dropdownMaxHeight, spaceBelow - 20)}px`;
-                                // Ensure no conflicting positioning
-                                autocompleteDiv.style.right = 'auto';
-                                autocompleteDiv.style.bottom = 'auto';
-                                autocompleteDiv.style.margin = '0';
-                                autocompleteDiv.style.transform = 'none';
+                                applyDropdownPosition(autocompleteDiv, position);
                             }
                         };
                         
@@ -804,8 +708,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         // Close on outside click - use capture phase for better reliability
                         const closeHandler = (e) => {
                             if (autocompleteDiv && !autocompleteDiv.contains(e.target) && e.target !== input && !input.contains(e.target)) {
-                                autocompleteDiv.remove();
-                                autocompleteDiv = null;
+                                autocompleteDiv = cleanupAutocomplete(autocompleteDiv);
                                 document.removeEventListener('click', closeHandler, true);
                                 document.removeEventListener('touchstart', closeHandler, true);
                             }
@@ -832,12 +735,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         }
                     }
                 } catch (error) {
-                    console.error('Autocomplete error:', error);
                     // Remove loading state on error
-                    if (autocompleteDiv) {
-                        autocompleteDiv.remove();
-                        autocompleteDiv = null;
-                    }
+                    autocompleteDiv = cleanupAutocomplete(autocompleteDiv);
                 }
             }, 300); // Reduced to 300ms for faster response
         });
@@ -848,24 +747,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateDefaultValueStyle(input);
             
             setTimeout(() => {
-                if (autocompleteDiv) {
-                    if (autocompleteDiv._cleanup) {
-                        autocompleteDiv._cleanup();
-                    }
-                    autocompleteDiv.remove();
-                    autocompleteDiv = null;
-                }
+                autocompleteDiv = cleanupAutocomplete(autocompleteDiv);
             }, 150); // Reduced delay for better mobile responsiveness
         });
         
         // Also close on input change if value is cleared
         input.addEventListener('input', (e) => {
             if (!e.target.value.trim() && autocompleteDiv) {
-                if (autocompleteDiv._cleanup) {
-                    autocompleteDiv._cleanup();
-                }
-                autocompleteDiv.remove();
-                autocompleteDiv = null;
+                autocompleteDiv = cleanupAutocomplete(autocompleteDiv);
             }
         });
     }
@@ -881,7 +770,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     function setupRandomCryptoButton() {
         const randomCryptoBtn = document.getElementById('randomCryptoBtn');
         if (!randomCryptoBtn) {
-            console.warn('randomCryptoBtn not found, will retry...');
             // Retry after a short delay in case DOM isn't ready
             setTimeout(setupRandomCryptoButton, 100);
             return;
@@ -895,29 +783,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Prevent multiple simultaneous clicks
             if (diceButtonProcessing) {
-                console.log('Dice button already processing, ignoring click');
                 return;
             }
             diceButtonProcessing = true;
             
             try {
-                console.log('Random crypto button clicked'); // Debug log
-            
             // Get next crypto in rotation (cycles through list)
             const randomCrypto = randomCryptos[randomCryptoIndex];
-            console.log('Selected crypto:', randomCrypto); // Debug log
-            
             // Move to next index, wrap around if at end
             randomCryptoIndex = (randomCryptoIndex + 1) % randomCryptos.length;
             
             // Get the third input (token2)
             const token2Input = document.getElementById('token2');
             if (!token2Input) {
-                console.error('token2 input not found');
                 return;
             }
-            
-            console.log('Setting value to:', randomCrypto); // Debug log
             
             // Close any existing autocomplete dropdowns first
             const existingDropdown = document.querySelector('.autocomplete-dropdown');
@@ -937,7 +817,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Verify the value was set correctly before proceeding
             if (token2Input.value.toLowerCase() !== randomCrypto.toLowerCase()) {
-                console.error('Value mismatch after setting:', token2Input.value, 'expected:', randomCrypto);
                 token2Input.value = randomCrypto; // Force set again
             }
             
@@ -972,7 +851,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (currentValue === randomCrypto.toLowerCase()) {
                 await updateAssetDisplay(token2Input);
             } else {
-                console.error('Value changed before updateAssetDisplay:', currentValue, 'expected:', randomCrypto);
             }
             
             // Trigger change event (but NOT input event to avoid autocomplete)
@@ -983,8 +861,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             setTimeout(() => {
                 token2Input.removeAttribute('data-programmatic-set');
             }, 200);
-            
-            console.log('Value set, current value:', token2Input.value); // Debug log
             
             // Add a brief highlight animation
             token2Input.style.animation = 'none';
@@ -1092,15 +968,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                         return; // Success, exit early
                     } else if (coinResponse.status === 404) {
                         // Coin not found, fall through to search
-                        console.log('Coin not found via direct lookup, trying search');
                     }
                 } else if (coinResponse.status === 404) {
                     // Coin not found, fall through to search
-                    console.log('Coin not found via direct lookup, trying search');
                 }
             } catch (directError) {
                 // If direct lookup fails, fall through to search
-                console.log('Direct coin lookup failed, trying search:', directError);
             }
             
             // Fallback: try search API to find exact match
@@ -1124,13 +997,11 @@ document.addEventListener('DOMContentLoaded', async () => {
                         updateDisplay(symbolMatch);
                     } else {
                         // If no exact match at all, don't show wrong coin - just log and return
-                        console.log('No exact match found for', value, 'in search results. Not displaying incorrect coin.');
                         // Don't update display with wrong coin
                     }
                 }
             }
         } catch (error) {
-            console.log('Could not fetch logo for', value, error);
         }
     }
     
@@ -1281,8 +1152,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (!response.ok) {
                 // Show detailed error message from server
                 const errorMsg = data.error || 'Analysis failed';
-                console.error('Server error:', errorMsg);
-                console.error('Response data:', data);
                 throw new Error(errorMsg);
             }
 
@@ -1298,7 +1167,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (typeof messageInterval !== 'undefined' && messageInterval) {
                 clearInterval(messageInterval);
             }
-            console.error('Error:', error);
             showError(error.message || 'An error occurred while analyzing the digital assets. Please check your API key and asset names/symbols.');
         } finally {
             // Hide loading state, show button
@@ -2193,7 +2061,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const contentArea = assetCard.querySelector(`#assetContent${index}`);
                 
                 if (!contentArea) {
-                    console.error(`Content area not found for asset ${index}: ${tokenName}`);
                     return;
                 }
                 
@@ -2207,7 +2074,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         timeframeText
                     ));
                 } catch (e) {
-                    console.error(`Error adding return metrics for ${tokenName}:`, e);
                 }
                 
                 // Volatility interpretation
@@ -2219,7 +2085,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         timeframeText
                     ));
                 } catch (e) {
-                    console.error(`Error adding volatility interpretation for ${tokenName}:`, e);
                 }
                 
                 // Sharpe interpretation
@@ -2233,7 +2098,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         timeframeText
                     ));
                 } catch (e) {
-                    console.error(`Error adding Sharpe interpretation for ${tokenName}:`, e);
                 }
                 
                 // Maximum Drawdown interpretation
@@ -2244,7 +2108,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         timeframeText
                     ));
                 } catch (e) {
-                    console.error(`Error adding Max Drawdown interpretation for ${tokenName}:`, e);
                 }
                 
                 // Sortino interpretation
@@ -2259,7 +2122,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         timeframeText
                     ));
                 } catch (e) {
-                    console.error(`Error adding Sortino interpretation for ${tokenName}:`, e);
                 }
                 
                 // Calmar interpretation
@@ -2272,7 +2134,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         timeframeText
                     ));
                 } catch (e) {
-                    console.error(`Error adding Calmar interpretation for ${tokenName}:`, e);
                 }
                 
                 // Beta interpretation (if data available)
@@ -2289,7 +2150,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ));
                     }
                 } catch (e) {
-                    console.error(`Error adding Beta interpretation for ${tokenName}:`, e);
                 }
                 
                 // Correlation interpretation (if data available)
@@ -2304,7 +2164,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                         ));
                     }
                 } catch (e) {
-                    console.error(`Error adding Correlation interpretation for ${tokenName}:`, e);
                 }
                 
                 // Add click handler for expand/collapse
@@ -2320,7 +2179,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     });
                 }
             } catch (error) {
-                console.error(`Error processing asset ${index} (${tokenData.id}):`, error);
                 // Continue processing other assets even if one fails
             }
         });
