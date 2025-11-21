@@ -687,7 +687,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
     if (randomCryptoBtn) {
         // Use a more robust click handler
-        randomCryptoBtn.addEventListener('click', function(e) {
+        randomCryptoBtn.addEventListener('click', async function(e) {
             e.preventDefault();
             e.stopPropagation();
             
@@ -725,11 +725,26 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Also set via property for compatibility
             token2Input.value = randomCrypto;
             
+            // Verify the value was set correctly before proceeding
+            if (token2Input.value.toLowerCase() !== randomCrypto.toLowerCase()) {
+                console.error('Value mismatch after setting:', token2Input.value, 'expected:', randomCrypto);
+                token2Input.value = randomCrypto; // Force set again
+            }
+            
             // Update default value styling
             updateDefaultValueStyle(token2Input);
             
-            // Update logo and name display immediately
-            updateAssetDisplay(token2Input);
+            // Small delay to ensure value is fully set before fetching display data
+            await new Promise(resolve => setTimeout(resolve, 50));
+            
+            // Update logo and name display - WAIT for it to complete to ensure correct data
+            // Double-check the value is still correct before updating
+            const currentValue = token2Input.value.trim().toLowerCase();
+            if (currentValue === randomCrypto.toLowerCase()) {
+                await updateAssetDisplay(token2Input);
+            } else {
+                console.error('Value changed before updateAssetDisplay:', currentValue, 'expected:', randomCrypto);
+            }
             
             // Trigger change event (but NOT input event to avoid autocomplete)
             const changeEvent = new Event('change', { bubbles: true, cancelable: true });
