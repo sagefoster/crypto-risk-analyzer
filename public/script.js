@@ -540,11 +540,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                         autocompleteDiv.style.maxHeight = `${maxHeight}px`;
                             } else {
                                 // Desktop: align directly below input (fixed positioning uses viewport coordinates)
+                                // Ensure position is explicitly set to fixed
+                                autocompleteDiv.style.position = 'fixed';
                                 autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
                                 autocompleteDiv.style.left = `${inputRect.left}px`;
                                 autocompleteDiv.style.width = `${inputRect.width}px`;
                                 autocompleteDiv.style.maxWidth = `${inputRect.width}px`;
                                 autocompleteDiv.style.maxHeight = `${Math.min(dropdownMaxHeight, spaceBelow - 20)}px`;
+                                // Ensure no conflicting positioning
+                                autocompleteDiv.style.right = 'auto';
+                                autocompleteDiv.style.bottom = 'auto';
+                                autocompleteDiv.style.margin = '0';
+                                autocompleteDiv.style.transform = 'none';
                             }
                 };
                 
@@ -757,11 +764,18 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 autocompleteDiv.style.maxHeight = `${maxHeight}px`;
                             } else {
                                 // Desktop: align directly below input, use viewport coordinates
+                                // Ensure position is explicitly set to fixed
+                                autocompleteDiv.style.position = 'fixed';
                                 autocompleteDiv.style.top = `${inputRect.bottom + 4}px`;
                                 autocompleteDiv.style.left = `${inputRect.left}px`;
                                 autocompleteDiv.style.width = `${inputRect.width}px`;
                                 autocompleteDiv.style.maxWidth = `${inputRect.width}px`;
                                 autocompleteDiv.style.maxHeight = `${Math.min(dropdownMaxHeight, spaceBelow - 20)}px`;
+                                // Ensure no conflicting positioning
+                                autocompleteDiv.style.right = 'auto';
+                                autocompleteDiv.style.bottom = 'auto';
+                                autocompleteDiv.style.margin = '0';
+                                autocompleteDiv.style.transform = 'none';
                             }
                         };
                         
