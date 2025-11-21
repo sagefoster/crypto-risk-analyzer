@@ -743,6 +743,25 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Update default value styling
             updateDefaultValueStyle(token2Input);
             
+            // Clear display immediately to prevent showing stale data
+            const token2Logo = document.getElementById('token2-logo');
+            const token2Info = document.getElementById('token2-info');
+            const token2Ticker = document.getElementById('token2-ticker');
+            const token2Name = document.getElementById('token2-name');
+            if (token2Logo) {
+                token2Logo.style.display = 'none';
+                token2Logo.src = '';
+            }
+            if (token2Info) {
+                token2Info.style.display = 'none';
+            }
+            if (token2Ticker) {
+                token2Ticker.textContent = '';
+            }
+            if (token2Name) {
+                token2Name.textContent = '';
+            }
+            
             // Small delay to ensure value is fully set before fetching display data
             await new Promise(resolve => setTimeout(resolve, 50));
             
