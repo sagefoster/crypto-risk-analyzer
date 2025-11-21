@@ -158,11 +158,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
 
-            // Update current price display (positioned on right side of chart)
+            // Update current price and market cap display
             const priceDisplay = document.getElementById(`${inputId}-price`);
             if (priceDisplay && data.currentPrice) {
                 priceDisplay.textContent = formatPrice(data.currentPrice);
-                priceDisplay.style.display = 'block';
+                priceDisplay.style.display = 'inline';
+            }
+            
+            const marketCapDisplay = document.getElementById(`${inputId}-marketcap`);
+            if (marketCapDisplay && data.marketCap) {
+                marketCapDisplay.textContent = formatMarketCap(data.marketCap);
+                marketCapDisplay.style.display = 'inline';
+            } else if (marketCapDisplay) {
+                marketCapDisplay.textContent = '';
+                marketCapDisplay.style.display = 'none';
             }
 
             // Update chart labels with high/low (will be positioned after chart renders)
@@ -610,12 +619,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                                         <div class="asset-info-left">
                                             <span class="asset-ticker" id="token${tokenIndex}-ticker"></span>
                                             <span class="asset-name" id="token${tokenIndex}-name"></span>
+                                            <span class="asset-price" id="token${tokenIndex}-price"></span>
+                                            <span class="asset-marketcap" id="token${tokenIndex}-marketcap"></span>
                                         </div>
                                         <div class="asset-chart-container">
                                             <div class="chart-labels" id="token${tokenIndex}-chart-labels"></div>
                                             <canvas id="token${tokenIndex}-chart" class="asset-chart"></canvas>
                                         </div>
-                                        <span class="asset-price-chart" id="token${tokenIndex}-price"></span>
                                     </div>
                                 </div>
                 </div>

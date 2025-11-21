@@ -893,7 +893,7 @@ header h1 {
 .asset-info-left {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
     flex-wrap: wrap;
     flex-shrink: 0;
 }
@@ -935,10 +935,10 @@ header h1 {
 }
 
 .asset-chart-container {
-    flex: 1;
-    min-width: 200px;
+    flex: 0 0 auto;
+    width: 180px;
     height: 50px;
-    margin-left: 12px;
+    margin-left: 16px;
     position: relative;
     display: flex;
     flex-direction: column;

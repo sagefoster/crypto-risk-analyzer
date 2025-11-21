@@ -1113,12 +1113,63 @@ app.get('/api/coin-history/:id', async (req, res) => {
       const highPrice = Math.max(...prices);
       const lowPrice = Math.min(...prices);
       
+      // Fetch market cap from coin data
+      let marketCap = null;
+      try {
+        const coinResponse = await axios.get(`https://pro-api.coingecko.com/api/v3/coins/${id}`, {
+          params: {
+            localization: false,
+            tickers: false,
+            market_data: true,
+            community_data: false,
+            developer_data: false,
+            sparkline: false,
+            x_cg_pro_api_key: apiKey
+          },
+          headers: {
+            'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+            'Accept': 'application/json'
+          },
+          validateStatus: (status) => status < 500
+        });
+        
+        if (coinResponse.status === 200 && coinResponse.data && coinResponse.data.market_data) {
+          marketCap = coinResponse.data.market_data.market_cap?.usd || null;
+        }
+      } catch (coinError) {
+        // Try demo API
+        try {
+          const coinResponse = await axios.get(`https://api.coingecko.com/api/v3/coins/${id}`, {
+            params: {
+              localization: false,
+              tickers: false,
+              market_data: true,
+              community_data: false,
+              developer_data: false,
+              sparkline: false,
+              x_cg_demo_api_key: apiKey
+            },
+            headers: {
+              'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (coinResponse.data && coinResponse.data.market_data) {
+            marketCap = coinResponse.data.market_data.market_cap?.usd || null;
+          }
+        } catch (demoError) {
+          // Market cap fetch failed, continue without it
+        }
+      }
+      
       // Return prices array with metadata
       res.json({ 
         prices: response.data.prices,
         currentPrice: currentPrice,
         highPrice: highPrice,
-        lowPrice: lowPrice
+        lowPrice: lowPrice,
+        marketCap: marketCap
       });
     } else {
       res.status(404).json({ error: 'Price data not found' });
