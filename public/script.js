@@ -121,11 +121,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 chartInstance.destroy();
                 chartInstances.delete(chartId);
             }
-            // Clear price display
+            // Clear price and market cap display
             const priceDisplay = document.getElementById(`${inputId}-price`);
             if (priceDisplay) {
                 priceDisplay.textContent = '';
                 priceDisplay.style.display = 'none';
+            }
+            const marketCapDisplay = document.getElementById(`${inputId}-marketcap`);
+            if (marketCapDisplay) {
+                marketCapDisplay.textContent = '';
+                marketCapDisplay.style.display = 'none';
             }
             // Clear chart labels
             const chartLabelsContainer = document.getElementById(`${inputId}-chart-labels`);
