@@ -932,6 +932,7 @@ header h1 {
     white-space: nowrap;
     flex-shrink: 0;
     margin-left: 8px;
+    align-self: center;
 }
 
 .asset-chart-container {
@@ -986,10 +987,59 @@ header h1 {
     max-height: 40px;
 }
 
-/* Mobile: hide charts on small screens to save space */
+/* Mobile: adjust layout for smaller screens */
 @media (max-width: 768px) {
+    .asset-info-display {
+        flex-wrap: wrap;
+        gap: 8px;
+        padding: 6px 10px;
+    }
+    
+    .asset-info-left {
+        gap: 6px;
+        flex-basis: 100%;
+        margin-bottom: 4px;
+    }
+    
+    .asset-ticker {
+        font-size: 0.9rem;
+    }
+    
+    .asset-name {
+        font-size: 0.85rem;
+    }
+    
+    .asset-marketcap {
+        font-size: 0.7rem;
+    }
+    
     .asset-chart-container {
-        display: none;
+        width: 140px;
+        height: 45px;
+        margin-left: 0;
+        flex-shrink: 0;
+    }
+    
+    .asset-chart {
+        height: 35px !important;
+        max-height: 35px;
+    }
+    
+    .asset-price-chart {
+        font-size: 0.7rem;
+        padding: 2px 5px;
+        margin-left: 6px;
+        align-self: center;
+    }
+    
+    .chart-labels {
+        font-size: 0.6rem;
+    }
+    
+    .chart-label-high,
+    .chart-label-low {
+        padding: 1px 3px;
+        font-size: 0.6rem;
     }
 }
 
