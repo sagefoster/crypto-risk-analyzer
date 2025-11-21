@@ -1180,11 +1180,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (nameDisplay) {
                 nameDisplay.textContent = '';
             }
-            // Clear price display
+            // Clear price and market cap display
             const priceDisplay = document.getElementById(`${inputId}-price`);
             if (priceDisplay) {
                 priceDisplay.textContent = '';
                 priceDisplay.style.display = 'none';
+            }
+            const marketCapDisplay = document.getElementById(`${inputId}-marketcap`);
+            if (marketCapDisplay) {
+                marketCapDisplay.textContent = '';
+                marketCapDisplay.style.display = 'none';
             }
             // Clear chart
             await updateAssetChart(inputId, '');
