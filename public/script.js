@@ -722,8 +722,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                             document.addEventListener('touchstart', closeHandler, true);
                         }, 100);
                     } else {
-                        // No results - remove loading state if it exists
-                        if (autocompleteDiv) {
+                        // No results - show message instead of removing
+                        if (autocompleteDiv && autocompleteDiv.classList.contains('autocomplete-loading')) {
+                            autocompleteDiv.innerHTML = '';
+                            autocompleteDiv.classList.remove('autocomplete-loading');
+                            const noResultsItem = document.createElement('div');
+                            noResultsItem.className = 'autocomplete-item autocomplete-loading-item';
+                            noResultsItem.innerHTML = '<div style="text-align: center; padding: 20px; color: var(--text-secondary);">No results found. Try typing more characters.</div>';
+                            autocompleteDiv.appendChild(noResultsItem);
+                        } else if (autocompleteDiv) {
+                            // If not loading, remove it
                             autocompleteDiv.remove();
                             autocompleteDiv = null;
                         }
