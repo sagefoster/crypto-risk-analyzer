@@ -673,6 +673,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Ordered: ripple, binancecoin, zcash, monero, solana, litecoin, dogecoin, uniswap, chainlink
     const randomCryptos = ['ripple', 'binancecoin', 'zcash', 'monero', 'solana', 'litecoin', 'dogecoin', 'uniswap', 'chainlink'];
     let randomCryptoIndex = 0; // Track current position in rotation
+    let diceButtonProcessing = false; // Lock to prevent multiple simultaneous clicks
     
     // Get random crypto button once (will be used later for scroll prompt too)
     // Use a function to ensure button is available when called
@@ -691,7 +692,15 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.preventDefault();
             e.stopPropagation();
             
-            console.log('Random crypto button clicked'); // Debug log
+            // Prevent multiple simultaneous clicks
+            if (diceButtonProcessing) {
+                console.log('Dice button already processing, ignoring click');
+                return;
+            }
+            diceButtonProcessing = true;
+            
+            try {
+                console.log('Random crypto button clicked'); // Debug log
             
             // Get next crypto in rotation (cycles through list)
             const randomCrypto = randomCryptos[randomCryptoIndex];
@@ -774,6 +783,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                     setTimeout(showScrollPrompt, 800);
                 }
             }, 200);
+            } finally {
+                // Reset lock after a delay to allow async operations to complete
+                setTimeout(() => {
+                    diceButtonProcessing = false;
+                }, 1000);
+            }
         }, { capture: true }); // Use capture phase to ensure it fires
     }
     }
