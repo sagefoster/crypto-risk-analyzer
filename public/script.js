@@ -461,32 +461,77 @@ document.addEventListener('DOMContentLoaded', async () => {
                     autocompleteDiv.style.zIndex = '10000';
                     
                     if (isMobile) {
-                        // Mobile: prefer below, but ensure visibility
+                        // Mobile: ensure dropdown is always visible in viewport
+                        // First, ensure input is in viewport
+                        if (inputRect.top < 0 || inputRect.bottom > viewportHeight) {
+                            // Input is out of view - scroll it into view first
+                            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            // Recalculate after scroll
+                            setTimeout(() => {
+                                const newInputRect = input.getBoundingClientRect();
+                                const newSpaceBelow = window.innerHeight - newInputRect.bottom;
+                                const newSpaceAbove = newInputRect.top;
+                                
+                                let topPosition;
+                                let maxHeight;
+                                
+                                if (newSpaceBelow >= 200) {
+                                    topPosition = newInputRect.bottom + 4;
+                                    maxHeight = Math.min(dropdownMaxHeight, newSpaceBelow - 20);
+                                } else if (newSpaceAbove >= 200) {
+                                    topPosition = Math.max(8, newInputRect.top - Math.min(dropdownMaxHeight, newSpaceAbove - 4));
+                                    maxHeight = Math.min(dropdownMaxHeight, newSpaceAbove - 20);
+                                } else {
+                                    if (newSpaceBelow > newSpaceAbove) {
+                                        topPosition = newInputRect.bottom + 4;
+                                        maxHeight = Math.max(150, newSpaceBelow - 20);
+                                    } else {
+                                        topPosition = Math.max(8, newInputRect.top - Math.min(dropdownMaxHeight, newSpaceAbove - 4));
+                                        maxHeight = Math.max(150, newSpaceAbove - 20);
+                                    }
+                                }
+                                
+                                if (autocompleteDiv) {
+                                    autocompleteDiv.style.top = `${topPosition}px`;
+                                    autocompleteDiv.style.left = `${Math.max(12, newInputRect.left)}px`;
+                                    autocompleteDiv.style.width = `${Math.min(newInputRect.width, window.innerWidth - 24)}px`;
+                                    autocompleteDiv.style.maxWidth = `${window.innerWidth - 24}px`;
+                                    autocompleteDiv.style.maxHeight = `${maxHeight}px`;
+                                }
+                            }, 300);
+                        }
+                        
+                        // Calculate position ensuring it's always in viewport
                         let topPosition;
                         let maxHeight;
                         
-                        if (spaceBelow >= 200) {
+                        // Ensure we use positive values and stay within viewport
+                        const safeInputBottom = Math.max(0, Math.min(inputRect.bottom, viewportHeight));
+                        const safeInputTop = Math.max(0, Math.min(inputRect.top, viewportHeight));
+                        const safeSpaceBelow = Math.max(0, viewportHeight - safeInputBottom);
+                        const safeSpaceAbove = Math.max(0, safeInputTop);
+                        
+                        if (safeSpaceBelow >= 200) {
                             // Enough space below - show below input
-                            topPosition = inputRect.bottom + 4;
-                            maxHeight = Math.min(dropdownMaxHeight, spaceBelow - 20);
-                        } else if (spaceAbove >= 200) {
+                            topPosition = safeInputBottom + 4;
+                            maxHeight = Math.min(dropdownMaxHeight, safeSpaceBelow - 20);
+                        } else if (safeSpaceAbove >= 200) {
                             // Not enough space below, but enough above - show above
-                            topPosition = Math.max(8, inputRect.top - Math.min(dropdownMaxHeight, spaceAbove - 4));
-                            maxHeight = Math.min(dropdownMaxHeight, spaceAbove - 20);
-                            // Scroll input into view if dropdown is above
-                            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            topPosition = Math.max(8, safeInputTop - Math.min(dropdownMaxHeight, safeSpaceAbove - 4));
+                            maxHeight = Math.min(dropdownMaxHeight, safeSpaceAbove - 20);
                         } else {
                             // Limited space - show in available space, prefer below
-                            if (spaceBelow > spaceAbove) {
-                                topPosition = inputRect.bottom + 4;
-                                maxHeight = Math.max(150, spaceBelow - 20);
+                            if (safeSpaceBelow > safeSpaceAbove) {
+                                topPosition = safeInputBottom + 4;
+                                maxHeight = Math.max(150, safeSpaceBelow - 20);
                             } else {
-                                topPosition = Math.max(8, inputRect.top - Math.min(dropdownMaxHeight, spaceAbove - 4));
-                                maxHeight = Math.max(150, spaceAbove - 20);
-                                // Scroll input into view if dropdown is above
-                                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                topPosition = Math.max(8, safeInputTop - Math.min(dropdownMaxHeight, safeSpaceAbove - 4));
+                                maxHeight = Math.max(150, safeSpaceAbove - 20);
                             }
                         }
+                        
+                        // Ensure topPosition is always within viewport
+                        topPosition = Math.max(8, Math.min(topPosition, viewportHeight - 50));
                         
                         autocompleteDiv.style.top = `${topPosition}px`;
                         autocompleteDiv.style.left = `${Math.max(12, inputRect.left)}px`;
@@ -636,36 +681,74 @@ document.addEventListener('DOMContentLoaded', async () => {
                             autocompleteDiv.style.zIndex = '10000';
                             
                             if (isMobile) {
-                                // Mobile: prefer below, but ensure visibility
+                                // Mobile: ensure dropdown is always visible in viewport
+                                // First, ensure input is in viewport
+                                if (inputRect.top < 0 || inputRect.bottom > viewportHeight) {
+                                    // Input is out of view - scroll it into view first
+                                    input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                                    // Recalculate after scroll
+                                    setTimeout(() => {
+                                        const newInputRect = input.getBoundingClientRect();
+                                        const newSpaceBelow = window.innerHeight - newInputRect.bottom;
+                                        const newSpaceAbove = newInputRect.top;
+                                        
+                                        let topPosition;
+                                        let maxHeight;
+                                        
+                                        if (newSpaceBelow >= 200) {
+                                            topPosition = newInputRect.bottom + 4;
+                                            maxHeight = Math.min(dropdownMaxHeight, newSpaceBelow - 20);
+                                        } else if (newSpaceAbove >= 200) {
+                                            topPosition = Math.max(8, newInputRect.top - Math.min(dropdownMaxHeight, newSpaceAbove - 4));
+                                            maxHeight = Math.min(dropdownMaxHeight, newSpaceAbove - 20);
+                                        } else {
+                                            if (newSpaceBelow > newSpaceAbove) {
+                                                topPosition = newInputRect.bottom + 4;
+                                                maxHeight = Math.max(150, newSpaceBelow - 20);
+                                            } else {
+                                                topPosition = Math.max(8, newInputRect.top - Math.min(dropdownMaxHeight, newSpaceAbove - 4));
+                                                maxHeight = Math.max(150, newSpaceAbove - 20);
+                                            }
+                                        }
+                                        
+                                        if (autocompleteDiv) {
+                                            autocompleteDiv.style.top = `${topPosition}px`;
+                                            autocompleteDiv.style.left = `${Math.max(12, newInputRect.left)}px`;
+                                            autocompleteDiv.style.width = `${Math.min(newInputRect.width, window.innerWidth - 24)}px`;
+                                            autocompleteDiv.style.maxWidth = `${window.innerWidth - 24}px`;
+                                            autocompleteDiv.style.maxHeight = `${maxHeight}px`;
+                                        }
+                                    }, 300);
+                                }
+                                
+                                // Calculate position ensuring it's always in viewport
                                 let topPosition;
                                 let maxHeight;
                                 
-                                if (spaceBelow >= 200) {
-                                    // Enough space below - show below input
-                                    topPosition = inputRect.bottom + 4;
-                                    maxHeight = Math.min(dropdownMaxHeight, spaceBelow - 20);
-                                } else if (spaceAbove >= 200) {
-                                    // Not enough space below, but enough above - show above
-                                    topPosition = Math.max(8, inputRect.top - Math.min(dropdownMaxHeight, spaceAbove - 4));
-                                    maxHeight = Math.min(dropdownMaxHeight, spaceAbove - 20);
-                                    // Scroll input into view if dropdown is above
-                                    setTimeout(() => {
-                                        input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                    }, 100);
+                                // Ensure we use positive values and stay within viewport
+                                const safeInputBottom = Math.max(0, Math.min(inputRect.bottom, viewportHeight));
+                                const safeInputTop = Math.max(0, Math.min(inputRect.top, viewportHeight));
+                                const safeSpaceBelow = Math.max(0, viewportHeight - safeInputBottom);
+                                const safeSpaceAbove = Math.max(0, safeInputTop);
+                                
+                                if (safeSpaceBelow >= 200) {
+                                    topPosition = safeInputBottom + 4;
+                                    maxHeight = Math.min(dropdownMaxHeight, safeSpaceBelow - 20);
+                                } else if (safeSpaceAbove >= 200) {
+                                    topPosition = Math.max(8, safeInputTop - Math.min(dropdownMaxHeight, safeSpaceAbove - 4));
+                                    maxHeight = Math.min(dropdownMaxHeight, safeSpaceAbove - 20);
                                 } else {
-                                    // Limited space - show in available space, prefer below
-                                    if (spaceBelow > spaceAbove) {
-                                        topPosition = inputRect.bottom + 4;
-                                        maxHeight = Math.max(150, spaceBelow - 20);
+                                    if (safeSpaceBelow > safeSpaceAbove) {
+                                        topPosition = safeInputBottom + 4;
+                                        maxHeight = Math.max(150, safeSpaceBelow - 20);
                                     } else {
-                                        topPosition = Math.max(8, inputRect.top - Math.min(dropdownMaxHeight, spaceAbove - 4));
-                                        maxHeight = Math.max(150, spaceAbove - 20);
-                                        // Scroll input into view if dropdown is above
-                                        setTimeout(() => {
-                                            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                                        }, 100);
+                                        topPosition = Math.max(8, safeInputTop - Math.min(dropdownMaxHeight, safeSpaceAbove - 4));
+                                        maxHeight = Math.max(150, safeSpaceAbove - 20);
                                     }
                                 }
+                                
+                                // Ensure topPosition is always within viewport
+                                topPosition = Math.max(8, Math.min(topPosition, viewportHeight - 50));
                                 
                                 autocompleteDiv.style.top = `${topPosition}px`;
                                 autocompleteDiv.style.left = `${Math.max(12, inputRect.left)}px`;
