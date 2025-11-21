@@ -887,6 +887,8 @@ header h1 {
     gap: 8px;
     padding: 6px 14px;
     animation: fadeInUp 0.3s ease;
+    width: 100%;
+    justify-content: space-between;
 }
 
 .asset-ticker {
@@ -902,6 +904,26 @@ header h1 {
     font-weight: 500;
     color: var(--text-primary);
     letter-spacing: 0.2px;
+}
+
+.asset-chart-container {
+    flex: 1;
+    max-width: 200px;
+    height: 40px;
+    margin-left: 12px;
+    position: relative;
+}
+
+.asset-chart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+/* Mobile: hide charts on small screens to save space */
+@media (max-width: 768px) {
+    .asset-chart-container {
+        display: none;
+    }
 }
 
 .input-hint {

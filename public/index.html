@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crypto Risk Analyzer - Compare Risk-Adjusted Returns</title>
     <link rel="stylesheet" href="style.css?v=2.8">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 <body>
     <!-- Initial Page Load Screen -->
@@ -53,6 +54,9 @@
                                     <div class="asset-info-display" id="token0-info" style="display: none;">
                                         <span class="asset-ticker" id="token0-ticker"></span>
                                         <span class="asset-name" id="token0-name"></span>
+                                        <div class="asset-chart-container">
+                                            <canvas id="token0-chart" class="asset-chart"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -72,6 +76,9 @@
                                     <div class="asset-info-display" id="token1-info" style="display: none;">
                                         <span class="asset-ticker" id="token1-ticker"></span>
                                         <span class="asset-name" id="token1-name"></span>
+                                        <div class="asset-chart-container">
+                                            <canvas id="token1-chart" class="asset-chart"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -91,6 +98,9 @@
                                     <div class="asset-info-display" id="token2-info" style="display: none;">
                                         <span class="asset-ticker" id="token2-ticker"></span>
                                         <span class="asset-name" id="token2-name"></span>
+                                        <div class="asset-chart-container">
+                                            <canvas id="token2-chart" class="asset-chart"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -99,7 +109,7 @@
                                     <span class="random-icon">🎲</span> Try a Random Crypto
                                 </button>
                             </div>
-                            <small class="input-hint"><span class="tip-icon">💡</span> You may choose a third asset to compare, or analyze with just 2.</small>
+                            <small class="input-hint"><span class="tip-icon">💡</span> You may choose up to 5 assets to compare, or analyze with just 2.</small>
                         </div>
                     </div>
                 </div>
@@ -176,7 +186,7 @@
         </footer>
     </div>
 
-    <script src="script.js?v=3.9"></script>
+    <script src="script.js?v=4.0"></script>
 </body>
 </html>
 

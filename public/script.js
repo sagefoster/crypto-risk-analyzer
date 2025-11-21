@@ -108,6 +108,124 @@ document.addEventListener('DOMContentLoaded', async () => {
         return null;
     }
 
+    // Chart instances storage
+    const chartInstances = new Map();
+
+    // Create or update price chart for an asset
+    async function updateAssetChart(inputId, coinId) {
+        if (!coinId || !coinId.trim()) {
+            // Clear chart if coin ID is empty
+            const chartId = `${inputId}-chart`;
+            const chartInstance = chartInstances.get(chartId);
+            if (chartInstance) {
+                chartInstance.destroy();
+                chartInstances.delete(chartId);
+            }
+            return;
+        }
+
+        const chartId = `${inputId}-chart`;
+        const canvas = document.getElementById(chartId);
+        if (!canvas) return;
+
+        try {
+            // Fetch 1-year price history
+            const response = await fetch(`/api/coin-history/${encodeURIComponent(coinId)}`);
+            if (!response.ok) {
+                // If fetch fails, clear existing chart
+                const existingChart = chartInstances.get(chartId);
+                if (existingChart) {
+                    existingChart.destroy();
+                    chartInstances.delete(chartId);
+                }
+                return;
+            }
+
+            const data = await response.json();
+            if (!data.prices || data.prices.length === 0) {
+                return;
+            }
+
+            // Process data: extract prices and normalize to percentage change
+            const prices = data.prices.map(p => p[1]);
+            const firstPrice = prices[0];
+            const normalizedPrices = prices.map(p => ((p - firstPrice) / firstPrice) * 100);
+
+            // Prepare labels (dates) - sample every ~30 days for cleaner display
+            const labels = [];
+            const chartData = [];
+            const step = Math.max(1, Math.floor(data.prices.length / 12)); // ~12 data points
+            
+            for (let i = 0; i < data.prices.length; i += step) {
+                const date = new Date(data.prices[i][0]);
+                labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+                chartData.push(normalizedPrices[i]);
+            }
+
+            // Destroy existing chart if it exists
+            const existingChart = chartInstances.get(chartId);
+            if (existingChart) {
+                existingChart.destroy();
+            }
+
+            // Determine color based on performance
+            const isPositive = normalizedPrices[normalizedPrices.length - 1] >= 0;
+            const chartColor = isPositive ? 'rgba(63, 185, 80, 0.8)' : 'rgba(248, 81, 73, 0.8)';
+            const bgColor = isPositive ? 'rgba(63, 185, 80, 0.1)' : 'rgba(248, 81, 73, 0.1)';
+
+            // Create new chart
+            const chartInstance = new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Price Change (%)',
+                        data: chartData,
+                        borderColor: chartColor,
+                        backgroundColor: bgColor,
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0,
+                        pointHoverRadius: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            enabled: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            display: false
+                        }
+                    },
+                    interaction: {
+                        intersect: false
+                    }
+                }
+            });
+
+            chartInstances.set(chartId, chartInstance);
+        } catch (error) {
+            // Silently fail - chart is optional
+            const existingChart = chartInstances.get(chartId);
+            if (existingChart) {
+                existingChart.destroy();
+                chartInstances.delete(chartId);
+            }
+        }
+    }
+
     // ========== MAIN CODE ==========
     
     // Handle initial page load screen
@@ -226,17 +344,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         try {
             progressInterval = setInterval(() => {
-                progress += increment;
-                if (progress >= targetProgress) {
-                    progress = targetProgress;
+            progress += increment;
+            if (progress >= targetProgress) {
+                progress = targetProgress;
                     clearInterval(progressInterval);
-                    progressBar.style.width = '100%';
-                    // Show enter button when progress completes
-                    showEnterButton();
-                } else {
-                    progressBar.style.width = `${progress}%`;
-                }
-            }, intervalTime);
+                progressBar.style.width = '100%';
+                // Show enter button when progress completes
+                showEnterButton();
+            } else {
+                progressBar.style.width = `${progress}%`;
+            }
+        }, intervalTime);
         } catch (error) {
             // Fallback: show button immediately on error
             if (progressBar) {
@@ -364,15 +482,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 <div class="asset-input-container">
                                     <div class="token-input-wrapper flowy-wrapper">
                                         <input type="text" class="token-input flowy-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="Enter asset name or symbol..." required>
-                                        <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
-                                    </div>
+                    <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+                </div>
                                     <div class="asset-info-display" id="token${tokenIndex}-info" style="display: none;">
                                         <span class="asset-ticker" id="token${tokenIndex}-ticker"></span>
                                         <span class="asset-name" id="token${tokenIndex}-name"></span>
+                                        <div class="asset-chart-container">
+                                            <canvas id="token${tokenIndex}-chart" class="asset-chart"></canvas>
+                                        </div>
                                     </div>
                                 </div>
                 </div>
-                <small class="input-hint">Autocomplete available as you type <span class="info-icon-small" data-tooltip="Autocomplete available as you type">ⓘ</span></small>
             </div>
         `;
         
@@ -386,7 +506,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             e.stopPropagation();
             if (inputField) {
                 inputField.value = '';
-                updateAssetDisplay(inputField); // Clear logo and name
+                updateAssetDisplay(inputField).catch(() => {}); // Clear logo and name
                 inputField.focus();
                 // Close any open autocomplete dropdown
                 const existingDropdown = tokenGroup.querySelector('.autocomplete-dropdown');
@@ -544,8 +664,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // Position dropdown immediately with proper calculation
                 const positionDropdown = () => {
-                    const inputRect = input.getBoundingClientRect();
-                    const isMobile = window.innerWidth <= 768;
+                const inputRect = input.getBoundingClientRect();
+                const isMobile = window.innerWidth <= 768;
                     const dropdownMaxHeight = 300;
                     
                     const position = calculateDropdownPosition(inputRect, isMobile, dropdownMaxHeight, autocompleteDiv, input);
@@ -559,7 +679,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 applyDropdownPosition(autocompleteDiv, newPosition);
                             }
                         }, 300);
-                    } else {
+                } else {
                         applyDropdownPosition(autocompleteDiv, position);
                     }
                 };
@@ -623,7 +743,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 e.preventDefault(); // Prevent input blur
                             });
                             
-                            item.addEventListener('click', (e) => {
+                            item.addEventListener('click', async (e) => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 
@@ -631,10 +751,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 input.value = coin.id;
                                 
                                 // Update logo and name display
-                                updateAssetDisplay(input, coin);
+                                await updateAssetDisplay(input, coin);
                                 
                                 // Immediately close dropdown after selection
-                                autocompleteDiv.style.display = 'none'; // Hide immediately
+                                    autocompleteDiv.style.display = 'none'; // Hide immediately
                                 autocompleteDiv = cleanupAutocomplete(autocompleteDiv);
                                 
                                 // Clear any pending search timeouts
@@ -768,7 +888,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Get random crypto button once (will be used later for scroll prompt too)
     // Use a function to ensure button is available when called
     function setupRandomCryptoButton() {
-        const randomCryptoBtn = document.getElementById('randomCryptoBtn');
+    const randomCryptoBtn = document.getElementById('randomCryptoBtn');
         if (!randomCryptoBtn) {
             // Retry after a short delay in case DOM isn't ready
             setTimeout(setupRandomCryptoButton, 100);
@@ -813,7 +933,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             nativeInputValueSetter.call(token2Input, randomCrypto);
             
             // Also set via property for compatibility
-            token2Input.value = randomCrypto;
+                token2Input.value = randomCrypto;
             
             // Verify the value was set correctly before proceeding
             if (token2Input.value.toLowerCase() !== randomCrypto.toLowerCase()) {
@@ -861,17 +981,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             setTimeout(() => {
                 token2Input.removeAttribute('data-programmatic-set');
             }, 200);
-            
-            // Add a brief highlight animation
-            token2Input.style.animation = 'none';
-            setTimeout(() => {
-                token2Input.style.animation = 'highlightPulse 0.6s ease';
-            }, 10);
-            
-            // Focus the input
-            setTimeout(() => {
-                token2Input.focus();
-            }, 100);
+                
+                // Add a brief highlight animation
+                token2Input.style.animation = 'none';
+                setTimeout(() => {
+                    token2Input.style.animation = 'highlightPulse 0.6s ease';
+                }, 10);
+                
+                // Focus the input
+                setTimeout(() => {
+                    token2Input.focus();
+                }, 100);
             
             // Check if scroll prompt should be shown after value is set
             setTimeout(() => {
@@ -919,11 +1039,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (nameDisplay) {
                 nameDisplay.textContent = '';
             }
+            // Clear chart
+            await updateAssetChart(inputId, '');
             return;
         }
         
         // Helper function to update display with coin data
-        const updateDisplay = (coin) => {
+        const updateDisplay = async (coin) => {
             if (!coin) return;
             
             if (logoImg && coin.thumb) {
@@ -946,11 +1068,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (infoDisplay && (coin.symbol || coin.name)) {
                 infoDisplay.style.display = 'flex';
             }
+            
+            // Update chart with coin ID
+            if (coin.id) {
+                await updateAssetChart(inputId, coin.id);
+            }
         };
         
         // If coinData is provided (from autocomplete), use it
         if (coinData && coinData.thumb) {
-            updateDisplay(coinData);
+            await updateDisplay(coinData);
             return;
         }
         
@@ -964,7 +1091,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const coinData = await coinResponse.json();
                     if (coinData && coinData.id && coinData.id.toLowerCase() === value.toLowerCase()) {
                         // Verify it's the correct coin before using it
-                        updateDisplay(coinData);
+                        await updateDisplay(coinData);
                         return; // Success, exit early
                     } else if (coinResponse.status === 404) {
                         // Coin not found, fall through to search
@@ -986,7 +1113,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 if (exactMatch) {
                     // Only use exact match - don't use partial matches
-                    updateDisplay(exactMatch);
+                    await updateDisplay(exactMatch);
                 } else {
                     // No exact match found - try to find by symbol (exact symbol match only)
                     const symbolMatch = data.results.find(coin => 
@@ -994,7 +1121,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     );
                     
                     if (symbolMatch) {
-                        updateDisplay(symbolMatch);
+                        await updateDisplay(symbolMatch);
                     } else {
                         // If no exact match at all, don't show wrong coin - just log and return
                         // Don't update display with wrong coin
@@ -1008,12 +1135,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Initialize asset displays for default values
         document.querySelectorAll('.token-input').forEach(input => {
             if (input.value) {
-                updateAssetDisplay(input);
+                updateAssetDisplay(input).catch(() => {});
             }
             
             // Update on change
             input.addEventListener('change', () => {
-                updateAssetDisplay(input);
+                updateAssetDisplay(input).catch(() => {});
             });
         });
 
@@ -1033,7 +1160,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.preventDefault();
                 e.stopPropagation();
                 input.value = '';
-                updateAssetDisplay(input); // Clear logo and name
+                updateAssetDisplay(input).catch(() => {}); // Clear logo and name
                 input.focus();
                 // Close any open autocomplete dropdown
                 const existingDropdown = group.querySelector('.autocomplete-dropdown');
@@ -1088,7 +1215,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             }, 300);
         }
         scrollPromptShown = false; // Reset flag so it can show again if needed
-        
+
         // Add exciting click feedback animation
         analyzeBtn.style.animation = 'analyzeClick 0.6s ease';
         analyzeBtn.style.transform = 'scale(1.05)';

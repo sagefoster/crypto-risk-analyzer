@@ -1052,6 +1052,75 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// API endpoint to fetch 1-year price history for a single coin (for mini charts)
+app.get('/api/coin-history/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const apiKey = process.env.COINGECKO_API_KEY;
+    
+    if (!apiKey) {
+      return res.status(400).json({ error: 'API key not configured' });
+    }
+    
+    // Fetch 1 year of data (365 days)
+    const days = 365;
+    const isDemoKey = apiKey.startsWith('CG-') && !apiKey.includes('pro');
+    
+    let response;
+    try {
+      if (!isDemoKey) {
+        // Try Pro API first
+        response = await axios.get(`https://pro-api.coingecko.com/api/v3/coins/${id}/market_chart`, {
+          params: {
+            vs_currency: 'usd',
+            days: days,
+            x_cg_pro_api_key: apiKey
+          },
+          headers: {
+            'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+            'Accept': 'application/json'
+          },
+          validateStatus: (status) => status < 500
+        });
+        
+        if (response.data && response.data.error_code === 10011) {
+          throw new Error('DEMO_KEY_DETECTED');
+        }
+      }
+      
+      if (!response || response.status !== 200) {
+        throw new Error('Pro API failed');
+      }
+    } catch (proError) {
+      // Fallback to Demo API
+      response = await axios.get(`https://api.coingecko.com/api/v3/coins/${id}/market_chart`, {
+        params: {
+          vs_currency: 'usd',
+          days: days,
+          x_cg_demo_api_key: apiKey
+        },
+        headers: {
+          'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
+          'Accept': 'application/json'
+        }
+      });
+    }
+    
+    if (response.data && response.data.prices) {
+      // Return prices array: [[timestamp, price], ...]
+      res.json({ prices: response.data.prices });
+    } else {
+      res.status(404).json({ error: 'Price data not found' });
+    }
+  } catch (error) {
+    if (error.response && error.response.status === 404) {
+      res.status(404).json({ error: 'Coin not found' });
+    } else {
+      res.status(500).json({ error: error.message || 'Failed to fetch price history' });
+    }
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
