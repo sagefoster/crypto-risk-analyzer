@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const priceDisplay = document.getElementById(`${inputId}-price`);
             if (priceDisplay && data.currentPrice) {
                 priceDisplay.textContent = formatPrice(data.currentPrice);
-                priceDisplay.style.display = 'inline';
+                priceDisplay.style.display = 'block';
             }
             
             const marketCapDisplay = document.getElementById(`${inputId}-marketcap`);
