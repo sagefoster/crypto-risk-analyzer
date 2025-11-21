@@ -626,12 +626,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             <span class="asset-name" id="token${tokenIndex}-name"></span>
                                             <span class="asset-marketcap" id="token${tokenIndex}-marketcap"></span>
                                         </div>
-                                        <div class="asset-chart-container">
-                                            <div class="chart-labels" id="token${tokenIndex}-chart-labels"></div>
-                                            <canvas id="token${tokenIndex}-chart" class="asset-chart"></canvas>
-                                        </div>
-                                        <span class="asset-price-chart" id="token${tokenIndex}-price"></span>
                                     </div>
+                                </div>
+                                <div class="asset-chart-section" id="token${tokenIndex}-chart-section" style="display: none;">
+                                    <div class="asset-chart-container">
+                                        <div class="chart-labels" id="token${tokenIndex}-chart-labels"></div>
+                                        <canvas id="token${tokenIndex}-chart" class="asset-chart"></canvas>
+                                    </div>
+                                    <span class="asset-price-chart" id="token${tokenIndex}-price"></span>
+                                </div>
                                 </div>
                 </div>
             </div>
@@ -1174,6 +1177,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (infoDisplay) {
                 infoDisplay.style.display = 'none';
             }
+            // Hide chart section when input is cleared
+            const chartSection = document.getElementById(`${inputId}-chart-section`);
+            if (chartSection) {
+                chartSection.style.display = 'none';
+            }
             if (tickerDisplay) {
                 tickerDisplay.textContent = '';
             }
@@ -1219,6 +1227,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             if (infoDisplay && (coin.symbol || coin.name)) {
                 infoDisplay.style.display = 'flex';
+            }
+            
+            // Show chart section when asset is selected
+            const chartSection = document.getElementById(`${inputId}-chart-section`);
+            if (chartSection && (coin.symbol || coin.name)) {
+                chartSection.style.display = 'flex';
             }
             
             // Update chart with coin ID

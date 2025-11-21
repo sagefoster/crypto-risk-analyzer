@@ -43,26 +43,30 @@
                     <div class="token-input-group" data-token-index="0">
                         <div class="form-group flowy-input-group">
                             <div class="asset-display-wrapper">
-                                <div class="asset-logo-container">
-                                    <img class="asset-logo" id="token0-logo" src="" alt="" style="display: none;">
+                                <div class="asset-left-section">
+                                    <div class="asset-logo-container">
+                                        <img class="asset-logo" id="token0-logo" src="" alt="" style="display: none;">
+                                    </div>
+                                    <div class="asset-input-container">
+                                        <div class="token-input-wrapper flowy-wrapper">
+                                            <input type="text" class="token-input flowy-input" id="token0" name="token0" value="bitcoin" placeholder="Enter asset name or symbol..." required>
+                                            <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+                                        </div>
+                                        <div class="asset-info-display" id="token0-info" style="display: none;">
+                                            <div class="asset-info-left">
+                                                <span class="asset-ticker" id="token0-ticker"></span>
+                                                <span class="asset-name" id="token0-name"></span>
+                                                <span class="asset-marketcap" id="token0-marketcap"></span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="asset-input-container">
-                                    <div class="token-input-wrapper flowy-wrapper">
-                                        <input type="text" class="token-input flowy-input" id="token0" name="token0" value="bitcoin" placeholder="Enter asset name or symbol..." required>
-                                        <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+                                <div class="asset-chart-section" id="token0-chart-section" style="display: none;">
+                                    <div class="asset-chart-container">
+                                        <div class="chart-labels" id="token0-chart-labels"></div>
+                                        <canvas id="token0-chart" class="asset-chart"></canvas>
                                     </div>
-                                    <div class="asset-info-display" id="token0-info" style="display: none;">
-                                        <div class="asset-info-left">
-                                            <span class="asset-ticker" id="token0-ticker"></span>
-                                            <span class="asset-name" id="token0-name"></span>
-                                            <span class="asset-marketcap" id="token0-marketcap"></span>
-                                        </div>
-                                        <div class="asset-chart-container">
-                                            <div class="chart-labels" id="token0-chart-labels"></div>
-                                            <canvas id="token0-chart" class="asset-chart"></canvas>
-                                        </div>
-                                        <span class="asset-price-chart" id="token0-price"></span>
-                                    </div>
+                                    <span class="asset-price-chart" id="token0-price"></span>
                                 </div>
                             </div>
                         </div>
@@ -70,26 +74,30 @@
                     <div class="token-input-group" data-token-index="1">
                         <div class="form-group flowy-input-group">
                             <div class="asset-display-wrapper">
-                                <div class="asset-logo-container">
-                                    <img class="asset-logo" id="token1-logo" src="" alt="" style="display: none;">
+                                <div class="asset-left-section">
+                                    <div class="asset-logo-container">
+                                        <img class="asset-logo" id="token1-logo" src="" alt="" style="display: none;">
+                                    </div>
+                                    <div class="asset-input-container">
+                                        <div class="token-input-wrapper flowy-wrapper">
+                                            <input type="text" class="token-input flowy-input" id="token1" name="token1" value="ethereum" placeholder="Enter asset name or symbol..." required>
+                                            <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+                                        </div>
+                                        <div class="asset-info-display" id="token1-info" style="display: none;">
+                                            <div class="asset-info-left">
+                                                <span class="asset-ticker" id="token1-ticker"></span>
+                                                <span class="asset-name" id="token1-name"></span>
+                                                <span class="asset-marketcap" id="token1-marketcap"></span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="asset-input-container">
-                                    <div class="token-input-wrapper flowy-wrapper">
-                                        <input type="text" class="token-input flowy-input" id="token1" name="token1" value="ethereum" placeholder="Enter asset name or symbol..." required>
-                                        <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+                                <div class="asset-chart-section" id="token1-chart-section" style="display: none;">
+                                    <div class="asset-chart-container">
+                                        <div class="chart-labels" id="token1-chart-labels"></div>
+                                        <canvas id="token1-chart" class="asset-chart"></canvas>
                                     </div>
-                                    <div class="asset-info-display" id="token1-info" style="display: none;">
-                                        <div class="asset-info-left">
-                                            <span class="asset-ticker" id="token1-ticker"></span>
-                                            <span class="asset-name" id="token1-name"></span>
-                                            <span class="asset-marketcap" id="token1-marketcap"></span>
-                                        </div>
-                                        <div class="asset-chart-container">
-                                            <div class="chart-labels" id="token1-chart-labels"></div>
-                                            <canvas id="token1-chart" class="asset-chart"></canvas>
-                                        </div>
-                                        <span class="asset-price-chart" id="token1-price"></span>
-                                    </div>
+                                    <span class="asset-price-chart" id="token1-price"></span>
                                 </div>
                             </div>
                         </div>
@@ -97,26 +105,30 @@
                     <div class="token-input-group token-input-group-optional" data-token-index="2">
                         <div class="form-group flowy-input-group">
                             <div class="asset-display-wrapper">
-                                <div class="asset-logo-container">
-                                    <img class="asset-logo" id="token2-logo" src="" alt="" style="display: none;">
+                                <div class="asset-left-section">
+                                    <div class="asset-logo-container">
+                                        <img class="asset-logo" id="token2-logo" src="" alt="" style="display: none;">
+                                    </div>
+                                    <div class="asset-input-container">
+                                        <div class="token-input-wrapper flowy-wrapper token-input-wrapper-optional">
+                                            <input type="text" class="token-input flowy-input token-input-optional" id="token2" name="token2" placeholder="Enter asset name or symbol...">
+                                            <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+                                        </div>
+                                        <div class="asset-info-display" id="token2-info" style="display: none;">
+                                            <div class="asset-info-left">
+                                                <span class="asset-ticker" id="token2-ticker"></span>
+                                                <span class="asset-name" id="token2-name"></span>
+                                                <span class="asset-marketcap" id="token2-marketcap"></span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="asset-input-container">
-                                    <div class="token-input-wrapper flowy-wrapper token-input-wrapper-optional">
-                                        <input type="text" class="token-input flowy-input token-input-optional" id="token2" name="token2" placeholder="Enter asset name or symbol...">
-                                        <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
+                                <div class="asset-chart-section" id="token2-chart-section" style="display: none;">
+                                    <div class="asset-chart-container">
+                                        <div class="chart-labels" id="token2-chart-labels"></div>
+                                        <canvas id="token2-chart" class="asset-chart"></canvas>
                                     </div>
-                                    <div class="asset-info-display" id="token2-info" style="display: none;">
-                                        <div class="asset-info-left">
-                                            <span class="asset-ticker" id="token2-ticker"></span>
-                                            <span class="asset-name" id="token2-name"></span>
-                                            <span class="asset-marketcap" id="token2-marketcap"></span>
-                                        </div>
-                                        <div class="asset-chart-container">
-                                            <div class="chart-labels" id="token2-chart-labels"></div>
-                                            <canvas id="token2-chart" class="asset-chart"></canvas>
-                                        </div>
-                                        <span class="asset-price-chart" id="token2-price"></span>
-                                    </div>
+                                    <span class="asset-price-chart" id="token2-price"></span>
                                 </div>
                             </div>
                             <div class="optional-asset-actions">
@@ -201,7 +213,7 @@
         </footer>
     </div>
 
-    <script src="script.js?v=4.7"></script>
+    <script src="script.js?v=4.9"></script>
 </body>
 </html>
 
