@@ -165,14 +165,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                 priceDisplay.style.display = 'inline';
             }
 
-            // Update chart labels with high/low
+            // Update chart labels with high/low (will be positioned after chart renders)
             const chartLabelsContainer = document.getElementById(`${inputId}-chart-labels`);
             if (chartLabelsContainer && data.highPrice && data.lowPrice) {
                 chartLabelsContainer.innerHTML = `
                     <span class="chart-label-high">H: ${formatPrice(data.highPrice)}</span>
                     <span class="chart-label-low">L: ${formatPrice(data.lowPrice)}</span>
                 `;
-                chartLabelsContainer.style.display = 'flex';
+                chartLabelsContainer.style.display = 'block';
             }
 
             // Process data: extract prices and normalize to percentage change
@@ -180,16 +180,34 @@ document.addEventListener('DOMContentLoaded', async () => {
             const firstPrice = prices[0];
             const normalizedPrices = prices.map(p => ((p - firstPrice) / firstPrice) * 100);
 
-            // Prepare labels (dates) - sample every ~30 days for cleaner display
+            // Find indices of high and low prices in the original data
+            const highIndex = prices.findIndex(p => p === data.highPrice);
+            const lowIndex = prices.findIndex(p => p === data.lowPrice);
+
+            // Use more data points for better detail - sample every 2-3 days instead of every 30
             const labels = [];
             const chartData = [];
-            const step = Math.max(1, Math.floor(data.prices.length / 12)); // ~12 data points
+            const step = Math.max(1, Math.floor(data.prices.length / 120)); // ~120 data points for more detail
+            const chartIndices = []; // Track original indices for each chart point
             
             for (let i = 0; i < data.prices.length; i += step) {
                 const date = new Date(data.prices[i][0]);
                 labels.push(date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
                 chartData.push(normalizedPrices[i]);
+                chartIndices.push(i);
             }
+
+            // Find chart indices for high and low
+            const highChartIndex = chartIndices.findIndex(idx => idx === highIndex);
+            const lowChartIndex = chartIndices.findIndex(idx => idx === lowIndex);
+            
+            // If exact match not found, find closest
+            const highChartIndexFinal = highChartIndex !== -1 ? highChartIndex : 
+                chartIndices.reduce((closest, idx, i) => 
+                    Math.abs(idx - highIndex) < Math.abs(chartIndices[closest] - highIndex) ? i : closest, 0);
+            const lowChartIndexFinal = lowChartIndex !== -1 ? lowChartIndex : 
+                chartIndices.reduce((closest, idx, i) => 
+                    Math.abs(idx - lowIndex) < Math.abs(chartIndices[closest] - lowIndex) ? i : closest, 0);
 
             // Destroy existing chart if it exists
             const existingChart = chartInstances.get(chartId);
@@ -214,7 +232,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         backgroundColor: bgColor,
                         borderWidth: 2,
                         fill: true,
-                        tension: 0.4,
+                        tension: 0.1, // Reduced from 0.4 for less smoothness, more detail
                         pointRadius: 0,
                         pointHoverRadius: 3
                     }]
@@ -240,6 +258,54 @@ document.addEventListener('DOMContentLoaded', async () => {
                     },
                     interaction: {
                         intersect: false
+                    },
+                    animation: {
+                        onComplete: () => {
+                            // Position high/low labels after chart is rendered
+                            if (chartLabelsContainer && data.highPrice && data.lowPrice) {
+                                const chartWidth = canvas.width;
+                                const chartHeight = canvas.height;
+                                
+                                // Calculate positions as percentages
+                                const highXPercent = (highChartIndexFinal / (chartData.length - 1)) * 100;
+                                const lowXPercent = (lowChartIndexFinal / (chartData.length - 1)) * 100;
+                                
+                                // Get Y positions from normalized prices
+                                const highYValue = normalizedPrices[highIndex];
+                                const lowYValue = normalizedPrices[lowIndex];
+                                
+                                // Find min/max for scaling
+                                const minValue = Math.min(...normalizedPrices);
+                                const maxValue = Math.max(...normalizedPrices);
+                                const range = maxValue - minValue;
+                                
+                                // Calculate Y positions (inverted because canvas Y is top-to-bottom)
+                                const highYPercent = 100 - ((highYValue - minValue) / range) * 100;
+                                const lowYPercent = 100 - ((lowYValue - minValue) / range) * 100;
+                                
+                                // Update labels with positioning
+                                const highLabel = chartLabelsContainer.querySelector('.chart-label-high');
+                                const lowLabel = chartLabelsContainer.querySelector('.chart-label-low');
+                                
+                                if (highLabel) {
+                                    highLabel.style.position = 'absolute';
+                                    highLabel.style.left = `${highXPercent}%`;
+                                    highLabel.style.top = `${Math.max(0, highYPercent - 15)}%`;
+                                    highLabel.style.transform = 'translateX(-50%)';
+                                }
+                                
+                                if (lowLabel) {
+                                    lowLabel.style.position = 'absolute';
+                                    lowLabel.style.left = `${lowXPercent}%`;
+                                    lowLabel.style.top = `${Math.min(100, lowYPercent + 5)}%`;
+                                    lowLabel.style.transform = 'translateX(-50%)';
+                                }
+                                
+                                // Make container relative for absolute positioning
+                                chartLabelsContainer.style.position = 'relative';
+                                chartLabelsContainer.style.height = '100%';
+                            }
+                        }
                     }
                 }
             });
