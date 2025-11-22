@@ -690,8 +690,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isAssetConfirmed(e.target)) {
                     return; // Keep the value locked when asset is confirmed
                 }
-                if (isTickerNameFormat(value)) {
-                    previousValue = value; // Store for potential restoration
+                // Store previous value for potential restoration
+                if (value) {
+                    previousValue = value;
                     e.target.value = '';
                     // Don't remove data-coin-id - keep it for analyze button
                 }
@@ -703,13 +704,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // If asset is confirmed (logo showing), always restore ticker and name
                 if (isAssetConfirmed(e.target) && coinId) {
-                    // Fetch coin data to get ticker and name
+                    // Fetch coin data to get name
                     try {
                         const coinResponse = await fetch(`/api/coin/${encodeURIComponent(coinId)}`);
                         if (coinResponse.ok) {
                             const coinData = await coinResponse.json();
-                            if (coinData && coinData.symbol && coinData.name) {
-                                e.target.value = `${coinData.symbol.toUpperCase()} ${coinData.name}`;
+                            if (coinData && coinData.name) {
+                                e.target.value = coinData.name;
                                 previousValue = ''; // Clear stored value
                                 return;
                             }
@@ -1221,8 +1222,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         fetch(`/api/coin/${encodeURIComponent(coinId)}`)
                             .then(res => res.ok ? res.json() : null)
                             .then(coinData => {
-                                if (coinData && coinData.symbol && coinData.name) {
-                                    token2Input.value = `${coinData.symbol.toUpperCase()} ${coinData.name}`;
+                                if (coinData && coinData.name) {
+                                    token2Input.value = coinData.name;
                                 }
                             })
                             .catch(() => {}); // Ignore errors
@@ -1285,6 +1286,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 logoImg.style.display = 'none';
                 logoImg.src = '';
             }
+            // Hide ticker below logo
+            const tickerBelow = document.getElementById(`${inputId}-ticker-below`);
+            if (tickerBelow) {
+                tickerBelow.style.display = 'none';
+                tickerBelow.textContent = '';
+            }
             // Hide chart section when input is cleared
             const chartSection = document.getElementById(`${inputId}-chart-section`);
             if (chartSection) {
@@ -1319,12 +1326,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
             }
             
-            // Update input value to show "TICKER Name" format when asset is confirmed
+            // Show ticker below logo when asset is confirmed
+            const tickerBelow = document.getElementById(`${inputId}-ticker-below`);
+            if (tickerBelow && coin.symbol) {
+                tickerBelow.textContent = coin.symbol.toUpperCase();
+                tickerBelow.style.display = 'block';
+            }
+            
+            // Update input value to show only the asset name when asset is confirmed
             if (coin.symbol && coin.name) {
                 // Store the coin ID in a data attribute for form submission
                 input.setAttribute('data-coin-id', coin.id);
-                // Update the input value to show ticker and name
-                input.value = `${coin.symbol.toUpperCase()} ${coin.name}`;
+                // Update the input value to show only the name (ticker is shown below icon)
+                input.value = coin.name;
             }
             
             // Show chart section when asset is selected
@@ -1417,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return logoImg && logoImg.style.display !== 'none' && logoImg.src;
             };
             
-            // Clear input on focus if it's in "TICKER Name" format
+            // Clear input on focus if asset is not confirmed
             // BUT only if asset is not confirmed (logo not showing)
             input.addEventListener('focus', (e) => {
                 const value = e.target.value.trim();
@@ -1425,8 +1439,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isAssetConfirmed(e.target)) {
                     return; // Keep the value locked when asset is confirmed
                 }
-                if (isTickerNameFormat(value)) {
-                    previousValue = value; // Store for potential restoration
+                // Store previous value for potential restoration
+                if (value) {
+                    previousValue = value;
                     e.target.value = '';
                     // Don't remove data-coin-id - keep it for analyze button
                 }
@@ -1440,13 +1455,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                 
                 // If asset is confirmed (logo showing), always restore ticker and name
                 if (isAssetConfirmed(e.target) && coinId) {
-                    // Fetch coin data to get ticker and name
+                    // Fetch coin data to get name
                     try {
                         const coinResponse = await fetch(`/api/coin/${encodeURIComponent(coinId)}`);
                         if (coinResponse.ok) {
                             const coinData = await coinResponse.json();
-                            if (coinData && coinData.symbol && coinData.name) {
-                                e.target.value = `${coinData.symbol.toUpperCase()} ${coinData.name}`;
+                            if (coinData && coinData.name) {
+                                e.target.value = coinData.name;
                                 previousValue = ''; // Clear stored value
                                 return;
                             }
@@ -1473,11 +1488,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             });
             
-            // Clear entire field on first backspace if it's in "TICKER Name" format
+            // Clear entire field on first backspace if asset is confirmed
             input.addEventListener('keydown', (e) => {
                 if (e.key === 'Backspace' && !e.target.selectionStart && !e.target.selectionEnd) {
                     const value = e.target.value.trim();
-                    if (isTickerNameFormat(value)) {
+                    // If asset is confirmed, prevent clearing
+                    if (isAssetConfirmed(e.target)) {
+                        e.preventDefault();
+                        return; // Keep the value locked
+                    }
+                    if (value) {
                         e.preventDefault();
                         previousValue = value; // Store for potential restoration
                         e.target.value = '';
@@ -1509,19 +1529,58 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Store previous value when clearing (using closure per input)
                 let previousValue = '';
                 
+                // Helper function to check if asset is confirmed (logo is visible)
+                const isAssetConfirmed = (inputElement) => {
+                    const inputId = inputElement.id;
+                    const logoImg = document.getElementById(`${inputId}-logo`);
+                    return logoImg && logoImg.style.display !== 'none' && logoImg.src;
+                };
+                
                 input.addEventListener('focus', (e) => {
                     const value = e.target.value.trim();
-                    if (isTickerNameFormat(value)) {
-                        previousValue = value; // Store for potential restoration
+                    // Don't clear if asset is confirmed (logo is showing)
+                    if (isAssetConfirmed(e.target)) {
+                        return; // Keep the value locked when asset is confirmed
+                    }
+                    // Store previous value for potential restoration
+                    if (value) {
+                        previousValue = value;
                         e.target.value = '';
                         // Don't remove data-coin-id - keep it for analyze button
                     }
                 });
                 
                 // Restore previous value on blur if input is empty and coin ID exists
+                // OR if asset is confirmed, always restore just the name
                 input.addEventListener('blur', async (e) => {
                     const value = e.target.value.trim();
                     const coinId = e.target.getAttribute('data-coin-id');
+                    
+                    // If asset is confirmed (logo showing), always restore just the name
+                    if (isAssetConfirmed(e.target) && coinId) {
+                        // Fetch coin data to get name
+                        try {
+                            const coinResponse = await fetch(`/api/coin/${encodeURIComponent(coinId)}`);
+                            if (coinResponse.ok) {
+                                const coinData = await coinResponse.json();
+                                if (coinData && coinData.name) {
+                                    e.target.value = coinData.name;
+                                    previousValue = ''; // Clear stored value
+                                    return;
+                                }
+                            }
+                        } catch (error) {
+                            // If fetch fails, try to restore from previousValue
+                        }
+                        
+                        // Fallback: restore from previousValue if available
+                        if (previousValue) {
+                            e.target.value = previousValue;
+                            previousValue = ''; // Clear stored value
+                            return;
+                        }
+                    }
+                    
                     // If input is empty but we have a coin ID, restore the previous value
                     if (!value && coinId && previousValue) {
                         e.target.value = previousValue;
@@ -1536,7 +1595,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 input.addEventListener('keydown', (e) => {
                     if (e.key === 'Backspace' && !e.target.selectionStart && !e.target.selectionEnd) {
                         const value = e.target.value.trim();
-                        if (isTickerNameFormat(value)) {
+                        // If asset is confirmed, prevent clearing
+                        if (isAssetConfirmed(e.target)) {
+                            e.preventDefault();
+                            return; // Keep the value locked
+                        }
+                        if (value) {
                             e.preventDefault();
                             previousValue = value; // Store for potential restoration
                             e.target.value = '';

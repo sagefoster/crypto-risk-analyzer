@@ -849,21 +849,35 @@ header h1 {
 }
 
 .asset-logo-container {
-    width: 52px;
-    height: 52px;
-    min-width: 52px;
+    width: 48px;
+    min-width: 48px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: center;
-    border-radius: 14px;
-    overflow: hidden;
-    background: rgba(28, 33, 40, 0.6);
+    justify-content: flex-start;
+    gap: 4px;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .asset-logo {
-    width: 100%;
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    overflow: hidden;
+    background: rgba(28, 33, 40, 0.6);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    object-fit: cover;
+}
+
+.asset-ticker-below {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--accent-primary);
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    line-height: 1;
+    margin-top: 2px;
+}
     height: 100%;
     object-fit: contain;
     border-radius: 12px;
@@ -1054,9 +1068,18 @@ header h1 {
     }
     
     .asset-logo-container {
-        width: 28px;
-        height: 28px;
-        min-width: 28px;
+        width: 40px;
+        min-width: 40px;
+    }
+    
+    .asset-logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .asset-ticker-below {
+        font-size: 0.65rem;
+        margin-top: 2px;
     }
     
     .asset-input-container {
