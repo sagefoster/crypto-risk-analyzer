@@ -496,12 +496,21 @@ body::before {
 }
 
 .container {
-    max-width: 900px;
+    max-width: 1350px;
     margin: 0 auto;
     overflow-x: hidden;
     width: 100%;
     padding-bottom: 20px;
     min-height: 100vh;
+}
+
+/* Desktop: wider container for better use of screen space */
+@media (min-width: 1024px) {
+    .container {
+        max-width: 1350px;
+        padding-left: 24px;
+        padding-right: 24px;
+    }
 }
 
 header {
@@ -1039,12 +1048,9 @@ header h1 {
         gap: 10px;
     }
     
+    /* Hide charts on mobile */
     .asset-chart-section {
-        flex: 1;
-        width: 100%;
-        padding-left: 0;
-        padding-top: 2px;
-        gap: 6px;
+        display: none !important;
     }
     
     .asset-logo-container {
