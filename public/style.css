@@ -1062,9 +1062,17 @@ header h1 {
         gap: 10px;
     }
     
-    /* Hide charts on mobile */
-    .asset-chart-section {
+    /* Hide charts on mobile for inputs page only */
+    #mainContent .asset-chart-section {
         display: none !important;
+    }
+    
+    /* Show charts on mobile for results pages */
+    #resultsContainer .asset-chart-section,
+    #resultsContainer .winner .asset-chart-section,
+    #resultsContainer .summary-card .asset-chart-section,
+    #resultsContainer .asset-interpretation-card .asset-chart-section {
+        display: flex !important;
     }
     
     .asset-logo-container {
