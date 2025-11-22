@@ -587,7 +587,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     const errorDiv = document.getElementById('error');
     const analyzeBtn = document.getElementById('analyzeBtn');
     const tokensContainer = document.getElementById('tokensContainer');
-    const addTokenBtn = document.getElementById('addTokenBtn');
+    // Removed: Add Another Asset button functionality (limited to 3 assets)
+    // const addTokenBtn = document.getElementById('addTokenBtn');
     const btnLoading = document.getElementById('btnLoading');
     
     // Ensure all loading sections stay hidden on page load
@@ -799,16 +800,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             clearBtn.classList.remove('hidden');
         });
         
-        // Update add button visibility (max 5 tokens)
-        if (tokenGroups.length >= 5) {
-            addTokenBtn.style.display = 'none';
-        } else {
-            addTokenBtn.style.display = 'flex';
-        }
+        // Removed: Add button visibility logic (limited to 3 assets)
+        // if (tokenGroups.length >= 5) {
+        //     addTokenBtn.style.display = 'none';
+        // } else {
+        //     addTokenBtn.style.display = 'flex';
+        // }
     }
 
-    // Add event listener to "Add Token" button
-    addTokenBtn.addEventListener('click', addTokenInput);
+    // Removed: Add event listener to "Add Token" button (limited to 3 assets)
+    // addTokenBtn.addEventListener('click', addTokenInput);
 
     // Initialize remove button visibility
     updateRemoveButtons();

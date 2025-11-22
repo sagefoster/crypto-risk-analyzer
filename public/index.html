@@ -37,7 +37,7 @@
     <div class="container" id="mainContent">
         <div class="card">
             <h2>Choose assets to analyze</h2>
-            <p class="form-tip"><span class="tip-icon">💡</span> Example assets are loaded by default. Remove, edit, or add up to 5 assets to compare.</p>
+            <p class="form-tip"><span class="tip-icon">💡</span> Example assets are loaded by default. Remove, edit, or add up to 3 assets to compare.</p>
             <form id="analysisForm">
                 <div id="tokensContainer">
                     <div class="token-input-group" data-token-index="0">
@@ -47,13 +47,13 @@
                                     <div class="asset-logo-container">
                                         <img class="asset-logo" id="token0-logo" src="" alt="" style="display: none;">
                                         <span class="asset-ticker-below" id="token0-ticker-below" style="display: none;"></span>
-                                        <span class="xstock-caution-icon" id="token0-xstock-caution" style="display: none;" title="Click for xStock disclaimer">⚠️</span>
                                     </div>
                                     <div class="asset-input-container">
                                         <div class="token-input-wrapper flowy-wrapper">
                                             <input type="text" class="token-input flowy-input" id="token0" name="token0" value="bitcoin" placeholder="Enter asset name or symbol..." required>
                                             <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                                         </div>
+                                        <span class="xstock-caution-icon" id="token0-xstock-caution" style="display: none;" title="Click for xStock disclaimer">⚠️</span>
                                     </div>
                                 </div>
                                 <div class="asset-chart-section" id="token0-chart-section" style="display: none;">
@@ -76,13 +76,13 @@
                                     <div class="asset-logo-container">
                                         <img class="asset-logo" id="token1-logo" src="" alt="" style="display: none;">
                                         <span class="asset-ticker-below" id="token1-ticker-below" style="display: none;"></span>
-                                        <span class="xstock-caution-icon" id="token1-xstock-caution" style="display: none;" title="Click for xStock disclaimer">⚠️</span>
                                     </div>
                                     <div class="asset-input-container">
                                         <div class="token-input-wrapper flowy-wrapper">
                                             <input type="text" class="token-input flowy-input" id="token1" name="token1" value="ethereum" placeholder="Enter asset name or symbol..." required>
                                             <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                                         </div>
+                                        <span class="xstock-caution-icon" id="token1-xstock-caution" style="display: none;" title="Click for xStock disclaimer">⚠️</span>
                                     </div>
                                 </div>
                                 <div class="asset-chart-section" id="token1-chart-section" style="display: none;">
@@ -105,13 +105,13 @@
                                     <div class="asset-logo-container">
                                         <img class="asset-logo" id="token2-logo" src="" alt="" style="display: none;">
                                         <span class="asset-ticker-below" id="token2-ticker-below" style="display: none;"></span>
-                                        <span class="xstock-caution-icon" id="token2-xstock-caution" style="display: none;" title="Click for xStock disclaimer">⚠️</span>
                                     </div>
                                     <div class="asset-input-container">
                                         <div class="token-input-wrapper flowy-wrapper token-input-wrapper-optional">
-                                            <input type="text" class="token-input flowy-input token-input-optional" id="token2" name="token2" placeholder="Search or Try Random">
+                                            <input type="text" class="token-input flowy-input token-input-optional" id="token2" name="token2" placeholder="Type here to search or Try Random below">
                                             <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                                         </div>
+                                        <span class="xstock-caution-icon" id="token2-xstock-caution" style="display: none;" title="Click for xStock disclaimer">⚠️</span>
                                     </div>
                                 </div>
                                 <div class="asset-chart-section" id="token2-chart-section" style="display: none;">
@@ -138,11 +138,6 @@
                     </div>
                 </div>
 
-                <div class="form-group" style="text-align: center;">
-                    <button type="button" class="btn-add-token" id="addTokenBtn">
-                        <span>+</span> Add Another Asset
-                    </button>
-                </div>
 
                 <div class="form-group">
                     <label for="timeframe">Timeframe</label>
