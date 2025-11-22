@@ -2182,17 +2182,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        // Hide scroll prompt when analyze is pressed
-        const scrollPrompt = document.querySelector('.scroll-prompt');
-        if (scrollPrompt) {
-            scrollPrompt.classList.remove('visible');
-            setTimeout(() => {
-                if (scrollPrompt.parentNode) {
-                    scrollPrompt.remove();
-                }
-            }, 300);
-        }
-        scrollPromptShown = false; // Reset flag so it can show again if needed
+        // Scroll prompt removed
 
         // Add exciting click feedback animation
         analyzeBtn.style.animation = 'analyzeClick 0.6s ease';
@@ -3531,130 +3521,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.addEventListener('load', ensureAnalyzeButtonVisible);
     setTimeout(ensureAnalyzeButtonVisible, 500);
     
-    // Scroll prompt when all 3 assets are entered
-    let scrollPromptShown = false;
-    function checkAllInputsFilled() {
-        const token0Input = document.getElementById('token0');
-        const token1Input = document.getElementById('token1');
-        const token2Input = document.getElementById('token2');
-        
-        // Check if all 3 inputs have values
-        const allFilled = token0Input && token0Input.value.trim() &&
-                         token1Input && token1Input.value.trim() &&
-                         token2Input && token2Input.value.trim();
-        
-        return allFilled;
-    }
-    
-    function showScrollPrompt() {
-        if (scrollPromptShown) return;
-        
-        // Only show if all 3 inputs are filled
-        if (!checkAllInputsFilled()) return;
-        
-        scrollPromptShown = true;
-        
-        // Create scroll prompt element
-        const scrollPrompt = document.createElement('div');
-        scrollPrompt.className = 'scroll-prompt';
-        scrollPrompt.innerHTML = `
-            <div class="scroll-prompt-content">
-                <div class="scroll-prompt-icon">↓</div>
-                <div class="scroll-prompt-text">Ready to analyze?<br>Scroll down</div>
-            </div>
-        `;
-        
-        // Position near the analyze button or last input
-        const analyzeBtn = document.getElementById('analyzeBtn');
-        const token2Input = document.getElementById('token2');
-        const targetElement = analyzeBtn || token2Input;
-        
-        if (targetElement) {
-            // Position scroll prompt on the right side, moved further right and down to avoid caution icon
-            scrollPrompt.style.position = 'fixed';
-            scrollPrompt.style.right = '10px';
-            scrollPrompt.style.bottom = '20px';
-            scrollPrompt.style.top = 'auto';
-            scrollPrompt.style.transform = 'none';
-            scrollPrompt.style.left = 'auto';
-        }
-        
-        // Make scroll prompt clickable - scroll to center analyze button
-        scrollPrompt.addEventListener('click', () => {
-            if (analyzeBtn) {
-                const analyzeBtnRect = analyzeBtn.getBoundingClientRect();
-                const scrollY = window.scrollY + analyzeBtnRect.top - (window.innerHeight / 2) + (analyzeBtnRect.height / 2);
-                
-                window.scrollTo({
-                    top: scrollY,
-                    behavior: 'smooth'
-                });
-                
-                // Hide prompt after clicking
-                scrollPrompt.classList.remove('visible');
-                setTimeout(() => {
-                    if (scrollPrompt.parentNode) {
-                        scrollPrompt.remove();
-                    }
-                }, 300);
-            }
-        });
-        
-        document.body.appendChild(scrollPrompt);
-        
-        // Animate in
-        setTimeout(() => {
-            scrollPrompt.classList.add('visible');
-        }, 100);
-        
-        // Auto-hide after 5 seconds or when user scrolls
-        const hidePrompt = () => {
-            scrollPrompt.classList.remove('visible');
-            setTimeout(() => {
-                if (scrollPrompt.parentNode) {
-                    scrollPrompt.remove();
-                }
-            }, 300);
-        };
-        
-        setTimeout(hidePrompt, 5000);
-        
-        let scrollTimeout;
-        window.addEventListener('scroll', () => {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                if (scrollPrompt.parentNode) {
-                    hidePrompt();
-                }
-            }, 200);
-        }, { once: true });
-    }
-    
-    // Monitor all token inputs for changes
-    function setupScrollPromptListener(input) {
-        if (!input) return;
-        
-        // Check on input change
-        input.addEventListener('input', () => {
-            if (!scrollPromptShown && checkAllInputsFilled()) {
-                setTimeout(showScrollPrompt, 500);
-            }
-        });
-        
-        // Check on autocomplete selection
-        input.addEventListener('change', () => {
-            if (!scrollPromptShown && checkAllInputsFilled()) {
-                setTimeout(showScrollPrompt, 500);
-            }
-        });
-    }
-    
-    // Setup listeners for all 3 inputs
-    setupScrollPromptListener(document.getElementById('token0'));
-    setupScrollPromptListener(document.getElementById('token1'));
-    setupScrollPromptListener(document.getElementById('token2'));
-    
-    // Note: Random crypto button scroll prompt check is now handled in the main click handler above
+    // Scroll prompt functionality removed
     
     // Make analyze button glow when it's in view
     if (analyzeBtn) {
