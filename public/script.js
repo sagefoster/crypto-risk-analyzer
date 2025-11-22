@@ -664,6 +664,38 @@ document.addEventListener('DOMContentLoaded', async () => {
         const newInput = tokenGroup.querySelector('.token-input');
         if (newInput) {
             setupAutocomplete(newInput);
+            
+            // Add focus and backspace handlers for new inputs
+            newInput.setAttribute('data-focus-handler-added', 'true');
+            newInput.addEventListener('focus', (e) => {
+                const value = e.target.value.trim();
+                if (isTickerNameFormat(value)) {
+                    e.target.value = '';
+                    e.target.removeAttribute('data-coin-id');
+                }
+            });
+            newInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.selectionStart && !e.target.selectionEnd) {
+                    const value = e.target.value.trim();
+                    if (isTickerNameFormat(value)) {
+                        e.preventDefault();
+                        e.target.value = '';
+                        e.target.removeAttribute('data-coin-id');
+                        // Clear logo and chart
+                        const inputId = e.target.id;
+                        const logoImg = document.getElementById(`${inputId}-logo`);
+                        if (logoImg) {
+                            logoImg.style.display = 'none';
+                            logoImg.src = '';
+                        }
+                        const chartSection = document.getElementById(`${inputId}-chart-section`);
+                        if (chartSection) {
+                            chartSection.style.display = 'none';
+                        }
+                        updateAssetChart(inputId, '').catch(() => {});
+                    }
+                }
+            });
         }
 
         // Focus the newly created input to keep keyboard open on mobile (only when user clicks add button)
@@ -1358,7 +1390,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Check if it looks like "TICKER Name" (2+ words, first is short uppercase)
         return parts.length >= 2 && parts[0].length <= 10 && /^[A-Z]+$/.test(parts[0]);
     }
-    
+
     // Setup autocomplete and clear buttons for existing inputs (including first input)
     document.querySelectorAll('.token-input-group').forEach(group => {
         const input = group.querySelector('.token-input');
