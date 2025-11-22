@@ -2604,6 +2604,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         summaryHTML += '</div>';
         summaryDiv.innerHTML = summaryHTML;
         
+        // Render charts for all summary cards
+        setTimeout(async () => {
+            tokenResults.forEach(async (tokenData) => {
+                const tokenId = tokenData.id.toLowerCase();
+                await updateAssetChart(`summary-${tokenId}`, tokenData.id);
+            });
+        }, 200);
+        
         // Add click handlers to summary cards
         setTimeout(() => {
             const cards = summaryDiv.querySelectorAll('.summary-card.clickable');
