@@ -1295,6 +1295,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Initialize asset displays for default values
         document.querySelectorAll('.token-input').forEach(input => {
             if (input.value) {
+                // For default values (bitcoin, ethereum), store the coin ID
+                const value = input.value.trim().toLowerCase();
+                if (value === 'bitcoin' || value === 'ethereum') {
+                    input.setAttribute('data-coin-id', value);
+                }
                 updateAssetDisplay(input).catch(() => {});
             }
             
