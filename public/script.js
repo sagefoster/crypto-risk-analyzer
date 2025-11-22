@@ -1322,12 +1322,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     token2Input.focus();
                 }, 100);
             
-            // Check if scroll prompt should be shown after value is set
-            setTimeout(() => {
-                if (!scrollPromptShown && checkAllInputsFilled()) {
-                    setTimeout(showScrollPrompt, 800);
-                }
-            }, 200);
+            // Scroll prompt removed
             } finally {
                 // Reset lock after a delay to allow async operations to complete
                 setTimeout(() => {
@@ -1503,12 +1498,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         token2Input.focus();
                     }, 100);
                     
-                    // Check if scroll prompt should be shown after value is set
-                    setTimeout(() => {
-                        if (!scrollPromptShown && checkAllInputsFilled()) {
-                            setTimeout(showScrollPrompt, 800);
-                        }
-                    }, 200);
+                    // Scroll prompt removed
                 } finally {
                     // Reset lock after a delay to allow async operations to complete
                     setTimeout(() => {
