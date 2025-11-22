@@ -1070,7 +1070,9 @@ header h1 {
     /* Show charts on mobile for results pages */
     #resultsContainer .asset-chart-section,
     #resultsContainer .winner .asset-chart-section,
+    #resultsContainer .winner-chart-section,
     #resultsContainer .summary-card .asset-chart-section,
+    #resultsContainer .summary-chart-section,
     #resultsContainer .asset-interpretation-card .asset-chart-section {
         display: flex !important;
     }

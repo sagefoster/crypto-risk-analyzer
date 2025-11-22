@@ -1017,26 +1017,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 const existingListeners = document.querySelectorAll('.autocomplete-dropdown');
                                 existingListeners.forEach(dropdown => dropdown.remove());
                                 
-                                // Ensure input value is locked after selection
-                                // The updateAssetDisplay should have set it, but ensure it's locked
+                                // Don't override the value - updateAssetDisplay already set it correctly
+                                // Just trigger blur to close dropdowns
                                 setTimeout(() => {
-                                    const coinId = input.getAttribute('data-coin-id');
-                                    if (coin && coin.symbol && coin.name) {
-                                        // If name equals symbol, use proper name mapping
-                                        let displayName = coin.name;
-                                        if (coin.name.toUpperCase() === coin.symbol.toUpperCase()) {
-                                            const nameMap = {
-                                                'xrp': 'Ripple',
-                                                'bnb': 'BNB',
-                                                'usdt': 'Tether',
-                                                'usdc': 'USD Coin',
-                                                'dai': 'Dai',
-                                                'busd': 'Binance USD'
-                                            };
-                                            displayName = nameMap[coin.id.toLowerCase()] || coin.name;
-                                        }
-                                        input.value = displayName;
-                                    }
                                     input.blur(); // Trigger blur to close any remaining dropdowns and lock value
                                 }, 10);
                             });
@@ -2465,6 +2448,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const winnerDiv = document.createElement('div');
         winnerDiv.className = 'winner higher';
+        const winnerId = winner.id.toLowerCase();
         winnerDiv.innerHTML = `
             <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance over the past ${timeframeText}${comparisonText}</div>
             <div class="winner-price-range">
@@ -2478,6 +2462,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
                 <div class="price-range-line-2">
                     <span class="price-value">$${winnerHigh} - $${winnerLow}</span>
+                </div>
+            </div>
+            <div class="asset-chart-section winner-chart-section" id="winner-${winnerId}-chart-section">
+                <div class="asset-chart-container">
+                    <div class="chart-labels" id="winner-${winnerId}-chart-labels"></div>
+                    <canvas id="winner-${winnerId}-chart" class="asset-chart"></canvas>
+                </div>
+                <div class="asset-price-wrapper">
+                    <span class="asset-price-label">Current Price</span>
+                    <span class="asset-price-chart" id="winner-${winnerId}-price">$${winnerCurrent}</span>
                 </div>
             </div>
             <div class="winner-metrics">
@@ -2494,7 +2488,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
         `;
         
-        // Removed winner-comparison footer text as it repeats the header information
+        // Render chart for winner
+        setTimeout(async () => {
+            await updateAssetChart(`winner-${winnerId}`, winner.id);
+        }, 100);
 
         return winnerDiv;
     }
@@ -2568,6 +2565,16 @@ document.addEventListener('DOMContentLoaded', async () => {
                     <div class="current-price-summary">
                         <span class="price-label">Current Price:</span>
                         <span class="price-value">$${currentPrice}</span>
+                    </div>
+                    <div class="asset-chart-section summary-chart-section" id="summary-${tokenId}-chart-section">
+                        <div class="asset-chart-container">
+                            <div class="chart-labels" id="summary-${tokenId}-chart-labels"></div>
+                            <canvas id="summary-${tokenId}-chart" class="asset-chart"></canvas>
+                        </div>
+                        <div class="asset-price-wrapper">
+                            <span class="asset-price-label">Current Price</span>
+                            <span class="asset-price-chart" id="summary-${tokenId}-price">$${currentPrice}</span>
+                        </div>
                     </div>
                     <div class="price-range-summary">
                         <span class="range-label">${rangeLabel}:</span>
