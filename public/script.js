@@ -747,21 +747,20 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tokens = [];
         tokenInputs.forEach(input => {
             const value = input.value.trim();
-            if (value) {
-                // Check if there's a stored coin ID (from autocomplete, dice button, or default values)
-                const coinId = input.getAttribute('data-coin-id');
-                if (coinId) {
-                    tokens.push(coinId);
+            // Check if there's a stored coin ID (from autocomplete, dice button, or default values)
+            // Use coin ID even if input is empty (user may have backspaced but not confirmed new asset)
+            const coinId = input.getAttribute('data-coin-id');
+            if (coinId) {
+                tokens.push(coinId);
+            } else if (value) {
+                // Fallback: extract from "TICKER Name" format or use original value
+                // Try to extract just the first word (ticker) if it looks like "TICKER Name"
+                const parts = value.split(' ');
+                if (parts.length > 1 && parts[0].length <= 10) {
+                    // Likely "TICKER Name" format, use the ticker part
+                    tokens.push(parts[0].toLowerCase());
                 } else {
-                    // Fallback: extract from "TICKER Name" format or use original value
-                    // Try to extract just the first word (ticker) if it looks like "TICKER Name"
-                    const parts = value.split(' ');
-                    if (parts.length > 1 && parts[0].length <= 10) {
-                        // Likely "TICKER Name" format, use the ticker part
-                        tokens.push(parts[0].toLowerCase());
-                    } else {
-                        tokens.push(value.toLowerCase());
-                    }
+                    tokens.push(value.toLowerCase());
                 }
             }
         });
