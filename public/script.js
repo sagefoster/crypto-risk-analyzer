@@ -1585,12 +1585,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                     
                     // Close on outside click
                     setTimeout(() => {
-                        document.addEventListener('click', function closeTooltip(e) {
+                        function closeTooltip(e) {
                             if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
                                 tooltip.remove();
                                 document.removeEventListener('click', closeTooltip);
+                                document.removeEventListener('scroll', closeTooltipOnScroll);
                             }
-                        });
+                        }
+                        
+                        // Close on scroll
+                        function closeTooltipOnScroll() {
+                            tooltip.remove();
+                            document.removeEventListener('scroll', closeTooltipOnScroll);
+                            document.removeEventListener('click', closeTooltip);
+                        }
+                        
+                        document.addEventListener('click', closeTooltip);
+                        document.addEventListener('scroll', closeTooltipOnScroll, { passive: true });
                     }, 100);
                 });
             }
@@ -1677,8 +1688,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                     if (!tooltip.contains(e.target) && !cautionIcon.contains(e.target)) {
                         tooltip.remove();
                         document.removeEventListener('click', closeTooltip);
+                        document.removeEventListener('scroll', closeTooltipOnScroll);
                     }
                 });
+                
+                // Close on scroll
+                function closeTooltipOnScroll() {
+                    tooltip.remove();
+                    document.removeEventListener('scroll', closeTooltipOnScroll);
+                    document.removeEventListener('click', closeTooltip);
+                }
+                document.addEventListener('scroll', closeTooltipOnScroll, { passive: true });
             }, 100);
         });
     }
@@ -1832,6 +1852,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Update chart with coin ID
             if (coin.id) {
                 await updateAssetChart(inputId, coin.id);
+            }
+            
+            // Update analyze button glow state
+            if (typeof updateAnalyzeButtonGlow === 'function') {
+                setTimeout(updateAnalyzeButtonGlow, 100);
             }
         };
         
@@ -3513,7 +3538,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Scroll prompt functionality removed
     
-    // Make analyze button glow when it's in view
+    // Function to check if all 3 assets are confirmed
+    function areAllAssetsConfirmed() {
+        const token0Input = document.getElementById('token0');
+        const token1Input = document.getElementById('token1');
+        const token2Input = document.getElementById('token2');
+        
+        const isAssetConfirmed = (inputElement) => {
+            if (!inputElement) return false;
+            const inputId = inputElement.id;
+            const logoImg = document.getElementById(`${inputId}-logo`);
+            return logoImg && logoImg.style.display !== 'none' && logoImg.src;
+        };
+        
+        return isAssetConfirmed(token0Input) && 
+               isAssetConfirmed(token1Input) && 
+               isAssetConfirmed(token2Input);
+    }
+    
+    // Function to update analyze button glow state
+    function updateAnalyzeButtonGlow() {
+        if (!analyzeBtn) return;
+        
+        if (areAllAssetsConfirmed()) {
+            // Check if button is in view
+            const rect = analyzeBtn.getBoundingClientRect();
+            const isInView = rect.top >= 0 && rect.top <= window.innerHeight;
+            
+            if (isInView) {
+                analyzeBtn.classList.add('in-view');
+            } else {
+                analyzeBtn.classList.remove('in-view');
+            }
+        } else {
+            analyzeBtn.classList.remove('in-view');
+        }
+    }
+    
+    // Make analyze button glow when it's in view AND all assets are confirmed
     if (analyzeBtn) {
         const observerOptions = {
             root: null,
@@ -3523,7 +3585,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         const analyzeButtonObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) {
+                if (entry.isIntersecting && areAllAssetsConfirmed()) {
                     analyzeBtn.classList.add('in-view');
                 } else {
                     analyzeBtn.classList.remove('in-view');
@@ -3532,6 +3594,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         }, observerOptions);
         
         analyzeButtonObserver.observe(analyzeBtn);
+        
+        // Also check when assets are updated
+        const checkAssets = () => updateAnalyzeButtonGlow();
+        document.getElementById('token0')?.addEventListener('input', checkAssets);
+        document.getElementById('token1')?.addEventListener('input', checkAssets);
+        document.getElementById('token2')?.addEventListener('input', checkAssets);
+        
+        // Initial check
+        setTimeout(updateAnalyzeButtonGlow, 500);
     }
     
     // Default tokens are already set in HTML (bitcoin, ethereum, blank)
