@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', async () => {
     // ========== HELPER FUNCTIONS (Module Scope) ==========
     
+    // Helper function to check if input is in "TICKER Name" format
+    function isTickerNameFormat(value) {
+        if (!value) return false;
+        const parts = value.trim().split(' ');
+        // Check if it looks like "TICKER Name" (2+ words, first is short uppercase)
+        return parts.length >= 2 && parts[0].length <= 10 && /^[A-Z]+$/.test(parts[0]);
+    }
+    
     // Format market cap for display
     function formatMarketCap(marketCap) {
         if (!marketCap || marketCap === 0) return 'N/A';
