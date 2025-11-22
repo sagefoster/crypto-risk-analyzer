@@ -1750,6 +1750,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             // Clear chart
             await updateAssetChart(inputId, '');
+            
+            // Update analyze button glow state
+            if (typeof updateAnalyzeButtonGlow === 'function') {
+                setTimeout(updateAnalyzeButtonGlow, 100);
+            }
             return;
         }
         
