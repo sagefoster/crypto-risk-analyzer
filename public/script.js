@@ -1399,14 +1399,33 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (input) {
             setupAutocomplete(input);
             
-            // Add focus handler to clear "TICKER Name" format (if not already added)
+            // Add focus, blur, and backspace handlers (if not already added)
             if (!input.hasAttribute('data-focus-handler-added')) {
                 input.setAttribute('data-focus-handler-added', 'true');
+                
+                // Store previous value when clearing (using closure per input)
+                let previousValue = '';
+                
                 input.addEventListener('focus', (e) => {
                     const value = e.target.value.trim();
                     if (isTickerNameFormat(value)) {
+                        previousValue = value; // Store for potential restoration
                         e.target.value = '';
-                        e.target.removeAttribute('data-coin-id');
+                        // Don't remove data-coin-id - keep it for analyze button
+                    }
+                });
+                
+                // Restore previous value on blur if input is empty and coin ID exists
+                input.addEventListener('blur', async (e) => {
+                    const value = e.target.value.trim();
+                    const coinId = e.target.getAttribute('data-coin-id');
+                    // If input is empty but we have a coin ID, restore the previous value
+                    if (!value && coinId && previousValue) {
+                        e.target.value = previousValue;
+                        previousValue = ''; // Clear stored value
+                    } else if (!value && !coinId) {
+                        // If no value and no coin ID, clear everything
+                        previousValue = '';
                     }
                 });
                 
@@ -1416,20 +1435,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const value = e.target.value.trim();
                         if (isTickerNameFormat(value)) {
                             e.preventDefault();
+                            previousValue = value; // Store for potential restoration
                             e.target.value = '';
-                            e.target.removeAttribute('data-coin-id');
-                            // Clear logo and chart
-                            const inputId = e.target.id;
-                            const logoImg = document.getElementById(`${inputId}-logo`);
-                            if (logoImg) {
-                                logoImg.style.display = 'none';
-                                logoImg.src = '';
-                            }
-                            const chartSection = document.getElementById(`${inputId}-chart-section`);
-                            if (chartSection) {
-                                chartSection.style.display = 'none';
-                            }
-                            updateAssetChart(inputId, '').catch(() => {});
+                            // Don't remove data-coin-id - keep it for analyze button
+                            // Don't clear logo and chart - they should persist
                         }
                     }
                 });
