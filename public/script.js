@@ -677,8 +677,19 @@ document.addEventListener('DOMContentLoaded', async () => {
             newInput.setAttribute('data-focus-handler-added', 'true');
             let previousValue = ''; // Store previous value for restoration
             
+            // Helper function to check if asset is confirmed (logo is visible)
+            const isAssetConfirmed = (inputElement) => {
+                const inputId = inputElement.id;
+                const logoImg = document.getElementById(`${inputId}-logo`);
+                return logoImg && logoImg.style.display !== 'none' && logoImg.src;
+            };
+            
             newInput.addEventListener('focus', (e) => {
                 const value = e.target.value.trim();
+                // Don't clear if asset is confirmed (logo is showing)
+                if (isAssetConfirmed(e.target)) {
+                    return; // Keep the value locked when asset is confirmed
+                }
                 if (isTickerNameFormat(value)) {
                     previousValue = value; // Store for potential restoration
                     e.target.value = '';
@@ -689,6 +700,32 @@ document.addEventListener('DOMContentLoaded', async () => {
             newInput.addEventListener('blur', async (e) => {
                 const value = e.target.value.trim();
                 const coinId = e.target.getAttribute('data-coin-id');
+                
+                // If asset is confirmed (logo showing), always restore ticker and name
+                if (isAssetConfirmed(e.target) && coinId) {
+                    // Fetch coin data to get ticker and name
+                    try {
+                        const coinResponse = await fetch(`/api/coin/${encodeURIComponent(coinId)}`);
+                        if (coinResponse.ok) {
+                            const coinData = await coinResponse.json();
+                            if (coinData && coinData.symbol && coinData.name) {
+                                e.target.value = `${coinData.symbol.toUpperCase()} ${coinData.name}`;
+                                previousValue = ''; // Clear stored value
+                                return;
+                            }
+                        }
+                    } catch (error) {
+                        // If fetch fails, try to restore from previousValue
+                    }
+                    
+                    // Fallback: restore from previousValue if available
+                    if (previousValue) {
+                        e.target.value = previousValue;
+                        previousValue = ''; // Clear stored value
+                        return;
+                    }
+                }
+                
                 // If input is empty but we have a coin ID, restore the previous value
                 if (!value && coinId && previousValue) {
                     e.target.value = previousValue;
@@ -966,11 +1003,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 const existingListeners = document.querySelectorAll('.autocomplete-dropdown');
                                 existingListeners.forEach(dropdown => dropdown.remove());
                                 
-                                // Focus input after a brief delay to ensure dropdown is closed
+                                // Ensure input value is locked after selection
+                                // The updateAssetDisplay should have set it, but ensure it's locked
                                 setTimeout(() => {
-                                    input.focus();
-                                    input.blur(); // Trigger blur to close any remaining dropdowns
-                                    setTimeout(() => input.focus(), 50);
+                                    const coinId = input.getAttribute('data-coin-id');
+                                    if (coin && coin.symbol && coin.name) {
+                                        input.value = `${coin.symbol.toUpperCase()} ${coin.name}`;
+                                    }
+                                    input.blur(); // Trigger blur to close any remaining dropdowns and lock value
                                 }, 10);
                             });
                             autocompleteDiv.appendChild(item);
@@ -1171,6 +1211,23 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Store coin ID before updating display
                 token2Input.setAttribute('data-coin-id', randomCrypto);
                 await updateAssetDisplay(token2Input);
+                
+                // Ensure input value is locked after update
+                // updateAssetDisplay should have set it, but verify it's locked
+                setTimeout(() => {
+                    const coinId = token2Input.getAttribute('data-coin-id');
+                    if (coinId) {
+                        // Fetch to get ticker and name if not already set
+                        fetch(`/api/coin/${encodeURIComponent(coinId)}`)
+                            .then(res => res.ok ? res.json() : null)
+                            .then(coinData => {
+                                if (coinData && coinData.symbol && coinData.name) {
+                                    token2Input.value = `${coinData.symbol.toUpperCase()} ${coinData.name}`;
+                                }
+                            })
+                            .catch(() => {}); // Ignore errors
+                    }
+                }, 100);
             } else {
             }
             
@@ -1353,9 +1410,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Store previous value when clearing (using closure per input)
             let previousValue = '';
             
+            // Helper function to check if asset is confirmed (logo is visible)
+            const isAssetConfirmed = (inputElement) => {
+                const inputId = inputElement.id;
+                const logoImg = document.getElementById(`${inputId}-logo`);
+                return logoImg && logoImg.style.display !== 'none' && logoImg.src;
+            };
+            
             // Clear input on focus if it's in "TICKER Name" format
+            // BUT only if asset is not confirmed (logo not showing)
             input.addEventListener('focus', (e) => {
                 const value = e.target.value.trim();
+                // Don't clear if asset is confirmed (logo is showing)
+                if (isAssetConfirmed(e.target)) {
+                    return; // Keep the value locked when asset is confirmed
+                }
                 if (isTickerNameFormat(value)) {
                     previousValue = value; // Store for potential restoration
                     e.target.value = '';
@@ -1364,9 +1433,36 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
             
             // Restore previous value on blur if input is empty and coin ID exists
+            // OR if asset is confirmed, always restore the ticker and name
             input.addEventListener('blur', async (e) => {
                 const value = e.target.value.trim();
                 const coinId = e.target.getAttribute('data-coin-id');
+                
+                // If asset is confirmed (logo showing), always restore ticker and name
+                if (isAssetConfirmed(e.target) && coinId) {
+                    // Fetch coin data to get ticker and name
+                    try {
+                        const coinResponse = await fetch(`/api/coin/${encodeURIComponent(coinId)}`);
+                        if (coinResponse.ok) {
+                            const coinData = await coinResponse.json();
+                            if (coinData && coinData.symbol && coinData.name) {
+                                e.target.value = `${coinData.symbol.toUpperCase()} ${coinData.name}`;
+                                previousValue = ''; // Clear stored value
+                                return;
+                            }
+                        }
+                    } catch (error) {
+                        // If fetch fails, try to restore from previousValue
+                    }
+                    
+                    // Fallback: restore from previousValue if available
+                    if (previousValue) {
+                        e.target.value = previousValue;
+                        previousValue = ''; // Clear stored value
+                        return;
+                    }
+                }
+                
                 // If input is empty but we have a coin ID, restore the previous value
                 if (!value && coinId && previousValue) {
                     e.target.value = previousValue;
