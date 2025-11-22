@@ -708,8 +708,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const nameMap = {
                         'xrp': 'Ripple',
                         'ripple': 'Ripple',
-                        'bnb': 'BNB',
-                        'binancecoin': 'BNB',
+                        'bnb': 'Binance Coin',
+                        'binancecoin': 'Binance Coin',
                         'usdt': 'Tether',
                         'tether': 'Tether',
                         'usdc': 'USD Coin',
@@ -1394,8 +1394,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const nameMap = {
                         'xrp': 'Ripple',
                         'ripple': 'Ripple',
-                        'bnb': 'BNB',
-                        'binancecoin': 'BNB',
+                        'bnb': 'Binance Coin',
+                        'binancecoin': 'Binance Coin',
                         'usdt': 'Tether',
                         'tether': 'Tether',
                         'usdc': 'USD Coin',
@@ -1554,8 +1554,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     const nameMap = {
                         'xrp': 'Ripple',
                         'ripple': 'Ripple',
-                        'bnb': 'BNB',
-                        'binancecoin': 'BNB',
+                        'bnb': 'Binance Coin',
+                        'binancecoin': 'Binance Coin',
                         'usdt': 'Tether',
                         'tether': 'Tether',
                         'usdc': 'USD Coin',
