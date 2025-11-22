@@ -1022,7 +1022,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 setTimeout(() => {
                                     const coinId = input.getAttribute('data-coin-id');
                                     if (coin && coin.symbol && coin.name) {
-                                        input.value = `${coin.symbol.toUpperCase()} ${coin.name}`;
+                                        // If name equals symbol, use proper name mapping
+                                        let displayName = coin.name;
+                                        if (coin.name.toUpperCase() === coin.symbol.toUpperCase()) {
+                                            const nameMap = {
+                                                'xrp': 'Ripple',
+                                                'bnb': 'BNB',
+                                                'usdt': 'Tether',
+                                                'usdc': 'USD Coin',
+                                                'dai': 'Dai',
+                                                'busd': 'Binance USD'
+                                            };
+                                            displayName = nameMap[coin.id.toLowerCase()] || coin.name;
+                                        }
+                                        input.value = displayName;
                                     }
                                     input.blur(); // Trigger blur to close any remaining dropdowns and lock value
                                 }, 10);
