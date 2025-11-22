@@ -1148,6 +1148,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     let randomCryptoIndex = 0; // Track current position in rotation
     let diceButtonProcessing = false; // Lock to prevent multiple simultaneous clicks
     
+    // Random stock button functionality - cycles through xStock tokens
+    // xStock tokens are tokenized equities available on CoinGecko
+    // Note: CoinGecko IDs may need verification - these are common patterns
+    const randomStocks = ['nvidia-xstock', 'apple-xstock', 'tesla-xstock', 'microsoft-xstock', 'amazon-xstock', 'meta-xstock', 'alphabet-xstock', 'coinbase-xstock', 'netflix-xstock', 'robinhood-xstock', 'spy-xstock', 'microstrategy-xstock'];
+    let randomStockIndex = 0; // Track current position in rotation
+    let stockDiceButtonProcessing = false; // Lock to prevent multiple simultaneous clicks
+    
     // Get random crypto button once (will be used later for scroll prompt too)
     // Use a function to ensure button is available when called
     function setupRandomCryptoButton() {
@@ -1254,7 +1261,20 @@ document.addEventListener('DOMContentLoaded', async () => {
                             'dai': 'Dai',
                             'dai-stablecoin': 'Dai',
                             'busd': 'Binance USD',
-                            'binance-usd': 'Binance USD'
+                            'binance-usd': 'Binance USD',
+                            // xStock tokens
+                            'nvidia-xstock': 'NVIDIA xStock',
+                            'apple-xstock': 'Apple xStock',
+                            'tesla-xstock': 'Tesla xStock',
+                            'microsoft-xstock': 'Microsoft xStock',
+                            'amazon-xstock': 'Amazon xStock',
+                            'meta-xstock': 'Meta xStock',
+                            'alphabet-xstock': 'Alphabet xStock',
+                            'coinbase-xstock': 'Coinbase xStock',
+                            'netflix-xstock': 'Netflix xStock',
+                            'robinhood-xstock': 'Robinhood xStock',
+                            'spy-xstock': 'SPY xStock',
+                            'microstrategy-xstock': 'MicroStrategy xStock'
                         };
                         const mappedName = nameMap[coinId.toLowerCase()];
                         if (mappedName) {
@@ -1322,6 +1342,361 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Also retry after a delay to ensure it's set up even if DOM loads late
     setTimeout(setupRandomCryptoButton, 500);
+    
+    // Random stock button functionality - similar to crypto dice
+    function setupRandomStockButton() {
+        const randomStockBtn = document.getElementById('randomStockBtn');
+        if (!randomStockBtn) {
+            setTimeout(setupRandomStockButton, 100);
+            return;
+        }
+        
+        if (randomStockBtn) {
+            randomStockBtn.addEventListener('click', async function(e) {
+                // Don't trigger if clicking the info icon
+                if (e.target && e.target.classList.contains('info-icon-stock')) {
+                    return;
+                }
+                
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Prevent multiple simultaneous clicks
+                if (stockDiceButtonProcessing) {
+                    return;
+                }
+                stockDiceButtonProcessing = true;
+                
+                try {
+                    // Get next stock in rotation (cycles through list)
+                    const randomStock = randomStocks[randomStockIndex];
+                    // Move to next index, wrap around if at end
+                    randomStockIndex = (randomStockIndex + 1) % randomStocks.length;
+                    
+                    // Get the third input (token2)
+                    const token2Input = document.getElementById('token2');
+                    if (!token2Input) {
+                        return;
+                    }
+                    
+                    // Close any existing autocomplete dropdowns first
+                    const existingDropdown = document.querySelector('.autocomplete-dropdown');
+                    if (existingDropdown) {
+                        existingDropdown.remove();
+                    }
+                    
+                    // Set a flag to prevent autocomplete from triggering (set BEFORE any value changes)
+                    token2Input.setAttribute('data-programmatic-set', 'true');
+                    
+                    // Set the value directly - use native setter to ensure it's properly set
+                    const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set;
+                    nativeInputValueSetter.call(token2Input, randomStock);
+                    
+                    // Also set via property for compatibility
+                    token2Input.value = randomStock;
+                    
+                    // Verify the value was set correctly before proceeding
+                    if (token2Input.value.toLowerCase() !== randomStock.toLowerCase()) {
+                        token2Input.value = randomStock; // Force set again
+                    }
+                    
+                    // Update default value styling
+                    updateDefaultValueStyle(token2Input);
+                    
+                    // Clear display immediately to prevent showing stale data
+                    const token2Logo = document.getElementById('token2-logo');
+                    const token2Ticker = document.getElementById('token2-ticker-below');
+                    if (token2Logo) {
+                        token2Logo.style.display = 'none';
+                        token2Logo.src = '';
+                    }
+                    if (token2Ticker) {
+                        token2Ticker.style.display = 'none';
+                        token2Ticker.textContent = '';
+                    }
+                    
+                    // Small delay to ensure value is fully set before fetching display data
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                    
+                    // Update logo and name display - WAIT for it to complete to ensure correct data
+                    // Double-check the value is still correct before updating
+                    const currentValue = token2Input.value.trim().toLowerCase();
+                    if (currentValue === randomStock.toLowerCase()) {
+                        // Store coin ID before updating display
+                        token2Input.setAttribute('data-coin-id', randomStock);
+                        await updateAssetDisplay(token2Input);
+                        
+                        // Ensure input value is locked after update with proper name mapping
+                        setTimeout(() => {
+                            const coinId = token2Input.getAttribute('data-coin-id');
+                            if (coinId && isAssetConfirmed(token2Input)) {
+                                // Extended name map including xStock tokens
+                                const nameMap = {
+                                    'xrp': 'Ripple',
+                                    'ripple': 'Ripple',
+                                    'bnb': 'BNB',
+                                    'binancecoin': 'BNB',
+                                    'usdt': 'Tether',
+                                    'tether': 'Tether',
+                                    'usdc': 'USD Coin',
+                                    'usd-coin': 'USD Coin',
+                                    'dai': 'Dai',
+                                    'dai-stablecoin': 'Dai',
+                                    'busd': 'Binance USD',
+                                    'binance-usd': 'Binance USD',
+                                    // xStock tokens
+                                    'nvidia-xstock': 'NVIDIA xStock',
+                                    'apple-xstock': 'Apple xStock',
+                                    'tesla-xstock': 'Tesla xStock',
+                                    'microsoft-xstock': 'Microsoft xStock',
+                                    'amazon-xstock': 'Amazon xStock',
+                                    'meta-xstock': 'Meta xStock',
+                                    'alphabet-xstock': 'Alphabet xStock',
+                                    'coinbase-xstock': 'Coinbase xStock',
+                                    'netflix-xstock': 'Netflix xStock',
+                                    'robinhood-xstock': 'Robinhood xStock',
+                                    'spy-xstock': 'SPY xStock',
+                                    'microstrategy-xstock': 'MicroStrategy xStock'
+                                };
+                                const mappedName = nameMap[coinId.toLowerCase()];
+                                if (mappedName) {
+                                    token2Input.value = mappedName;
+                                    return;
+                                }
+                                
+                                // Fallback: fetch to get ticker and name if not already set
+                                fetch(`/api/coin/${encodeURIComponent(coinId)}`)
+                                    .then(res => res.ok ? res.json() : null)
+                                    .then(coinData => {
+                                        if (coinData && coinData.name) {
+                                            // If name equals symbol, use proper name mapping
+                                            let displayName = coinData.name;
+                                            if (coinData.symbol && coinData.name.toUpperCase() === coinData.symbol.toUpperCase()) {
+                                                displayName = nameMap[coinData.id.toLowerCase()] || nameMap[coinData.symbol.toLowerCase()] || coinData.name;
+                                            }
+                                            token2Input.value = displayName;
+                                        }
+                                    })
+                                    .catch(() => {}); // Ignore errors
+                            }
+                        }, 200);
+                    }
+                    
+                    // Trigger change event (but NOT input event to avoid autocomplete)
+                    const changeEvent = new Event('change', { bubbles: true, cancelable: true });
+                    token2Input.dispatchEvent(changeEvent);
+                    
+                    // Remove the flag after events are dispatched
+                    setTimeout(() => {
+                        token2Input.removeAttribute('data-programmatic-set');
+                    }, 200);
+                    
+                    // Add a brief highlight animation
+                    token2Input.style.animation = 'none';
+                    setTimeout(() => {
+                        token2Input.style.animation = 'highlightPulse 0.6s ease';
+                    }, 10);
+                    
+                    // Focus the input
+                    setTimeout(() => {
+                        token2Input.focus();
+                    }, 100);
+                    
+                    // Check if scroll prompt should be shown after value is set
+                    setTimeout(() => {
+                        if (!scrollPromptShown && checkAllInputsFilled()) {
+                            setTimeout(showScrollPrompt, 800);
+                        }
+                    }, 200);
+                } finally {
+                    // Reset lock after a delay to allow async operations to complete
+                    setTimeout(() => {
+                        stockDiceButtonProcessing = false;
+                    }, 1000);
+                }
+            }, { capture: true }); // Use capture phase to ensure it fires
+            
+            // Setup tooltip for info icon
+            const infoIcon = randomStockBtn.querySelector('.info-icon-stock');
+            if (infoIcon) {
+                const tooltipText = "Similar to how an investor can gain exposure to Bitcoin by holding a spot crypto ETF such as IBIT or FBTC in their brokerage account, so too can an investor gain exposure to a common stock/equity/index by holding a 'spot stock digital asset' such as NVDAx or SPYx in their digital crypto wallet.<br><br><strong>Disclaimer:</strong> xStock digital asset representations of stocks may not track 1:1 with the underlying stock price and may not contain the full price data history from before the xStock token was created.<br><br><a href='https://xstocks.fi/us' target='_blank' rel='noopener noreferrer' style='color: #22c55e; text-decoration: underline;'>Learn more about xStocks →</a>";
+                
+                infoIcon.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                    // Remove any existing tooltips
+                    document.querySelectorAll('.xstock-tooltip-popup').forEach(t => t.remove());
+                    
+                    // Get click position
+                    const clickX = e.clientX;
+                    const clickY = e.clientY;
+                    
+                    // Create tooltip
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'xstock-tooltip-popup metric-tooltip-popup';
+                    tooltip.innerHTML = `
+                        <div class="tooltip-header">
+                            <strong>About xStocks</strong>
+                            <span class="tooltip-close">×</span>
+                        </div>
+                        <div class="tooltip-content">${tooltipText}</div>
+                    `;
+                    
+                    // Add to body first to get dimensions
+                    tooltip.style.position = 'fixed';
+                    tooltip.style.visibility = 'hidden';
+                    document.body.appendChild(tooltip);
+                    
+                    // Get tooltip dimensions
+                    const tooltipRect = tooltip.getBoundingClientRect();
+                    const viewportWidth = window.innerWidth;
+                    const viewportHeight = window.innerHeight;
+                    
+                    // Position tooltip near click location
+                    // Try to position above first, then below, then adjust horizontally
+                    let top, left;
+                    
+                    // Check if there's space above
+                    if (clickY - tooltipRect.height - 10 > 10) {
+                        top = clickY - tooltipRect.height - 10;
+                    } else {
+                        top = clickY + 10;
+                    }
+                    
+                    // Center horizontally on click, but keep on screen
+                    left = clickX - (tooltipRect.width / 2);
+                    
+                    // Keep tooltip on screen horizontally
+                    if (left + tooltipRect.width > viewportWidth - 10) {
+                        left = viewportWidth - tooltipRect.width - 10;
+                    }
+                    if (left < 10) {
+                        left = 10;
+                    }
+                    
+                    // Keep tooltip on screen vertically
+                    if (top + tooltipRect.height > viewportHeight - 10) {
+                        top = viewportHeight - tooltipRect.height - 10;
+                    }
+                    if (top < 10) {
+                        top = 10;
+                    }
+                    
+                    tooltip.style.left = `${left}px`;
+                    tooltip.style.top = `${top}px`;
+                    tooltip.style.visibility = 'visible';
+                    
+                    // Close button
+                    tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
+                        tooltip.remove();
+                    });
+                    
+                    // Close on outside click
+                    setTimeout(() => {
+                        document.addEventListener('click', function closeTooltip(e) {
+                            if (!tooltip.contains(e.target) && !infoIcon.contains(e.target)) {
+                                tooltip.remove();
+                                document.removeEventListener('click', closeTooltip);
+                            }
+                        });
+                    }, 100);
+                });
+            }
+        }
+    }
+    
+    // Function to setup xStock caution tooltip (reusable)
+    function setupXStockCautionTooltip(cautionIcon) {
+        const tooltipText = "Similar to how an investor can gain exposure to Bitcoin by holding a spot crypto ETF such as IBIT or FBTC in their brokerage account, so too can an investor gain exposure to a common stock/equity/index by holding a 'spot stock digital asset' such as NVDAx or SPYx in their digital crypto wallet.<br><br><strong>Disclaimer:</strong> xStock digital asset representations of stocks may not track 1:1 with the underlying stock price and may not contain the full price data history from before the xStock token was created.<br><br><a href='https://xstocks.fi/us' target='_blank' rel='noopener noreferrer' style='color: #22c55e; text-decoration: underline;'>Learn more about xStocks →</a>";
+        
+        cautionIcon.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            e.stopImmediatePropagation();
+            // Remove any existing tooltips
+            document.querySelectorAll('.xstock-tooltip-popup').forEach(t => t.remove());
+            
+            // Get click position
+            const clickX = e.clientX;
+            const clickY = e.clientY;
+            
+            // Create tooltip
+            const tooltip = document.createElement('div');
+            tooltip.className = 'xstock-tooltip-popup metric-tooltip-popup';
+            tooltip.innerHTML = `
+                <div class="tooltip-header">
+                    <strong>About xStocks</strong>
+                    <span class="tooltip-close">×</span>
+                </div>
+                <div class="tooltip-content">${tooltipText}</div>
+            `;
+            
+            // Add to body first to get dimensions
+            tooltip.style.position = 'fixed';
+            tooltip.style.visibility = 'hidden';
+            document.body.appendChild(tooltip);
+            
+            // Get tooltip dimensions
+            const tooltipRect = tooltip.getBoundingClientRect();
+            const viewportWidth = window.innerWidth;
+            const viewportHeight = window.innerHeight;
+            
+            // Position tooltip near click location
+            let top, left;
+            
+            // Check if there's space above
+            if (clickY - tooltipRect.height - 10 > 10) {
+                top = clickY - tooltipRect.height - 10;
+            } else {
+                top = clickY + 10;
+            }
+            
+            // Center horizontally on click, but keep on screen
+            left = clickX - (tooltipRect.width / 2);
+            
+            // Keep tooltip on screen horizontally
+            if (left + tooltipRect.width > viewportWidth - 10) {
+                left = viewportWidth - tooltipRect.width - 10;
+            }
+            if (left < 10) {
+                left = 10;
+            }
+            
+            // Keep tooltip on screen vertically
+            if (top + tooltipRect.height > viewportHeight - 10) {
+                top = viewportHeight - tooltipRect.height - 10;
+            }
+            if (top < 10) {
+                top = 10;
+            }
+            
+            tooltip.style.left = `${left}px`;
+            tooltip.style.top = `${top}px`;
+            tooltip.style.visibility = 'visible';
+            
+            // Close button
+            tooltip.querySelector('.tooltip-close').addEventListener('click', () => {
+                tooltip.remove();
+            });
+            
+            // Close on outside click
+            setTimeout(() => {
+                document.addEventListener('click', function closeTooltip(e) {
+                    if (!tooltip.contains(e.target) && !cautionIcon.contains(e.target)) {
+                        tooltip.remove();
+                        document.removeEventListener('click', closeTooltip);
+                    }
+                });
+            }, 100);
+        });
+    }
+    
+    // Call the setup function immediately
+    setupRandomStockButton();
+    
+    // Also retry after a delay to ensure it's set up even if DOM loads late
+    setTimeout(setupRandomStockButton, 500);
 
     // Function to update asset display (logo, ticker, and name)
     async function updateAssetDisplay(input, coinData = null) {
@@ -1340,6 +1715,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (tickerBelow) {
                 tickerBelow.style.display = 'none';
                 tickerBelow.textContent = '';
+            }
+            // Hide xStock caution icon
+            const cautionIcon = document.getElementById(`${inputId}-xstock-caution`);
+            if (cautionIcon) {
+                cautionIcon.style.display = 'none';
             }
             // Hide chart section when input is cleared
             const chartSection = document.getElementById(`${inputId}-chart-section`);
@@ -1380,6 +1760,22 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (tickerBelow && coin.symbol) {
                 tickerBelow.textContent = coin.symbol.toUpperCase();
                 tickerBelow.style.display = 'block';
+            }
+            
+            // Check if this is an xStock and show caution icon
+            const isXStock = coin.id && coin.id.toLowerCase().includes('xstock');
+            const cautionIcon = document.getElementById(`${inputId}-xstock-caution`);
+            if (cautionIcon) {
+                if (isXStock) {
+                    cautionIcon.style.display = 'flex';
+                    // Setup tooltip for caution icon if not already set up
+                    if (!cautionIcon.hasAttribute('data-tooltip-setup')) {
+                        cautionIcon.setAttribute('data-tooltip-setup', 'true');
+                        setupXStockCautionTooltip(cautionIcon);
+                    }
+                } else {
+                    cautionIcon.style.display = 'none';
+                }
             }
             
             // Update input value to show only the asset name when asset is confirmed
