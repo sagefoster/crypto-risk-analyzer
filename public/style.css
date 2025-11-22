@@ -48,7 +48,7 @@ p, .overview, .form-intro, .interpretation-text, .interpretation-details,
 
 .form-tip {
     color: var(--text-secondary);
-    font-size: 0.525rem;
+    font-size: 0.6375rem;
     line-height: 1.6;
     margin-top: 0.5rem;
     margin-bottom: 1.5rem;
