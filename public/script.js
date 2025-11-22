@@ -1609,7 +1609,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Function to setup xStock caution tooltip (reusable)
     function setupXStockCautionTooltip(cautionIcon) {
-        const tooltipText = "<strong>⚠️ Disclaimer:</strong> xStock digital asset representations of stocks may not track 1:1 with the underlying stock price and may not contain the full price data history from before the xStock token was created. Using xStocks in this comparison tool may result in incomplete or inaccurate risk metrics compared to native cryptocurrencies.<br><br><strong>What are xStocks?</strong> Similar to how an investor can gain exposure to Bitcoin by holding a spot crypto ETF such as IBIT or FBTC in their brokerage account, so too can an investor gain exposure to a common stock/equity/index by holding a 'spot stock digital asset' such as NVDAx or SPYx in their digital crypto wallet.<br><br><a href='https://xstocks.fi/us' target='_blank' rel='noopener noreferrer' style='color: #22c55e; text-decoration: underline;'>Learn more about xStocks →</a>";
+        const tooltipText = "<strong>⚠️ Disclaimer:</strong> xStocks are tokenized representations of stocks and indexes. These digital assets may not track 1:1 with the underlying stock price and may not contain the full price data history from before the xStock token was created. Using xStocks in this comparison tool may result in incomplete or inaccurate risk metrics compared to native cryptocurrencies.<br><br><a href='https://xstocks.fi/us' target='_blank' rel='noopener noreferrer' style='color: #22c55e; text-decoration: underline;'>Learn more about xStocks →</a>";
         
         cautionIcon.addEventListener('click', function(e) {
             e.preventDefault();
@@ -3570,11 +3570,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         const targetElement = analyzeBtn || token2Input;
         
         if (targetElement) {
-            // Position scroll prompt on the right side, vertically centered, but moved left to avoid caution icon
+            // Position scroll prompt on the right side, moved further right and down to avoid caution icon
             scrollPrompt.style.position = 'fixed';
-            scrollPrompt.style.right = '80px';
-            scrollPrompt.style.top = '50%';
-            scrollPrompt.style.transform = 'translateY(-50%)';
+            scrollPrompt.style.right = '10px';
+            scrollPrompt.style.bottom = '20px';
+            scrollPrompt.style.top = 'auto';
+            scrollPrompt.style.transform = 'none';
             scrollPrompt.style.left = 'auto';
         }
         
