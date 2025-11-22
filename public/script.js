@@ -1333,15 +1333,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
-        // Helper function to check if input is in "TICKER Name" format
-        function isTickerNameFormat(value) {
-            if (!value) return false;
-            const parts = value.trim().split(' ');
-            // Check if it looks like "TICKER Name" (2+ words, first is short uppercase)
-            return parts.length >= 2 && parts[0].length <= 10 && /^[A-Z]+$/.test(parts[0]);
-        }
-        
-        // Initialize asset displays for default values
+    // Initialize asset displays for default values
         document.querySelectorAll('.token-input').forEach(input => {
             if (input.value) {
                 // For default values (bitcoin, ethereum), store the coin ID
@@ -1390,14 +1382,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                 updateAssetDisplay(input).catch(() => {});
             });
         });
-
-    // Helper function to check if input is in "TICKER Name" format (shared with initialization)
-    function isTickerNameFormat(value) {
-        if (!value) return false;
-        const parts = value.trim().split(' ');
-        // Check if it looks like "TICKER Name" (2+ words, first is short uppercase)
-        return parts.length >= 2 && parts[0].length <= 10 && /^[A-Z]+$/.test(parts[0]);
-    }
 
     // Setup autocomplete and clear buttons for existing inputs (including first input)
     document.querySelectorAll('.token-input-group').forEach(group => {
