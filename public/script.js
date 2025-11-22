@@ -1237,11 +1237,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await updateAssetDisplay(token2Input);
                 
                 // Ensure input value is locked after update
-                // updateAssetDisplay should have set it, but verify it's locked
+                // updateAssetDisplay should have set it correctly, but verify and fix if needed
                 setTimeout(() => {
                     const coinId = token2Input.getAttribute('data-coin-id');
-                    if (coinId) {
-                        // Fetch to get ticker and name if not already set
+                    if (coinId && isAssetConfirmed(token2Input)) {
+                        // First try direct name mapping based on coinId
+                        const nameMap = {
+                            'xrp': 'Ripple',
+                            'ripple': 'Ripple',
+                            'bnb': 'BNB',
+                            'binancecoin': 'BNB',
+                            'usdt': 'Tether',
+                            'tether': 'Tether',
+                            'usdc': 'USD Coin',
+                            'usd-coin': 'USD Coin',
+                            'dai': 'Dai',
+                            'dai-stablecoin': 'Dai',
+                            'busd': 'Binance USD',
+                            'binance-usd': 'Binance USD'
+                        };
+                        const mappedName = nameMap[coinId.toLowerCase()];
+                        if (mappedName) {
+                            token2Input.value = mappedName;
+                            return;
+                        }
+                        
+                        // Fallback: fetch to get ticker and name if not already set
                         fetch(`/api/coin/${encodeURIComponent(coinId)}`)
                             .then(res => res.ok ? res.json() : null)
                             .then(coinData => {
@@ -1249,22 +1270,14 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     // If name equals symbol, use proper name mapping
                                     let displayName = coinData.name;
                                     if (coinData.symbol && coinData.name.toUpperCase() === coinData.symbol.toUpperCase()) {
-                                        const nameMap = {
-                                            'xrp': 'Ripple',
-                                            'bnb': 'BNB',
-                                            'usdt': 'Tether',
-                                            'usdc': 'USD Coin',
-                                            'dai': 'Dai',
-                                            'busd': 'Binance USD'
-                                        };
-                                        displayName = nameMap[coinData.id.toLowerCase()] || coinData.name;
+                                        displayName = nameMap[coinData.id.toLowerCase()] || nameMap[coinData.symbol.toLowerCase()] || coinData.name;
                                     }
                                     token2Input.value = displayName;
                                 }
                             })
                             .catch(() => {}); // Ignore errors
                     }
-                }, 100);
+                }, 200);
             } else {
             }
             
