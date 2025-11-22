@@ -1366,13 +1366,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Map common coins where name equals symbol
                     const nameMap = {
                         'xrp': 'Ripple',
+                        'ripple': 'Ripple',
                         'bnb': 'BNB',
+                        'binancecoin': 'BNB',
                         'usdt': 'Tether',
+                        'tether': 'Tether',
                         'usdc': 'USD Coin',
+                        'usd-coin': 'USD Coin',
                         'dai': 'Dai',
-                        'busd': 'Binance USD'
+                        'dai-stablecoin': 'Dai',
+                        'busd': 'Binance USD',
+                        'binance-usd': 'Binance USD'
                     };
-                    displayName = nameMap[coin.id.toLowerCase()] || coin.name;
+                    displayName = nameMap[coin.id.toLowerCase()] || nameMap[coin.symbol.toLowerCase()] || coin.name;
                 }
                 input.value = displayName;
             }
