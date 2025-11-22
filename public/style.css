@@ -1068,13 +1068,18 @@ header h1 {
     }
     
     .asset-logo-container {
-        width: 40px;
-        min-width: 40px;
+        width: 40px !important;
+        min-width: 40px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        gap: 4px !important;
     }
     
     .asset-logo {
-        width: 40px;
-        height: 40px;
+        width: 40px !important;
+        height: 40px !important;
     }
     
     .asset-ticker-below {
