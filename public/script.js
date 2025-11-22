@@ -1293,6 +1293,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }
     
+        // Helper function to check if input is in "TICKER Name" format
+        function isTickerNameFormat(value) {
+            if (!value) return false;
+            const parts = value.trim().split(' ');
+            // Check if it looks like "TICKER Name" (2+ words, first is short uppercase)
+            return parts.length >= 2 && parts[0].length <= 10 && /^[A-Z]+$/.test(parts[0]);
+        }
+        
         // Initialize asset displays for default values
         document.querySelectorAll('.token-input').forEach(input => {
             if (input.value) {
@@ -1304,12 +1312,53 @@ document.addEventListener('DOMContentLoaded', async () => {
                 updateAssetDisplay(input).catch(() => {});
             }
             
+            // Clear input on focus if it's in "TICKER Name" format
+            input.addEventListener('focus', (e) => {
+                const value = e.target.value.trim();
+                if (isTickerNameFormat(value)) {
+                    e.target.value = '';
+                    e.target.removeAttribute('data-coin-id');
+                }
+            });
+            
+            // Clear entire field on first backspace if it's in "TICKER Name" format
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Backspace' && !e.target.selectionStart && !e.target.selectionEnd) {
+                    const value = e.target.value.trim();
+                    if (isTickerNameFormat(value)) {
+                        e.preventDefault();
+                        e.target.value = '';
+                        e.target.removeAttribute('data-coin-id');
+                        // Clear logo and chart
+                        const inputId = e.target.id;
+                        const logoImg = document.getElementById(`${inputId}-logo`);
+                        if (logoImg) {
+                            logoImg.style.display = 'none';
+                            logoImg.src = '';
+                        }
+                        const chartSection = document.getElementById(`${inputId}-chart-section`);
+                        if (chartSection) {
+                            chartSection.style.display = 'none';
+                        }
+                        updateAssetChart(inputId, '').catch(() => {});
+                    }
+                }
+            });
+            
             // Update on change
             input.addEventListener('change', () => {
                 updateAssetDisplay(input).catch(() => {});
             });
         });
 
+    // Helper function to check if input is in "TICKER Name" format (shared with initialization)
+    function isTickerNameFormat(value) {
+        if (!value) return false;
+        const parts = value.trim().split(' ');
+        // Check if it looks like "TICKER Name" (2+ words, first is short uppercase)
+        return parts.length >= 2 && parts[0].length <= 10 && /^[A-Z]+$/.test(parts[0]);
+    }
+    
     // Setup autocomplete and clear buttons for existing inputs (including first input)
     document.querySelectorAll('.token-input-group').forEach(group => {
         const input = group.querySelector('.token-input');
@@ -1318,6 +1367,42 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Setup autocomplete
         if (input) {
             setupAutocomplete(input);
+            
+            // Add focus handler to clear "TICKER Name" format (if not already added)
+            if (!input.hasAttribute('data-focus-handler-added')) {
+                input.setAttribute('data-focus-handler-added', 'true');
+                input.addEventListener('focus', (e) => {
+                    const value = e.target.value.trim();
+                    if (isTickerNameFormat(value)) {
+                        e.target.value = '';
+                        e.target.removeAttribute('data-coin-id');
+                    }
+                });
+                
+                // Add backspace handler to clear entire field
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Backspace' && !e.target.selectionStart && !e.target.selectionEnd) {
+                        const value = e.target.value.trim();
+                        if (isTickerNameFormat(value)) {
+                            e.preventDefault();
+                            e.target.value = '';
+                            e.target.removeAttribute('data-coin-id');
+                            // Clear logo and chart
+                            const inputId = e.target.id;
+                            const logoImg = document.getElementById(`${inputId}-logo`);
+                            if (logoImg) {
+                                logoImg.style.display = 'none';
+                                logoImg.src = '';
+                            }
+                            const chartSection = document.getElementById(`${inputId}-chart-section`);
+                            if (chartSection) {
+                                chartSection.style.display = 'none';
+                            }
+                            updateAssetChart(inputId, '').catch(() => {});
+                        }
+                    }
+                });
+            }
         }
         
         // Setup clear button for first input (and any others that might not have it)
