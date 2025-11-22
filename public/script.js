@@ -620,13 +620,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                                         <input type="text" class="token-input flowy-input" id="token${tokenIndex}" name="token${tokenIndex}" placeholder="Enter asset name or symbol..." required>
                     <button type="button" class="btn-remove-token" aria-label="Clear input">×</button>
                 </div>
-                                    <div class="asset-info-display" id="token${tokenIndex}-info" style="display: none;">
-                                        <div class="asset-info-left">
-                                            <span class="asset-ticker" id="token${tokenIndex}-ticker"></span>
-                                            <span class="asset-name" id="token${tokenIndex}-name"></span>
-                                            <span class="asset-marketcap" id="token${tokenIndex}-marketcap"></span>
-                                        </div>
-                                    </div>
                                 </div>
                                 <div class="asset-chart-section" id="token${tokenIndex}-chart-section" style="display: none;">
                                     <div class="asset-chart-container">
@@ -1116,6 +1109,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Double-check the value is still correct before updating
             const currentValue = token2Input.value.trim().toLowerCase();
             if (currentValue === randomCrypto.toLowerCase()) {
+                // Store coin ID before updating display
+                token2Input.setAttribute('data-coin-id', randomCrypto);
                 await updateAssetDisplay(token2Input);
             } else {
             }
@@ -1166,9 +1161,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function updateAssetDisplay(input, coinData = null) {
         const inputId = input.id;
         const logoImg = document.getElementById(`${inputId}-logo`);
-        const infoDisplay = document.getElementById(`${inputId}-info`);
-        const tickerDisplay = document.getElementById(`${inputId}-ticker`);
-        const nameDisplay = document.getElementById(`${inputId}-name`);
         const value = input.value.trim().toLowerCase();
         
         if (!value) {
@@ -1177,19 +1169,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 logoImg.style.display = 'none';
                 logoImg.src = '';
             }
-            if (infoDisplay) {
-                infoDisplay.style.display = 'none';
-            }
             // Hide chart section when input is cleared
             const chartSection = document.getElementById(`${inputId}-chart-section`);
             if (chartSection) {
                 chartSection.style.display = 'none';
-            }
-            if (tickerDisplay) {
-                tickerDisplay.textContent = '';
-            }
-            if (nameDisplay) {
-                nameDisplay.textContent = '';
             }
             // Clear price and market cap display
             const priceDisplay = document.getElementById(`${inputId}-price`);
@@ -1220,16 +1203,12 @@ document.addEventListener('DOMContentLoaded', async () => {
                 };
             }
             
-            if (tickerDisplay && coin.symbol) {
-                tickerDisplay.textContent = coin.symbol.toUpperCase();
-            }
-            
-            if (nameDisplay && coin.name) {
-                nameDisplay.textContent = coin.name;
-            }
-            
-            if (infoDisplay && (coin.symbol || coin.name)) {
-                infoDisplay.style.display = 'flex';
+            // Update input value to show "TICKER Name" format when asset is confirmed
+            if (coin.symbol && coin.name) {
+                // Store the coin ID in a data attribute for form submission
+                input.setAttribute('data-coin-id', coin.id);
+                // Update the input value to show ticker and name
+                input.value = `${coin.symbol.toUpperCase()} ${coin.name}`;
             }
             
             // Show chart section when asset is selected
