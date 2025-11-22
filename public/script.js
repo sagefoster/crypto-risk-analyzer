@@ -705,9 +705,23 @@ document.addEventListener('DOMContentLoaded', async () => {
         const tokenInputs = tokensContainer.querySelectorAll('.token-input');
         const tokens = [];
         tokenInputs.forEach(input => {
-            const value = input.value.trim().toLowerCase();
+            const value = input.value.trim();
             if (value) {
-                tokens.push(value);
+                // Check if there's a stored coin ID (from autocomplete, dice button, or default values)
+                const coinId = input.getAttribute('data-coin-id');
+                if (coinId) {
+                    tokens.push(coinId);
+                } else {
+                    // Fallback: extract from "TICKER Name" format or use original value
+                    // Try to extract just the first word (ticker) if it looks like "TICKER Name"
+                    const parts = value.split(' ');
+                    if (parts.length > 1 && parts[0].length <= 10) {
+                        // Likely "TICKER Name" format, use the ticker part
+                        tokens.push(parts[0].toLowerCase());
+                    } else {
+                        tokens.push(value.toLowerCase());
+                    }
+                }
             }
         });
         return tokens;
@@ -887,10 +901,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 e.preventDefault();
                                 e.stopPropagation();
                                 
-                                // Set the value
-                                input.value = coin.id;
-                                
-                                // Update logo and name display
+                                // Store coin ID and update display
+                                input.setAttribute('data-coin-id', coin.id);
                                 await updateAssetDisplay(input, coin);
                                 
                                 // Immediately close dropdown after selection
