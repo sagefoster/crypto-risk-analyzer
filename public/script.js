@@ -1325,6 +1325,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 e.preventDefault();
                 e.stopPropagation();
                 input.value = '';
+                input.removeAttribute('data-coin-id'); // Clear stored coin ID
                 updateAssetDisplay(input).catch(() => {}); // Clear logo and name
                 input.focus();
                 // Close any open autocomplete dropdown
