@@ -1408,6 +1408,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                     displayName = nameMap[coin.id.toLowerCase()] || nameMap[coin.symbol.toLowerCase()] || coin.name;
                 }
                 input.value = displayName;
+                
+                // Force the value to stay locked by setting it again after a brief delay
+                // This prevents any event handlers from reverting it
+                setTimeout(() => {
+                    const currentCoinId = input.getAttribute('data-coin-id');
+                    if (currentCoinId === coin.id && isAssetConfirmed(input)) {
+                        const nameMap = {
+                            'xrp': 'Ripple',
+                            'ripple': 'Ripple',
+                            'bnb': 'BNB',
+                            'binancecoin': 'BNB',
+                            'usdt': 'Tether',
+                            'tether': 'Tether',
+                            'usdc': 'USD Coin',
+                            'usd-coin': 'USD Coin',
+                            'dai': 'Dai',
+                            'dai-stablecoin': 'Dai',
+                            'busd': 'Binance USD',
+                            'binance-usd': 'Binance USD'
+                        };
+                        const mappedName = nameMap[currentCoinId.toLowerCase()];
+                        if (mappedName && input.value !== mappedName) {
+                            input.value = mappedName;
+                        }
+                    }
+                }, 100);
             }
             
             // Show chart section when asset is selected
