@@ -47,6 +47,7 @@ p, .overview, .form-intro, .interpretation-text, .interpretation-details,
 }
 
 .form-tip {
+    font-size: 0.85rem;
     color: var(--text-secondary);
     font-size: 0.875rem;
     line-height: 1.6;
@@ -1198,7 +1199,9 @@ header h1 {
 }
 
 .token-input-optional::placeholder {
-    font-size: 0.8em;
+    font-size: 0.75em;
+    white-space: nowrap;
+    overflow: visible;
 }
 
 /* xStock caution icon */
@@ -1379,8 +1382,10 @@ header h1 {
     }
     
     .optional-asset-actions {
-        flex-direction: column;
+        flex-direction: row;
         gap: 6px;
+        justify-content: center;
+        align-items: center;
     }
     
     .btn-random-crypto {
