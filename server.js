@@ -461,7 +461,8 @@ app.post('/api/analyze', async (req, res) => {
             'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
             'Accept': 'application/json'
           },
-          validateStatus: (status) => status < 500 // Don't throw on 4xx errors
+          validateStatus: (status) => status < 500, // Don't throw on 4xx errors
+          timeout: 30000 // 30 second timeout
         });
         
         // Check if response indicates it's a demo key
@@ -490,7 +491,8 @@ app.post('/api/analyze', async (req, res) => {
             headers: {
               'User-Agent': 'Sharpe-Ratio-Analyzer/1.0',
               'Accept': 'application/json'
-            }
+            },
+            timeout: 30000 // 30 second timeout
           });
           return response;
         } catch (demoError) {
