@@ -556,7 +556,27 @@ app.post('/api/analyze', async (req, res) => {
           return { tokenId, valid: true, data: response };
         } catch (error) {
           console.error(`Token ${tokenId} validation failed:`, error.message);
-          return { tokenId, valid: false, error: error.message || 'Unknown error' };
+          // Provide more detailed error message
+          let errorMessage = error.message || 'Unknown error';
+          if (error.response) {
+            // API returned an error response
+            const status = error.response.status;
+            const statusText = error.response.statusText;
+            if (status === 404) {
+              errorMessage = `Token not found (404). The token ID "${tokenId}" may be incorrect or not available on CoinGecko.`;
+            } else if (status === 429) {
+              errorMessage = `Rate limit exceeded (429). Please try again in a moment.`;
+            } else if (status === 401 || status === 403) {
+              errorMessage = `API authentication failed (${status}). Check your API key.`;
+            } else {
+              errorMessage = `API error (${status} ${statusText}): ${error.message}`;
+            }
+          } else if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+            errorMessage = `Request timeout. The API took too long to respond. Please try again.`;
+          } else if (error.code === 'ENOTFOUND' || error.code === 'ECONNREFUSED') {
+            errorMessage = `Network error. Could not connect to CoinGecko API. Please check your internet connection.`;
+          }
+          return { tokenId, valid: false, error: errorMessage };
         }
       })
     );
