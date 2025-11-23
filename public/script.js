@@ -1244,75 +1244,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 token2Input.setAttribute('data-coin-id', randomCrypto);
                 await updateAssetDisplay(token2Input);
                 
-                // Ensure input value is locked after update
-                // updateAssetDisplay should have set it correctly, but verify and fix if needed
-                setTimeout(() => {
-                    const coinId = token2Input.getAttribute('data-coin-id');
-                    if (coinId && isAssetConfirmed(token2Input)) {
-                        // First try direct name mapping based on coinId
-                        const nameMap = {
-                            'xrp': 'Ripple',
-                            'ripple': 'Ripple',
-                            'bnb': 'Binance Coin',
-                            'binancecoin': 'Binance Coin',
-                            'usdt': 'Tether',
-                            'tether': 'Tether',
-                            'usdc': 'USD Coin',
-                            'usd-coin': 'USD Coin',
-                            'dai': 'Dai',
-                            'dai-stablecoin': 'Dai',
-                            'busd': 'Binance USD',
-                            'binance-usd': 'Binance USD',
-                            // xStock tokens
-                            'nvidia-xstock': 'NVIDIA xStock',
-                            'apple-xstock': 'Apple xStock',
-                            'tesla-xstock': 'Tesla xStock',
-                            'microsoft-xstock': 'Microsoft xStock',
-                            'amazon-xstock': 'Amazon xStock',
-                            'meta-xstock': 'Meta xStock',
-                            'alphabet-xstock': 'Alphabet xStock',
-                            'coinbase-xstock': 'Coinbase xStock',
-                            'netflix-xstock': 'Netflix xStock',
-                            'robinhood-xstock': 'Robinhood xStock',
-                            'spy-xstock': 'SPY xStock',
-                            'microstrategy-xstock': 'MicroStrategy xStock'
-                        };
-                        const mappedName = nameMap[coinId.toLowerCase()];
-                        // Only override if current value is wrong (matches ticker or is the coin ID)
-                        const currentValue = token2Input.value.trim();
-                        const needsFix = mappedName && (
-                            currentValue.toLowerCase() === coinId.toLowerCase() || 
-                            currentValue.toUpperCase() === coinId.toUpperCase() ||
-                            (currentValue === 'XRP' && coinId.toLowerCase() === 'xrp') ||
-                            (currentValue === 'BNB' && coinId.toLowerCase() === 'bnb') ||
-                            (currentValue === 'ripple' && coinId.toLowerCase() === 'xrp') ||
-                            (currentValue === 'binancecoin' && coinId.toLowerCase() === 'bnb')
-                        );
-                        if (needsFix) {
-                            token2Input.value = mappedName;
-                            return;
-                        }
-                        
-                        // Fallback: fetch to get ticker and name if not already set
-                        if (!mappedName) {
-                            fetch(`/api/coin/${encodeURIComponent(coinId)}`)
-                                .then(res => res.ok ? res.json() : null)
-                                .then(coinData => {
-                                    if (coinData && coinData.name && token2Input.getAttribute('data-coin-id') === coinId) {
-                                        // If name equals symbol, use proper name mapping
-                                        let displayName = coinData.name;
-                                        if (coinData.symbol && coinData.name.toUpperCase() === coinData.symbol.toUpperCase()) {
-                                            displayName = nameMap[coinData.id.toLowerCase()] || nameMap[coinData.symbol.toLowerCase()] || coinData.name;
-                                        }
-                                        if (isAssetConfirmed(token2Input) && token2Input.getAttribute('data-coin-id') === coinId) {
-                                            token2Input.value = displayName;
-                                        }
-                                    }
-                                })
-                                .catch(() => {}); // Ignore errors
-                        }
-                    }
-                }, 500);
+                // No need for additional setTimeout - updateAssetDisplay handles name mapping correctly
             } else {
             }
             
