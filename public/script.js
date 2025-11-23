@@ -1968,6 +1968,48 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return logoImg && logoImg.style.display !== 'none' && logoImg.src;
             };
             
+            // Click/touch handler: clear input on single click/touch to allow fresh typing
+            const handleInputClear = (e) => {
+                // Don't clear if asset is confirmed (logo is showing)
+                if (isAssetConfirmed(e.target)) {
+                    return; // Keep the value locked when asset is confirmed
+                }
+                
+                const value = e.target.value.trim();
+                // Only clear if there's a value and user clicked (not selecting text)
+                // Check if there's a text selection - if so, don't clear
+                const selectionStart = e.target.selectionStart;
+                const selectionEnd = e.target.selectionEnd;
+                const hasSelection = selectionStart !== selectionEnd;
+                
+                if (value && !hasSelection) {
+                    // Store previous value for potential restoration
+                    previousValue = value;
+                    
+                    // Set flag to prevent autocomplete from triggering with old value
+                    e.target.setAttribute('data-clearing', 'true');
+                    
+                    // Clear the input immediately
+                    e.target.value = '';
+                    
+                    // Clear any existing autocomplete dropdown
+                    const existingDropdown = document.querySelector('.autocomplete-dropdown');
+                    if (existingDropdown) {
+                        existingDropdown.remove();
+                    }
+                    
+                    // Remove the flag after a brief delay to allow fresh typing
+                    setTimeout(() => {
+                        e.target.removeAttribute('data-clearing');
+                    }, 100);
+                    
+                    // Don't remove data-coin-id - keep it for analyze button
+                }
+            };
+            
+            input.addEventListener('click', handleInputClear);
+            input.addEventListener('touchstart', handleInputClear, { passive: true });
+            
             // Clear input on focus if asset is not confirmed
             // BUT only if asset is not confirmed (logo not showing)
             input.addEventListener('focus', (e) => {
@@ -1976,10 +2018,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isAssetConfirmed(e.target)) {
                     return; // Keep the value locked when asset is confirmed
                 }
+                
+                // Only clear on focus if it wasn't already cleared by click/touch
+                // Check if we just cleared it (data-clearing flag)
+                if (e.target.getAttribute('data-clearing') === 'true') {
+                    return; // Already cleared by click/touch handler
+                }
+                
                 // Store previous value for potential restoration
                 if (value) {
                     previousValue = value;
+                    
+                    // Set flag to prevent autocomplete from triggering with old value
+                    e.target.setAttribute('data-clearing', 'true');
+                    
                     e.target.value = '';
+                    
+                    // Clear any existing autocomplete dropdown
+                    const existingDropdown = document.querySelector('.autocomplete-dropdown');
+                    if (existingDropdown) {
+                        existingDropdown.remove();
+                    }
+                    
+                    // Remove the flag after a brief delay
+                    setTimeout(() => {
+                        e.target.removeAttribute('data-clearing');
+                    }, 100);
+                    
                     // Don't remove data-coin-id - keep it for analyze button
                 }
             });
