@@ -1338,7 +1338,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await updateAssetDisplay(token2Input);
                 
                 // Ensure name is correct after updateAssetDisplay completes
-                // Wait a bit longer to let updateAssetDisplay's setTimeout complete
+                // Wait longer to let updateAssetDisplay and its setTimeout complete
                 setTimeout(() => {
                     const coinId = token2Input.getAttribute('data-coin-id');
                     if (coinId && isAssetConfirmed(token2Input)) {
@@ -1356,20 +1356,32 @@ document.addEventListener('DOMContentLoaded', async () => {
                             'busd': 'Binance USD',
                             'binance-usd': 'Binance USD'
                         };
-                        const mappedName = nameMap[coinId.toLowerCase()];
+                        // Check both coin ID and common variations
+                        const mappedName = nameMap[coinId.toLowerCase()] || 
+                                         nameMap[coinId.toLowerCase().replace('-', '')];
+                        
                         // Only fix if the current value is wrong (ticker, coin ID, or lowercase version)
                         const currentValue = token2Input.value.trim();
                         if (mappedName && (
                             currentValue.toUpperCase() === coinId.toUpperCase() ||
                             currentValue === 'XRP' || currentValue === 'xrp' ||
                             currentValue === 'BNB' || currentValue === 'bnb' ||
-                            currentValue === 'ripple' || currentValue === 'binancecoin' ||
-                            currentValue.toLowerCase() === coinId.toLowerCase()
+                            currentValue === 'Ripple' && coinId.toLowerCase() !== 'ripple' && coinId.toLowerCase() !== 'xrp' ||
+                            currentValue === 'Binance Coin' && coinId.toLowerCase() !== 'binancecoin' && coinId.toLowerCase() !== 'bnb' ||
+                            currentValue.toLowerCase() === coinId.toLowerCase() ||
+                            currentValue.toLowerCase() === 'ripple' && coinId.toLowerCase() !== 'ripple' ||
+                            currentValue.toLowerCase() === 'binancecoin' && coinId.toLowerCase() !== 'binancecoin'
                         )) {
+                            // Only set if it's actually wrong
+                            if (currentValue !== mappedName) {
+                                token2Input.value = mappedName;
+                            }
+                        } else if (mappedName && currentValue !== mappedName) {
+                            // If we have a mapped name and current value doesn't match, set it
                             token2Input.value = mappedName;
                         }
                     }
-                }, 500); // Increased delay to ensure updateAssetDisplay completes first
+                }, 600); // Increased delay to ensure updateAssetDisplay completes first
             } else {
             }
             
@@ -1882,26 +1894,34 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Store the coin ID in a data attribute for form submission
                 input.setAttribute('data-coin-id', coin.id);
                 // Update the input value to show only the name (ticker is shown below icon)
-                // If name equals symbol (uppercase), use a proper name mapping
-                let displayName = coin.name;
+                // Use name mapping for coins where name equals symbol or for specific coin IDs
+                const nameMap = {
+                    'xrp': 'Ripple',
+                    'ripple': 'Ripple',
+                    'bnb': 'Binance Coin',
+                    'binancecoin': 'Binance Coin',
+                    'usdt': 'Tether',
+                    'tether': 'Tether',
+                    'usdc': 'USD Coin',
+                    'usd-coin': 'USD Coin',
+                    'dai': 'Dai',
+                    'dai-stablecoin': 'Dai',
+                    'busd': 'Binance USD',
+                    'binance-usd': 'Binance USD'
+                };
+                
+                // Check name map first by coin ID, then by symbol, then by name
+                let displayName = nameMap[coin.id.toLowerCase()] || 
+                                  nameMap[coin.symbol.toLowerCase()] || 
+                                  coin.name;
+                
+                // If name equals symbol (uppercase), use name mapping
                 if (coin.name.toUpperCase() === coin.symbol.toUpperCase()) {
-                    // Map common coins where name equals symbol
-                    const nameMap = {
-                        'xrp': 'Ripple',
-                        'ripple': 'Ripple',
-                        'bnb': 'Binance Coin',
-                        'binancecoin': 'Binance Coin',
-                        'usdt': 'Tether',
-                        'tether': 'Tether',
-                        'usdc': 'USD Coin',
-                        'usd-coin': 'USD Coin',
-                        'dai': 'Dai',
-                        'dai-stablecoin': 'Dai',
-                        'busd': 'Binance USD',
-                        'binance-usd': 'Binance USD'
-                    };
-                    displayName = nameMap[coin.id.toLowerCase()] || nameMap[coin.symbol.toLowerCase()] || coin.name;
+                    displayName = nameMap[coin.id.toLowerCase()] || 
+                                 nameMap[coin.symbol.toLowerCase()] || 
+                                 displayName;
                 }
+                
                 input.value = displayName;
                 
                 // Force the value to stay locked by setting it again after a brief delay
