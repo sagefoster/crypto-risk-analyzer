@@ -553,8 +553,24 @@ header h1 {
     border-radius: 0 !important;
 }
 
+/* Utility classes for responsive display */
+.desktop-only {
+    display: block;
+}
+
+.mobile-only {
+    display: none;
+}
+
 /* Mobile: adjust info-card */
 @media (max-width: 768px) {
+    .desktop-only {
+        display: none !important;
+    }
+    
+    .mobile-only {
+        display: block !important;
+    }
     .card.info-card {
         margin: -4px 0 20px 0 !important;
     }
