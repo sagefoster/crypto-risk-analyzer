@@ -1382,7 +1382,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                             token2Input.value = mappedName;
                         }
                     }
-                }, 600); // Increased delay to ensure updateAssetDisplay completes first
+                }, 300); // Reduced delay since updateAssetDisplay is already awaited
             } else {
             }
             
@@ -1408,10 +1408,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Scroll prompt removed
             } finally {
-                // Reset lock after a delay to allow async operations to complete
+                // Release lock after updateAssetDisplay completes (it's already awaited above)
+                // Use a shorter delay since the critical async operation is done
                 setTimeout(() => {
                     diceButtonProcessing = false;
-                }, 1000);
+                }, 400); // Reduced from 1000ms to 400ms - just enough to prevent rapid double-clicks
+            }
             }
         }, { capture: true }); // Use capture phase to ensure it fires
     }
