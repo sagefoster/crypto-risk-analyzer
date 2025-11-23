@@ -26,6 +26,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (price >= 0.01) return `$${price.toFixed(4)}`;
         return `$${price.toFixed(6)}`;
     }
+    
+    // Helper function to check if asset is confirmed (logo is visible)
+    function isAssetConfirmed(inputElement) {
+        const inputId = inputElement.id;
+        const logoImg = document.getElementById(`${inputId}-logo`);
+        return logoImg && logoImg.style.display !== 'none' && logoImg.src;
+    }
 
     // Shared dropdown positioning calculation
     function calculateDropdownPosition(inputRect, isMobile, dropdownMaxHeight, autocompleteDiv, inputElement) {
