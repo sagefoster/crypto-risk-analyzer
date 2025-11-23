@@ -685,6 +685,29 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return logoImg && logoImg.style.display !== 'none' && logoImg.src;
             };
             
+            // Click handler: clear input on single click to allow fresh typing
+            newInput.addEventListener('click', (e) => {
+                // Don't clear if asset is confirmed (logo is showing)
+                if (isAssetConfirmed(e.target)) {
+                    return; // Keep the value locked when asset is confirmed
+                }
+                
+                const value = e.target.value.trim();
+                // Only clear if there's a value and user clicked (not selecting text)
+                // Check if there's a text selection - if so, don't clear
+                const selectionStart = e.target.selectionStart;
+                const selectionEnd = e.target.selectionEnd;
+                const hasSelection = selectionStart !== selectionEnd;
+                
+                if (value && !hasSelection) {
+                    // Store previous value for potential restoration
+                    previousValue = value;
+                    e.target.value = '';
+                    // Don't remove data-coin-id - keep it for analyze button
+                    // Focus will trigger autocomplete suggestions
+                }
+            });
+            
             newInput.addEventListener('focus', (e) => {
                 const value = e.target.value.trim();
                 // Don't clear if asset is confirmed (logo is showing)
