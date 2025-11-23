@@ -1146,7 +1146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Random crypto button functionality - cycles through list without repeating
     // Ordered: ripple, binancecoin, zcash, monero, solana, litecoin, dogecoin, uniswap, chainlink
     const randomCryptos = ['ripple', 'binancecoin', 'zcash', 'monero', 'solana', 'litecoin', 'dogecoin', 'uniswap', 'chainlink'];
-    let randomCryptoIndex = 0; // Track current position in rotation
+    let randomCryptoIndex = -1; // Start at -1 so first click gets index 0
     let diceButtonProcessing = false; // Lock to prevent multiple simultaneous clicks
     
     // Random stock button functionality - cycles through xStock tokens
@@ -1180,9 +1180,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             try {
             // Get next crypto in rotation (cycles through list)
-            const randomCrypto = randomCryptos[randomCryptoIndex];
-            // Move to next index, wrap around if at end
+            // Move to next index FIRST, then get the crypto (ensures we don't repeat)
             randomCryptoIndex = (randomCryptoIndex + 1) % randomCryptos.length;
+            const randomCrypto = randomCryptos[randomCryptoIndex];
             
             // Get the third input (token2)
             const token2Input = document.getElementById('token2');
@@ -1253,8 +1253,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const nameMap = {
                             'xrp': 'Ripple',
                             'ripple': 'Ripple',
-                            'bnb': 'BNB',
-                            'binancecoin': 'BNB',
+                            'bnb': 'Binance Coin',
+                            'binancecoin': 'Binance Coin',
                             'usdt': 'Tether',
                             'tether': 'Tether',
                             'usdc': 'USD Coin',
@@ -1829,8 +1829,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                         const nameMap = {
                             'xrp': 'Ripple',
                             'ripple': 'Ripple',
-                            'bnb': 'BNB',
-                            'binancecoin': 'BNB',
+                            'bnb': 'Binance Coin',
+                            'binancecoin': 'Binance Coin',
                             'usdt': 'Tether',
                             'tether': 'Tether',
                             'usdc': 'USD Coin',
