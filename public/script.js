@@ -1280,6 +1280,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             // Get the third input (token2)
             const token2Input = document.getElementById('token2');
             if (!token2Input) {
+                diceButtonProcessing = false; // Release lock if input not found
                 return;
             }
             
