@@ -722,8 +722,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
             
-            newInput.addEventListener('click', handleInputClear);
-            newInput.addEventListener('touchstart', handleInputClear, { passive: true });
+            // Use mousedown instead of click to fire before focus event
+            // Also use capture phase to ensure it runs first
+            newInput.addEventListener('mousedown', handleInputClear, { capture: true });
+            newInput.addEventListener('touchstart', handleInputClear, { passive: true, capture: true });
             
             newInput.addEventListener('focus', (e) => {
                 const value = e.target.value.trim();
@@ -2001,8 +2003,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
             
-            input.addEventListener('click', handleInputClear);
-            input.addEventListener('touchstart', handleInputClear, { passive: true });
+            // Use mousedown instead of click to fire before focus event
+            // Also use capture phase to ensure it runs first
+            input.addEventListener('mousedown', handleInputClear, { capture: true });
+            input.addEventListener('touchstart', handleInputClear, { passive: true, capture: true });
             
             // Clear input on focus if asset is not confirmed
             // BUT only if asset is not confirmed (logo not showing)
