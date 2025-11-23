@@ -1278,27 +1278,41 @@ document.addEventListener('DOMContentLoaded', async () => {
                             'microstrategy-xstock': 'MicroStrategy xStock'
                         };
                         const mappedName = nameMap[coinId.toLowerCase()];
-                        if (mappedName) {
+                        // Only override if current value is wrong (matches ticker or is the coin ID)
+                        const currentValue = token2Input.value.trim();
+                        const needsFix = mappedName && (
+                            currentValue.toLowerCase() === coinId.toLowerCase() || 
+                            currentValue.toUpperCase() === coinId.toUpperCase() ||
+                            (currentValue === 'XRP' && coinId.toLowerCase() === 'xrp') ||
+                            (currentValue === 'BNB' && coinId.toLowerCase() === 'bnb') ||
+                            (currentValue === 'ripple' && coinId.toLowerCase() === 'xrp') ||
+                            (currentValue === 'binancecoin' && coinId.toLowerCase() === 'bnb')
+                        );
+                        if (needsFix) {
                             token2Input.value = mappedName;
                             return;
                         }
                         
                         // Fallback: fetch to get ticker and name if not already set
-                        fetch(`/api/coin/${encodeURIComponent(coinId)}`)
-                            .then(res => res.ok ? res.json() : null)
-                            .then(coinData => {
-                                if (coinData && coinData.name) {
-                                    // If name equals symbol, use proper name mapping
-                                    let displayName = coinData.name;
-                                    if (coinData.symbol && coinData.name.toUpperCase() === coinData.symbol.toUpperCase()) {
-                                        displayName = nameMap[coinData.id.toLowerCase()] || nameMap[coinData.symbol.toLowerCase()] || coinData.name;
+                        if (!mappedName) {
+                            fetch(`/api/coin/${encodeURIComponent(coinId)}`)
+                                .then(res => res.ok ? res.json() : null)
+                                .then(coinData => {
+                                    if (coinData && coinData.name && token2Input.getAttribute('data-coin-id') === coinId) {
+                                        // If name equals symbol, use proper name mapping
+                                        let displayName = coinData.name;
+                                        if (coinData.symbol && coinData.name.toUpperCase() === coinData.symbol.toUpperCase()) {
+                                            displayName = nameMap[coinData.id.toLowerCase()] || nameMap[coinData.symbol.toLowerCase()] || coinData.name;
+                                        }
+                                        if (isAssetConfirmed(token2Input) && token2Input.getAttribute('data-coin-id') === coinId) {
+                                            token2Input.value = displayName;
+                                        }
                                     }
-                                    token2Input.value = displayName;
-                                }
-                            })
-                            .catch(() => {}); // Ignore errors
+                                })
+                                .catch(() => {}); // Ignore errors
+                        }
                     }
-                }, 200);
+                }, 500);
             } else {
             }
             
