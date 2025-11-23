@@ -472,7 +472,11 @@ app.post('/api/analyze', async (req, res) => {
         if (response.status === 200 && response.data.prices) {
           return response;
         }
-        throw new Error('Pro API failed');
+        // Handle 404 specifically
+        if (response.status === 404) {
+          throw new Error(`Token "${tokenId}" not found (404). The token ID may be incorrect or not available on CoinGecko.`);
+        }
+        throw new Error(`Pro API failed with status ${response.status}`);
       } catch (proError) {
         // If Pro API fails or indicates demo key, use Demo API endpoint
         console.log(`Using Demo API for ${tokenId}...`);
@@ -494,10 +498,17 @@ app.post('/api/analyze', async (req, res) => {
           if (demoError.response && demoError.response.status === 429) {
             throw new Error(`Rate limit exceeded. Please try again in a moment or upgrade to a Pro API key.`);
           }
+          if (demoError.response && demoError.response.status === 404) {
+            throw new Error(`Token "${tokenId}" not found (404). The token ID may be incorrect or not available on CoinGecko.`);
+          }
           if (demoError.response && (demoError.response.status === 401 || demoError.response.status === 403)) {
             throw new Error(`API authentication failed for ${timeframe} days. Demo API keys may be limited to 365 days of data. Consider using a shorter timeframe or upgrading to a Pro API key.`);
           }
-          throw demoError;
+          // Re-throw with more context
+          const errorMsg = demoError.response 
+            ? `API error (${demoError.response.status}): ${demoError.message || 'Unknown error'}`
+            : demoError.message || 'Unknown error';
+          throw new Error(errorMsg);
         }
       }
     };
