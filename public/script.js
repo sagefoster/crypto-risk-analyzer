@@ -685,8 +685,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return logoImg && logoImg.style.display !== 'none' && logoImg.src;
             };
             
-            // Click handler: clear input on single click to allow fresh typing
-            newInput.addEventListener('click', (e) => {
+            // Click/touch handler: clear input on single click/touch to allow fresh typing
+            // Use both click and touchstart for better mobile support
+            const handleInputClear = (e) => {
                 // Don't clear if asset is confirmed (logo is showing)
                 if (isAssetConfirmed(e.target)) {
                     return; // Keep the value locked when asset is confirmed
@@ -702,11 +703,30 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (value && !hasSelection) {
                     // Store previous value for potential restoration
                     previousValue = value;
+                    
+                    // Set flag to prevent autocomplete from triggering with old value
+                    e.target.setAttribute('data-clearing', 'true');
+                    
+                    // Clear the input immediately
                     e.target.value = '';
+                    
+                    // Clear any existing autocomplete dropdown
+                    const existingDropdown = document.querySelector('.autocomplete-dropdown');
+                    if (existingDropdown) {
+                        existingDropdown.remove();
+                    }
+                    
+                    // Remove the flag after a brief delay to allow fresh typing
+                    setTimeout(() => {
+                        e.target.removeAttribute('data-clearing');
+                    }, 100);
+                    
                     // Don't remove data-coin-id - keep it for analyze button
-                    // Focus will trigger autocomplete suggestions
                 }
-            });
+            };
+            
+            newInput.addEventListener('click', handleInputClear);
+            newInput.addEventListener('touchstart', handleInputClear, { passive: true });
             
             newInput.addEventListener('focus', (e) => {
                 const value = e.target.value.trim();
@@ -714,10 +734,33 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (isAssetConfirmed(e.target)) {
                     return; // Keep the value locked when asset is confirmed
                 }
+                
+                // Only clear on focus if it wasn't already cleared by click/touch
+                // Check if we just cleared it (data-clearing flag)
+                if (e.target.getAttribute('data-clearing') === 'true') {
+                    return; // Already cleared by click/touch handler
+                }
+                
                 // Store previous value for potential restoration
                 if (value) {
                     previousValue = value;
+                    
+                    // Set flag to prevent autocomplete from triggering with old value
+                    e.target.setAttribute('data-clearing', 'true');
+                    
                     e.target.value = '';
+                    
+                    // Clear any existing autocomplete dropdown
+                    const existingDropdown = document.querySelector('.autocomplete-dropdown');
+                    if (existingDropdown) {
+                        existingDropdown.remove();
+                    }
+                    
+                    // Remove the flag after a brief delay
+                    setTimeout(() => {
+                        e.target.removeAttribute('data-clearing');
+                    }, 100);
+                    
                     // Don't remove data-coin-id - keep it for analyze button
                 }
             });
@@ -914,6 +957,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         input.addEventListener('input', async (e) => {
             // Skip autocomplete if value was set programmatically (e.g., by random crypto button)
             if (e.target.getAttribute('data-programmatic-set') === 'true') {
+                return;
+            }
+            
+            // Skip autocomplete if input is being cleared (to prevent showing suggestions for old value)
+            if (e.target.getAttribute('data-clearing') === 'true') {
                 return;
             }
             
