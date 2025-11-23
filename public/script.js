@@ -685,6 +685,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return logoImg && logoImg.style.display !== 'none' && logoImg.src;
             };
             
+            // Track if input was just cleared by mousedown/touchstart
+            let wasJustCleared = false;
+            
             // Click/touch handler: clear input on single click/touch to allow fresh typing
             // Always clear on click, even if asset is confirmed - user explicitly wants to edit
             // Use both click and touchstart for better mobile support
@@ -698,6 +701,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const hasSelection = selectionStart !== selectionEnd;
                 
                 if (value && !hasSelection) {
+                    // Set flag to prevent focus handler from restoring value
+                    wasJustCleared = true;
+                    
                     // Store previous value for potential restoration
                     previousValue = value;
                     
@@ -716,7 +722,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Remove the flag after a brief delay to allow fresh typing
                     setTimeout(() => {
                         e.target.removeAttribute('data-clearing');
-                    }, 100);
+                        wasJustCleared = false; // Reset after delay
+                    }, 200);
                     
                     // Don't remove data-coin-id - keep it for analyze button
                 }
@@ -1967,6 +1974,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return logoImg && logoImg.style.display !== 'none' && logoImg.src;
             };
             
+            // Track if input was just cleared by mousedown/touchstart
+            let wasJustCleared = false;
+            
             // Click/touch handler: clear input on single click/touch to allow fresh typing
             // Always clear on click, even if asset is confirmed - user explicitly wants to edit
             const handleInputClear = (e) => {
@@ -1979,6 +1989,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 const hasSelection = selectionStart !== selectionEnd;
                 
                 if (value && !hasSelection) {
+                    // Set flag to prevent focus handler from restoring value
+                    wasJustCleared = true;
+                    
                     // Store previous value for potential restoration
                     previousValue = value;
                     
@@ -1997,7 +2010,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Remove the flag after a brief delay to allow fresh typing
                     setTimeout(() => {
                         e.target.removeAttribute('data-clearing');
-                    }, 100);
+                        wasJustCleared = false; // Reset after delay
+                    }, 200);
                     
                     // Don't remove data-coin-id - keep it for analyze button
                 }
@@ -2008,9 +2022,18 @@ document.addEventListener('DOMContentLoaded', async () => {
             input.addEventListener('mousedown', handleInputClear, { capture: true });
             input.addEventListener('touchstart', handleInputClear, { passive: true, capture: true });
             
+            // Track if input was just cleared by mousedown/touchstart
+            let wasJustCleared = false;
+            
             // Clear input on focus if asset is not confirmed
             // BUT only if asset is not confirmed (logo not showing)
             input.addEventListener('focus', (e) => {
+                // If we just cleared it via mousedown/touchstart, don't do anything
+                if (wasJustCleared) {
+                    wasJustCleared = false; // Reset flag
+                    return;
+                }
+                
                 const value = e.target.value.trim();
                 // Don't clear if asset is confirmed (logo is showing)
                 if (isAssetConfirmed(e.target)) {
