@@ -1787,11 +1787,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                             'binance-usd': 'Binance USD'
                         };
                         const mappedName = nameMap[currentCoinId.toLowerCase()];
-                        if (mappedName && input.value !== mappedName) {
+                        // Only fix if the current value is wrong (ticker, coin ID, or lowercase version)
+                        const currentValue = input.value.trim();
+                        const isWrong = mappedName && (
+                            currentValue.toUpperCase() === currentCoinId.toUpperCase() ||
+                            currentValue === 'XRP' || currentValue === 'xrp' ||
+                            currentValue === 'BNB' || currentValue === 'bnb' ||
+                            currentValue === 'ripple' || currentValue === 'binancecoin'
+                        );
+                        if (isWrong && input.value !== mappedName) {
                             input.value = mappedName;
                         }
                     }
-                }, 100);
+                }, 200);
             }
             
             // Show chart section when asset is selected
