@@ -14,18 +14,10 @@
             const newDomain = 'cryptorisk.blocksage.tech';
             
             if (window.location.hostname === oldDomain) {
-                // Show redirect message and redirect
-                const path = window.location.pathname + window.location.search;
+                // Immediate redirect - preserve path and query params
+                const path = window.location.pathname + window.location.search + window.location.hash;
                 const newUrl = 'https://' + newDomain + path;
-                
-                // Create redirect page HTML
-                const redirectHTML = '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta http-equiv="refresh" content="3;url=' + newUrl + '"><title>Site Moved - Crypto Risk Analyzer</title><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:-apple-system,BlinkMacSystemFont,\'Segoe UI\',Roboto,sans-serif;background:linear-gradient(135deg,#0a0e27 0%,#1a1f3a 100%);color:#e4e7eb;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}.container{text-align:center;max-width:600px;background:rgba(28,33,40,0.9);border:1px solid rgba(88,166,255,0.2);border-radius:16px;padding:40px;box-shadow:0 8px 32px rgba(0,0,0,0.3)}h1{font-size:2rem;margin-bottom:20px;background:linear-gradient(135deg,#667eea 0%,#58a6ff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}p{font-size:1.1rem;line-height:1.6;margin-bottom:30px;color:#cbd5e1}.new-url{font-size:1.3rem;font-weight:600;color:#58a6ff;margin:20px 0;word-break:break-all}.redirect-link{display:inline-block;padding:14px 28px;background:linear-gradient(135deg,#667eea 0%,#58a6ff 100%);color:white;text-decoration:none;border-radius:8px;font-weight:600;font-size:1.1rem;transition:transform 0.2s,box-shadow 0.2s;margin-top:20px}.redirect-link:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(88,166,255,0.4)}.countdown{margin-top:20px;font-size:0.9rem;color:#94a3b8}</style></head><body><div class="container"><h1>🚀 Site Has Moved</h1><p>The Crypto Risk Analyzer is now available at our new domain:</p><div class="new-url">' + newDomain + '</div><p>You will be automatically redirected in a few seconds.</p><a href="' + newUrl + '" class="redirect-link">Go to New Site →</a><div class="countdown">Redirecting automatically...</div></div><script>setTimeout(function(){window.location.replace(\'' + newUrl + '\');},100);</script></body></html>';
-                
-                // Stop all execution and replace page
-                document.open();
-                document.write(redirectHTML);
-                document.close();
-                return; // Prevent further execution
+                window.location.replace(newUrl);
             }
         })();
     </script>

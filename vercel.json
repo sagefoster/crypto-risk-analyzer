@@ -30,7 +30,8 @@
         }
       ],
       "destination": "https://cryptorisk.blocksage.tech/$1",
-      "permanent": true
+      "permanent": true,
+      "statusCode": 301
     }
   ]
 }
