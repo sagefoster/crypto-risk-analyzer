@@ -857,6 +857,11 @@ header h1 {
     padding-left: 8px;
 }
 
+/* Hide charts on input page for both mobile and desktop */
+#mainContent .asset-chart-section {
+    display: none !important;
+}
+
 .asset-display-wrapper:hover {
     background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(102, 126, 234, 0.04));
     border-color: rgba(88, 166, 255, 0.2);
@@ -1076,11 +1081,6 @@ header h1 {
         width: 100%;
         padding-right: 0;
         gap: 10px;
-    }
-    
-    /* Hide charts on mobile for inputs page only */
-    #mainContent .asset-chart-section {
-        display: none !important;
     }
     
     /* Show charts on mobile for results pages */
