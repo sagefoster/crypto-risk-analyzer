@@ -1413,6 +1413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 diceButtonProcessing = false;
             }
         }, { capture: true }); // Use capture phase to ensure it fires
+        }
     }
     
     // Call the setup function immediately
