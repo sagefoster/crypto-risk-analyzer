@@ -744,10 +744,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 
                 const value = e.target.value.trim();
-                // Don't clear if asset is confirmed (logo is showing)
-                if (isAssetConfirmed(e.target)) {
-                    return; // Keep the value locked when asset is confirmed
-                }
+                // Always clear on focus if there's a value - user clicking means they want to edit
+                // (The blur handler will restore it if asset is confirmed and input is empty)
                 
                 // Only clear on focus if it wasn't already cleared by click/touch
                 // Check if we just cleared it (data-clearing flag)
@@ -2045,10 +2043,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
                 
                 const value = e.target.value.trim();
-                // Don't clear if asset is confirmed (logo is showing)
-                if (isAssetConfirmed(e.target)) {
-                    return; // Keep the value locked when asset is confirmed
-                }
+                // Always clear on focus if there's a value - user clicking means they want to edit
+                // (The blur handler will restore it if asset is confirmed and input is empty)
                 
                 // Only clear on focus if it wasn't already cleared by click/touch
                 // Check if we just cleared it (data-clearing flag)
