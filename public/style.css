@@ -1591,6 +1591,10 @@ select {
     color: var(--text-tertiary);
     font-style: italic;
 }
+
+input[type="text"],
+input[type="password"],
+select {
     border-radius: 8px;
     color: var(--text-primary);
     font-size: 1rem;
