@@ -735,6 +735,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             newInput.addEventListener('touchstart', handleInputClear, { passive: true, capture: true });
             
             newInput.addEventListener('focus', (e) => {
+                // If we just cleared it via mousedown/touchstart, don't do anything
+                if (wasJustCleared) {
+                    wasJustCleared = false; // Reset flag
+                    return;
+                }
+                
                 const value = e.target.value.trim();
                 // Don't clear if asset is confirmed (logo is showing)
                 if (isAssetConfirmed(e.target)) {
