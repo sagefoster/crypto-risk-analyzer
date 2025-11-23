@@ -909,6 +909,8 @@ header h1 {
     line-height: 1;
     margin-top: 2px;
 }
+
+.asset-logo img {
     height: 100%;
     object-fit: contain;
     border-radius: 12px;
