@@ -686,14 +686,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
             
             // Click/touch handler: clear input on single click/touch to allow fresh typing
+            // Always clear on click, even if asset is confirmed - user explicitly wants to edit
             // Use both click and touchstart for better mobile support
             const handleInputClear = (e) => {
-                // Don't clear if asset is confirmed (logo is showing)
-                if (isAssetConfirmed(e.target)) {
-                    return; // Keep the value locked when asset is confirmed
-                }
-                
                 const value = e.target.value.trim();
+                
                 // Only clear if there's a value and user clicked (not selecting text)
                 // Check if there's a text selection - if so, don't clear
                 const selectionStart = e.target.selectionStart;
@@ -1969,13 +1966,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             };
             
             // Click/touch handler: clear input on single click/touch to allow fresh typing
+            // Always clear on click, even if asset is confirmed - user explicitly wants to edit
             const handleInputClear = (e) => {
-                // Don't clear if asset is confirmed (logo is showing)
-                if (isAssetConfirmed(e.target)) {
-                    return; // Keep the value locked when asset is confirmed
-                }
-                
                 const value = e.target.value.trim();
+                
                 // Only clear if there's a value and user clicked (not selecting text)
                 // Check if there's a text selection - if so, don't clear
                 const selectionStart = e.target.selectionStart;
