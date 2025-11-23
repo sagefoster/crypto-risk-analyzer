@@ -1339,50 +1339,50 @@ document.addEventListener('DOMContentLoaded', async () => {
                 await updateAssetDisplay(token2Input);
                 
                 // Ensure name is correct after updateAssetDisplay completes
-                // Wait longer to let updateAssetDisplay and its setTimeout complete
-                setTimeout(() => {
-                    const coinId = token2Input.getAttribute('data-coin-id');
-                    if (coinId && isAssetConfirmed(token2Input)) {
-                        const nameMap = {
-                            'xrp': 'Ripple',
-                            'ripple': 'Ripple',
-                            'bnb': 'Binance Coin',
-                            'binancecoin': 'Binance Coin',
-                            'usdt': 'Tether',
-                            'tether': 'Tether',
-                            'usdc': 'USD Coin',
-                            'usd-coin': 'USD Coin',
-                            'dai': 'Dai',
-                            'dai-stablecoin': 'Dai',
-                            'busd': 'Binance USD',
-                            'binance-usd': 'Binance USD'
-                        };
-                        // Check both coin ID and common variations
-                        const mappedName = nameMap[coinId.toLowerCase()] || 
-                                         nameMap[coinId.toLowerCase().replace('-', '')];
-                        
-                        // Only fix if the current value is wrong (ticker, coin ID, or lowercase version)
-                        const currentValue = token2Input.value.trim();
-                        if (mappedName && (
-                            currentValue.toUpperCase() === coinId.toUpperCase() ||
-                            currentValue === 'XRP' || currentValue === 'xrp' ||
-                            currentValue === 'BNB' || currentValue === 'bnb' ||
-                            currentValue === 'Ripple' && coinId.toLowerCase() !== 'ripple' && coinId.toLowerCase() !== 'xrp' ||
-                            currentValue === 'Binance Coin' && coinId.toLowerCase() !== 'binancecoin' && coinId.toLowerCase() !== 'bnb' ||
-                            currentValue.toLowerCase() === coinId.toLowerCase() ||
-                            currentValue.toLowerCase() === 'ripple' && coinId.toLowerCase() !== 'ripple' ||
-                            currentValue.toLowerCase() === 'binancecoin' && coinId.toLowerCase() !== 'binancecoin'
-                        )) {
-                            // Only set if it's actually wrong
-                            if (currentValue !== mappedName) {
-                                token2Input.value = mappedName;
-                            }
-                        } else if (mappedName && currentValue !== mappedName) {
-                            // If we have a mapped name and current value doesn't match, set it
+                // Wait for name mapping to complete
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                const coinId = token2Input.getAttribute('data-coin-id');
+                if (coinId && isAssetConfirmed(token2Input)) {
+                    const nameMap = {
+                        'xrp': 'Ripple',
+                        'ripple': 'Ripple',
+                        'bnb': 'Binance Coin',
+                        'binancecoin': 'Binance Coin',
+                        'usdt': 'Tether',
+                        'tether': 'Tether',
+                        'usdc': 'USD Coin',
+                        'usd-coin': 'USD Coin',
+                        'dai': 'Dai',
+                        'dai-stablecoin': 'Dai',
+                        'busd': 'Binance USD',
+                        'binance-usd': 'Binance USD'
+                    };
+                    // Check both coin ID and common variations
+                    const mappedName = nameMap[coinId.toLowerCase()] || 
+                                     nameMap[coinId.toLowerCase().replace('-', '')];
+                    
+                    // Only fix if the current value is wrong (ticker, coin ID, or lowercase version)
+                    const currentValue = token2Input.value.trim();
+                    if (mappedName && (
+                        currentValue.toUpperCase() === coinId.toUpperCase() ||
+                        currentValue === 'XRP' || currentValue === 'xrp' ||
+                        currentValue === 'BNB' || currentValue === 'bnb' ||
+                        currentValue === 'Ripple' && coinId.toLowerCase() !== 'ripple' && coinId.toLowerCase() !== 'xrp' ||
+                        currentValue === 'Binance Coin' && coinId.toLowerCase() !== 'binancecoin' && coinId.toLowerCase() !== 'bnb' ||
+                        currentValue.toLowerCase() === coinId.toLowerCase() ||
+                        currentValue.toLowerCase() === 'ripple' && coinId.toLowerCase() !== 'ripple' ||
+                        currentValue.toLowerCase() === 'binancecoin' && coinId.toLowerCase() !== 'binancecoin'
+                    )) {
+                        // Only set if it's actually wrong
+                        if (currentValue !== mappedName) {
                             token2Input.value = mappedName;
                         }
+                    } else if (mappedName && currentValue !== mappedName) {
+                        // If we have a mapped name and current value doesn't match, set it
+                        token2Input.value = mappedName;
                     }
-                }, 300); // Reduced delay since updateAssetDisplay is already awaited
+                }
             } else {
             }
             
@@ -1408,11 +1408,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             
             // Scroll prompt removed
             } finally {
-                // Release lock after updateAssetDisplay completes (it's already awaited above)
-                // Use a shorter delay since the critical async operation is done
-                setTimeout(() => {
-                    diceButtonProcessing = false;
-                }, 400); // Reduced from 1000ms to 400ms - just enough to prevent rapid double-clicks
+                // Release lock immediately after async operations complete
+                // The await above ensures updateAssetDisplay and name mapping are done
+                diceButtonProcessing = false;
             }
             }
         }, { capture: true }); // Use capture phase to ensure it fires
