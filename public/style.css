@@ -862,6 +862,16 @@ header h1 {
     display: none !important;
 }
 
+/* Show charts on results pages for both mobile and desktop */
+#resultsContainer .asset-chart-section,
+#resultsContainer .winner .asset-chart-section,
+#resultsContainer .winner-chart-section,
+#resultsContainer .summary-card .asset-chart-section,
+#resultsContainer .summary-chart-section,
+#resultsContainer .asset-interpretation-card .asset-chart-section {
+    display: flex !important;
+}
+
 .asset-display-wrapper:hover {
     background: linear-gradient(135deg, rgba(88, 166, 255, 0.08), rgba(102, 126, 234, 0.04));
     border-color: rgba(88, 166, 255, 0.2);
@@ -1083,14 +1093,14 @@ header h1 {
         gap: 10px;
     }
     
-    /* Show charts on mobile for results pages */
-    #resultsContainer .asset-chart-section,
-    #resultsContainer .winner .asset-chart-section,
-    #resultsContainer .winner-chart-section,
-    #resultsContainer .summary-card .asset-chart-section,
-    #resultsContainer .summary-chart-section,
-    #resultsContainer .asset-interpretation-card .asset-chart-section {
-        display: flex !important;
+    /* Chart title mobile - make smaller so chart can be bigger */
+    .chart-title-mobile {
+        font-size: 0.7rem !important;
+        font-weight: 500;
+        color: var(--text-tertiary);
+        margin-bottom: 4px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
     }
     
     .asset-logo-container {
