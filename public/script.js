@@ -729,8 +729,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
             
-            // Use mousedown instead of click to fire before focus event
+            // Use pointerdown to fire before focus event (works for both mouse and touch)
             // Also use capture phase to ensure it runs first
+            newInput.addEventListener('pointerdown', handleInputClear, { capture: true });
+            // Fallback for older browsers
             newInput.addEventListener('mousedown', handleInputClear, { capture: true });
             newInput.addEventListener('touchstart', handleInputClear, { passive: true, capture: true });
             
@@ -2023,8 +2025,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                 }
             };
             
-            // Use mousedown instead of click to fire before focus event
+            // Use pointerdown to fire before focus event (works for both mouse and touch)
             // Also use capture phase to ensure it runs first
+            input.addEventListener('pointerdown', handleInputClear, { capture: true });
+            // Fallback for older browsers
             input.addEventListener('mousedown', handleInputClear, { capture: true });
             input.addEventListener('touchstart', handleInputClear, { passive: true, capture: true });
             
