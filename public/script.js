@@ -492,17 +492,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             progressBar.style.transition = 'width 0.3s ease';
             
             progressInterval = setInterval(() => {
-                progress += increment;
-                if (progress >= targetProgress) {
-                    progress = targetProgress;
+            progress += increment;
+            if (progress >= targetProgress) {
+                progress = targetProgress;
                     clearInterval(progressInterval);
-                    progressBar.style.width = '100%';
-                    // Show enter button when progress completes
-                    showEnterButton();
-                } else {
-                    progressBar.style.width = `${progress}%`;
-                }
-            }, intervalTime);
+                progressBar.style.width = '100%';
+                // Show enter button when progress completes
+                showEnterButton();
+            } else {
+                progressBar.style.width = `${progress}%`;
+            }
+        }, intervalTime);
         } catch (error) {
             // Fallback: show button immediately on error
             console.error('Progress bar error:', error);
@@ -1412,9 +1412,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // The await above ensures updateAssetDisplay and name mapping are done
                 diceButtonProcessing = false;
             }
-            }
         }, { capture: true }); // Use capture phase to ensure it fires
-    }
     }
     
     // Call the setup function immediately
@@ -1508,7 +1506,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         
                         // Ensure input value is locked after update with proper name mapping
                         // Wait longer to let updateAssetDisplay's setTimeout complete first
-                        setTimeout(() => {
+            setTimeout(() => {
                             const coinId = token2Input.getAttribute('data-coin-id');
                             if (coinId && isAssetConfirmed(token2Input)) {
                                 // Extended name map including xStock tokens
@@ -1581,7 +1579,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     // Remove the flag after events are dispatched
                     setTimeout(() => {
                         token2Input.removeAttribute('data-programmatic-set');
-                    }, 200);
+            }, 200);
                     
                     // Add a brief highlight animation
                     token2Input.style.animation = 'none';
@@ -1595,13 +1593,13 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }, 100);
                     
                     // Scroll prompt removed
-                } finally {
-                    // Reset lock after a delay to allow async operations to complete
-                    setTimeout(() => {
+            } finally {
+                // Reset lock after a delay to allow async operations to complete
+                setTimeout(() => {
                         stockDiceButtonProcessing = false;
-                    }, 1000);
-                }
-            }, { capture: true }); // Use capture phase to ensure it fires
+                }, 1000);
+            }
+        }, { capture: true }); // Use capture phase to ensure it fires
             
             // Setup tooltip for info icon
             const infoIcon = randomStockBtn.querySelector('.info-icon-stock');
@@ -2036,19 +2034,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     
     // Initialize asset displays for default values
     let isInitializing = true;
-    document.querySelectorAll('.token-input').forEach(input => {
-        if (input.value) {
-            // For default values (bitcoin, ethereum), store the coin ID
-            const value = input.value.trim().toLowerCase();
-            if (value === 'bitcoin' || value === 'ethereum') {
-                input.setAttribute('data-coin-id', value);
+        document.querySelectorAll('.token-input').forEach(input => {
+            if (input.value) {
+                // For default values (bitcoin, ethereum), store the coin ID
+                const value = input.value.trim().toLowerCase();
+                if (value === 'bitcoin' || value === 'ethereum') {
+                    input.setAttribute('data-coin-id', value);
+                }
+                updateAssetDisplay(input).catch(() => {});
             }
-            updateAssetDisplay(input).catch(() => {});
-        }
-        
-        // Store previous value when clearing (using closure per input)
-        let previousValue = '';
-        
+            
+            // Store previous value when clearing (using closure per input)
+            let previousValue = '';
+            
         // Helper function to check if asset is confirmed (logo is visible)
         const isAssetConfirmed = (inputElement) => {
             const inputId = inputElement.id;
@@ -2108,7 +2106,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
         // Clear input on focus if asset is not confirmed
         // BUT only if asset is not confirmed (logo not showing)
-        input.addEventListener('focus', (e) => {
+            input.addEventListener('focus', (e) => {
             // Don't clear during initialization
             if (isInitializing) {
                 return;
@@ -2120,7 +2118,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 return;
             }
             
-            const value = e.target.value.trim();
+                const value = e.target.value.trim();
             // Don't clear if asset is confirmed (logo is showing)
             if (isAssetConfirmed(e.target)) {
                 return; // Keep the value locked when asset is confirmed
@@ -2139,7 +2137,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 // Set flag to prevent autocomplete from triggering with old value
                 e.target.setAttribute('data-clearing', 'true');
                 
-                e.target.value = '';
+                    e.target.value = '';
                 
                 // Clear any existing autocomplete dropdown
                 const existingDropdown = document.querySelector('.autocomplete-dropdown');
@@ -2152,9 +2150,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                     e.target.removeAttribute('data-clearing');
                 }, 100);
                 
-                // Don't remove data-coin-id - keep it for analyze button
-            }
-        });
+                    // Don't remove data-coin-id - keep it for analyze button
+                }
+            });
             
             // Restore previous value on blur if input is empty and coin ID exists
             // OR if asset is confirmed, always restore the ticker and name
