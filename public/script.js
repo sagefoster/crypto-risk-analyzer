@@ -1337,7 +1337,39 @@ document.addEventListener('DOMContentLoaded', async () => {
                 token2Input.setAttribute('data-coin-id', randomCrypto);
                 await updateAssetDisplay(token2Input);
                 
-                // No need for additional setTimeout - updateAssetDisplay handles name mapping correctly
+                // Ensure name is correct after updateAssetDisplay completes
+                // Wait a bit longer to let updateAssetDisplay's setTimeout complete
+                setTimeout(() => {
+                    const coinId = token2Input.getAttribute('data-coin-id');
+                    if (coinId && isAssetConfirmed(token2Input)) {
+                        const nameMap = {
+                            'xrp': 'Ripple',
+                            'ripple': 'Ripple',
+                            'bnb': 'Binance Coin',
+                            'binancecoin': 'Binance Coin',
+                            'usdt': 'Tether',
+                            'tether': 'Tether',
+                            'usdc': 'USD Coin',
+                            'usd-coin': 'USD Coin',
+                            'dai': 'Dai',
+                            'dai-stablecoin': 'Dai',
+                            'busd': 'Binance USD',
+                            'binance-usd': 'Binance USD'
+                        };
+                        const mappedName = nameMap[coinId.toLowerCase()];
+                        // Only fix if the current value is wrong (ticker, coin ID, or lowercase version)
+                        const currentValue = token2Input.value.trim();
+                        if (mappedName && (
+                            currentValue.toUpperCase() === coinId.toUpperCase() ||
+                            currentValue === 'XRP' || currentValue === 'xrp' ||
+                            currentValue === 'BNB' || currentValue === 'bnb' ||
+                            currentValue === 'ripple' || currentValue === 'binancecoin' ||
+                            currentValue.toLowerCase() === coinId.toLowerCase()
+                        )) {
+                            token2Input.value = mappedName;
+                        }
+                    }
+                }, 500); // Increased delay to ensure updateAssetDisplay completes first
             } else {
             }
             
@@ -1462,6 +1494,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         await updateAssetDisplay(token2Input);
                         
                         // Ensure input value is locked after update with proper name mapping
+                        // Wait longer to let updateAssetDisplay's setTimeout complete first
                         setTimeout(() => {
                             const coinId = token2Input.getAttribute('data-coin-id');
                             if (coinId && isAssetConfirmed(token2Input)) {
@@ -1469,8 +1502,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                                 const nameMap = {
                                     'xrp': 'Ripple',
                                     'ripple': 'Ripple',
-                                    'bnb': 'BNB',
-                                    'binancecoin': 'BNB',
+                                    'bnb': 'Binance Coin',
+                                    'binancecoin': 'Binance Coin',
                                     'usdt': 'Tether',
                                     'tether': 'Tether',
                                     'usdc': 'USD Coin',
@@ -1494,7 +1527,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                                     'microstrategy-xstock': 'MicroStrategy xStock'
                                 };
                                 const mappedName = nameMap[coinId.toLowerCase()];
-                                if (mappedName) {
+                                // Only fix if the current value is wrong (ticker, coin ID, or lowercase version)
+                                const currentValue = token2Input.value.trim();
+                                if (mappedName && (
+                                    currentValue.toUpperCase() === coinId.toUpperCase() ||
+                                    currentValue === 'XRP' || currentValue === 'xrp' ||
+                                    currentValue === 'BNB' || currentValue === 'bnb' ||
+                                    currentValue === 'ripple' || currentValue === 'binancecoin' ||
+                                    currentValue.toLowerCase() === coinId.toLowerCase()
+                                )) {
                                     token2Input.value = mappedName;
                                     return;
                                 }
@@ -1509,12 +1550,15 @@ document.addEventListener('DOMContentLoaded', async () => {
                                             if (coinData.symbol && coinData.name.toUpperCase() === coinData.symbol.toUpperCase()) {
                                                 displayName = nameMap[coinData.id.toLowerCase()] || nameMap[coinData.symbol.toLowerCase()] || coinData.name;
                                             }
-                                            token2Input.value = displayName;
+                                            // Only set if different from current value
+                                            if (token2Input.value !== displayName) {
+                                                token2Input.value = displayName;
+                                            }
                                         }
                                     })
                                     .catch(() => {}); // Ignore errors
                             }
-                        }, 200);
+                        }, 500); // Increased delay to ensure updateAssetDisplay completes first
                     }
                     
                     // Trigger change event (but NOT input event to avoid autocomplete)
