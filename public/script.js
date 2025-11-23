@@ -487,20 +487,25 @@ document.addEventListener('DOMContentLoaded', async () => {
         const increment = (targetProgress / duration) * intervalTime;
         
         try {
+            // Force initial width to ensure visibility
+            progressBar.style.width = '0%';
+            progressBar.style.transition = 'width 0.3s ease';
+            
             progressInterval = setInterval(() => {
-            progress += increment;
-            if (progress >= targetProgress) {
-                progress = targetProgress;
+                progress += increment;
+                if (progress >= targetProgress) {
+                    progress = targetProgress;
                     clearInterval(progressInterval);
-                progressBar.style.width = '100%';
-                // Show enter button when progress completes
-                showEnterButton();
-            } else {
-                progressBar.style.width = `${progress}%`;
-            }
-        }, intervalTime);
+                    progressBar.style.width = '100%';
+                    // Show enter button when progress completes
+                    showEnterButton();
+                } else {
+                    progressBar.style.width = `${progress}%`;
+                }
+            }, intervalTime);
         } catch (error) {
             // Fallback: show button immediately on error
+            console.error('Progress bar error:', error);
             if (progressBar) {
                 progressBar.style.width = '100%';
             }
@@ -552,11 +557,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     }, 3000);
     
-    // Enter button click handler
+    // Enter button click handler (works for both mouse and touch)
     if (enterButton) {
         enterButton.addEventListener('click', () => {
             removeLoaderAndShowContent();
         });
+        // Add touchstart for better mobile support
+        enterButton.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent double-firing
+            removeLoaderAndShowContent();
+        }, { passive: false });
     }
     
     // Keyboard support: Enter key to dismiss loader
