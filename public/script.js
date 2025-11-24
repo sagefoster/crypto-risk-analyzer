@@ -3242,10 +3242,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <div class="chart-labels" id="summary-${tokenId}-chart-labels"></div>
                             <canvas id="summary-${tokenId}-chart" class="asset-chart"></canvas>
                         </div>
-                        <div class="asset-price-wrapper">
-                            <span class="asset-price-label">Current Price</span>
-                            <span class="asset-price-chart" id="summary-${tokenId}-price">$${currentPrice}</span>
-                        </div>
                     </div>
                     <div class="summary-stat">
                         <span class="summary-label">${returnLabel}</span>
