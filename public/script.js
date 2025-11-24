@@ -3137,19 +3137,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         const winnerId = winner.id.toLowerCase();
         winnerDiv.innerHTML = `
             <div class="winner-header">🏆 <strong>${winnerName}</strong> shows the best overall risk-adjusted performance over the past ${timeframeText}${comparisonText}</div>
-            <div class="winner-price-range desktop-only">
-                <div class="price-range-line-current">
-                    <span class="price-label">Current Price:</span>
-                    <span class="price-value-large">$${winnerCurrent}</span>
-                </div>
-                <div class="price-range-line-1">
-                    <span class="price-label">${winnerRangeLabel}</span>
-                    <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
-                </div>
-                <div class="price-range-line-2">
-                    <span class="price-value">$${winnerHigh} - $${winnerLow}</span>
-                </div>
-            </div>
             <div class="asset-chart-section winner-chart-section" id="winner-${winnerId}-chart-section">
                 <div class="chart-title-mobile mobile-only">${winnerRangeLabel} Chart</div>
                 <div class="asset-chart-container">
@@ -3249,10 +3236,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             summaryHTML += `
                 <div class="summary-card ${performanceClass} clickable" data-token="${tokenId}" role="button" tabindex="0" aria-label="View detailed analysis for ${tokenName}">
                     <h4>${tokenName}</h4>
-                    <div class="current-price-summary desktop-only">
-                        <span class="price-label">Current Price:</span>
-                        <span class="price-value">$${currentPrice}</span>
-                    </div>
                     <div class="asset-chart-section summary-chart-section" id="summary-${tokenId}-chart-section">
                         <div class="chart-title-mobile mobile-only">${rangeLabel} Chart</div>
                         <div class="asset-chart-container">
@@ -3263,11 +3246,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                             <span class="asset-price-label">Current Price</span>
                             <span class="asset-price-chart" id="summary-${tokenId}-price">$${currentPrice}</span>
                         </div>
-                    </div>
-                    <div class="price-range-summary desktop-only">
-                        <span class="range-label">${rangeLabel}:</span>
-                        <span class="range-value">$${highPrice} - $${lowPrice}</span>
-                        <span class="info-icon" data-metric="priceRange" data-timeframe="${timeframeText}">ⓘ</span>
                     </div>
                     <div class="summary-stat">
                         <span class="summary-label">${returnLabel}</span>
