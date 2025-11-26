@@ -2202,11 +2202,12 @@ small {
     border: 2px solid var(--accent-primary);
     border-radius: 12px;
     padding: 16px;
-    max-width: 320px;
+    max-width: 350px;
     min-width: 280px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
     z-index: 10000;
     animation: tooltipFadeIn 0.2s ease-out;
+    overflow: visible;
 }
 
 .tooltip-header {
@@ -2240,6 +2241,48 @@ small {
     color: var(--text-secondary);
     font-size: 0.9rem;
     line-height: 1.6;
+    white-space: pre-wrap;
+    overflow: visible;
+    max-width: 350px;
+    display: block;
+}
+
+.tooltip-content code {
+    display: block;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 8px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    white-space: pre-wrap;
+    overflow-x: hidden !important;
+    overflow-y: visible;
+}
+
+.tooltip-content pre {
+    display: block;
+    margin: 8px 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    overflow: visible;
+}
+
+.tooltip-content pre code {
+    display: block;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    white-space: pre-wrap;
+    overflow-x: hidden !important;
+    overflow-y: visible;
+    word-wrap: break-word;
 }
 
 .tooltip-content a {
@@ -3229,6 +3272,50 @@ small {
 .interpretation-details strong {
     color: var(--text-primary);
     font-weight: 600;
+}
+
+.interpretation-details code {
+    display: block;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin: 8px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    white-space: pre-wrap;
+    overflow-x: hidden !important;
+    overflow-y: visible;
+    word-wrap: break-word;
+}
+
+.interpretation-details pre {
+    display: block;
+    margin: 8px 0;
+    padding: 0;
+    background: transparent;
+    border: none;
+    overflow: visible;
+}
+
+.interpretation-details pre code {
+    display: block;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 6px 8px;
+    border-radius: 6px;
+    margin: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    white-space: pre-wrap;
+    overflow-x: hidden !important;
+    overflow-y: visible;
+    word-wrap: break-word;
+}
+
+.interpretation-details ul {
+    margin: 8px 0;
+    padding-left: 20px;
 }
 
 .interpretation-separator {

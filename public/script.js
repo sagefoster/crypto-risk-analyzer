@@ -2468,13 +2468,24 @@ document.addEventListener('DOMContentLoaded', async () => {
                 })
             });
 
-            const data = await response.json();
-
             if (!response.ok) {
-                // Show detailed error message from server
-                const errorMsg = data.error || 'Analysis failed';
+                // Try to get error message from response
+                let errorMsg = 'Analysis failed';
+                try {
+                    const errorText = await response.text();
+                    try {
+                        const errorData = JSON.parse(errorText);
+                        errorMsg = errorData.error || errorMsg;
+                    } catch (e) {
+                        errorMsg = errorText || `Server error: ${response.status} ${response.statusText}`;
+                    }
+                } catch (e) {
+                    errorMsg = `Server error: ${response.status} ${response.statusText}`;
+                }
                 throw new Error(errorMsg);
             }
+
+            const data = await response.json();
 
             // Clear message rotation
             if (messageInterval) {
@@ -2583,11 +2594,26 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p><strong>Period Return: ${periodReturnPct}%</strong><br>
                 Your total return from start to end over ${timeframeText}.</p>
                 
-                <p><strong>CAGR: ${cagrPct}%</strong><br>
-                Compound Annual Growth Rate-the smoothed yearly return if growth was consistent. Formula: ((Ending ÷ Starting)^(1 ÷ Years)) - 1</p>
+                <p><strong>CAGR: ${cagrPct}%</strong></p>
+                <p><strong>Formula:</strong></p>
+                <pre><code>((Ending Value ÷ Starting Value)^(1 ÷ Years)) − 1</code></pre>
+                <p><strong>Where:</strong></p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li>Ending Value = Price at end of period</li>
+                    <li>Starting Value = Price at beginning of period</li>
+                    <li>Years = Period length in years</li>
+                </ul>
+                <p>Compound Annual Growth Rate—the smoothed yearly return if growth was consistent. This geometric mean accounts for compounding effects.</p>
                 
-                <p><strong>Annualized Return (Arithmetic): ${annualizedReturnPct}%</strong><br>
-                Average daily return × 252 trading days. Used in Sharpe/Sortino ratios. This arithmetic mean differs from CAGR's geometric calculation-higher volatility creates a bigger gap.</p>
+                <p><strong>Annualized Return (Arithmetic): ${annualizedReturnPct}%</strong></p>
+                <p><strong>Formula:</strong></p>
+                <pre><code>Mean Daily Return × 252</code></pre>
+                <p><strong>Where:</strong></p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li>Mean Daily Return = Average of all daily returns</li>
+                    <li>252 = Number of trading days per year</li>
+                </ul>
+                <p>Used in Sharpe/Sortino ratios. This arithmetic mean differs from CAGR's geometric calculation—higher volatility creates a bigger gap.</p>
             `;
         }
         
@@ -2648,7 +2674,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
             ${contextNote}
             <div class="interpretation-details">
-                <p><strong>Formula:</strong> (Return - Risk-Free Rate) ÷ Volatility = (${returnPct}% - ${riskFreeRate.toFixed(2)}%) ÷ ${volatilityPct}% = <strong>${sharpeRatio.toFixed(3)}</strong></p>
+                <p><strong>Formula:</strong></p>
+                <pre><code>(Mean Return − Risk-Free Rate)
+--------------------------------
+        Standard Deviation</code></pre>
+                <p><strong>Calculation:</strong> (${returnPct}% − ${riskFreeRate.toFixed(2)}%) ÷ ${volatilityPct}% = <strong>${sharpeRatio.toFixed(3)}</strong></p>
+                <p><strong>Where:</strong></p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li>Mean Return = ${returnPct}% (annualized)</li>
+                    <li>Risk-Free Rate = ${riskFreeRate.toFixed(2)}% (10-Year Treasury)</li>
+                    <li>Standard Deviation = ${volatilityPct}% (annualized volatility)</li>
+                </ul>
                 <p><strong>Key Insight:</strong> ${sharpeRatio > 1 ? 'Earning more than 1% extra return for each 1% of risk taken.' : sharpeRatio > 0 ? 'Positive excess return, but not keeping pace with risk.' : 'Losing money while taking risk. Treasury bonds would be better.'}</p>
             </div>
             <div class="interpretation-separator"></div>
@@ -2730,8 +2766,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
             <div class="interpretation-details">
-                <p><strong>Formula:</strong> Calmar Ratio = Annualized Return ÷ |Maximum Drawdown|</p>
+                <p><strong>Formula:</strong></p>
+                <pre><code>Annualized Return
+-----------------------------
+  |Maximum Drawdown|</code></pre>
                 <p><strong>${tokenName}'s Calculation:</strong> ${annRetPct}% ÷ ${mddPct}% = ${calmarRatio !== null && isFinite(calmarRatio) ? calmarRatio.toFixed(3) : 'N/A'}</p>
+                <p><strong>Where:</strong></p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li>Annualized Return = ${annRetPct}% (mean daily return × 252)</li>
+                    <li>Maximum Drawdown = ${mddPct}% (largest peak-to-trough decline)</li>
+                </ul>
                 <p><strong>What It Means:</strong> While Sharpe/Sortino use volatility (standard deviation) to measure risk, Calmar focuses on your actual worst-case loss (max drawdown). It answers: "How much return do I get for the biggest loss I might experience?"</p>
                 <p><strong>Why It's Useful:</strong> Popular with hedge funds and CTAs because drawdowns are what investors actually feel. A high Calmar Ratio means strong returns without suffering devastating losses. >3 is excellent, >1 is good, <0 is concerning.</p>
                 ${calmarRatio !== null && isFinite(calmarRatio) ? `<p><strong>Context:</strong> For every 1% of maximum loss during ${timeframeText}, ${tokenName} delivered ${calmarRatio.toFixed(2)}% of annualized return.</p>` : ''}
@@ -2769,7 +2813,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             </div>
             <p class="interpretation-text">${interpretation}</p>
             <div class="interpretation-details">
-                <p><strong>What Beta Measures:</strong> Beta quantifies how much an asset moves relative to a benchmark. Beta = Covariance(asset, benchmark) ÷ Variance(benchmark).</p>
+                <p><strong>What Beta Measures:</strong> Beta quantifies how much an asset moves relative to a benchmark.</p>
+                <p><strong>Formula:</strong></p>
+                <pre><code>Covariance(Asset, Benchmark)
+-----------------------------
+   Variance(Benchmark)</code></pre>
+                <p><strong>Where:</strong></p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li>Covariance = How asset moves relative to benchmark</li>
+                    <li>Variance = Volatility of benchmark</li>
+                </ul>
                 <p><strong>Interpreting Values:</strong></p>
                 <ul style="margin-left: 20px; line-height: 1.8;">
                     <li><strong>Beta = 1.0:</strong> Moves in lockstep with benchmark</li>
@@ -2823,7 +2876,17 @@ document.addEventListener('DOMContentLoaded', async () => {
             <p class="interpretation-text ${interpretationClass}">${interpretation}</p>
             <div class="interpretation-details">
                 <p><strong>Why It Matters:</strong> Only penalizes bad volatility (losses), not upside gains. Better for crypto than Sharpe. Calculated from ${timeframeText} of daily returns, focusing only on days with negative returns.</p>
-                <p><strong>Formula:</strong> (Return - Risk-Free Rate) ÷ Downside Volatility = <strong>${sortinoDisplay}</strong></p>
+                <p><strong>Formula:</strong></p>
+                <pre><code>(Mean Return − Risk-Free Rate)
+--------------------------------
+     Downside Deviation</code></pre>
+                <p><strong>Calculation:</strong> (${returnPct}% − ${riskFreeRate.toFixed(2)}%) ÷ ${downsideVolPct}% = <strong>${sortinoDisplay}</strong></p>
+                <p><strong>Where:</strong></p>
+                <ul style="margin-left: 20px; line-height: 1.8;">
+                    <li>Mean Return = ${returnPct}% (annualized)</li>
+                    <li>Risk-Free Rate = ${riskFreeRate.toFixed(2)}% (10-Year Treasury)</li>
+                    <li>Downside Deviation = ${downsideVolPct}% (volatility of negative returns only)</li>
+                </ul>
                 <p><strong>Comparison:</strong> ${comparisonNote}</p>
             </div>
         `;
@@ -3555,20 +3618,94 @@ document.addEventListener('DOMContentLoaded', async () => {
             periodReturn: {
                 title: 'Period Return',
                 content: val ? 
-                    `Total return from start to end of the period. ${valPct} means if you invested $100 at the start, you'd have $${(100 * (1 + valNum/100)).toFixed(2)} at the end. This is the actual price change you experienced. <strong>Example:</strong> SPY (S&P 500 ETF) typically has 8-12% annual returns over long periods.` :
-                    `Total return from start to end of the period. If you invested $100 at the start, this shows what you'd have at the end. This is the actual price change you experienced. <strong>Example:</strong> SPY (S&P 500 ETF) typically has 8-12% annual returns over long periods.`
+                    `<strong>Period Return:</strong> Total gain/loss over the analysis period
+
+<pre><code>Ending Value − Starting Value
+--------------------------------
+        Starting Value</code></pre>
+
+Where:
+• Starting Value = Price at beginning of period
+• Ending Value = Price at end of period
+
+Current value: <strong>${valPct}</strong>
+
+If you invested $100 at the start, you'd have $${(100 * (1 + valNum/100)).toFixed(2)} at the end. This is the actual price change you experienced.
+
+<strong>Example:</strong> SPY (S&P 500 ETF) typically has 8-12% annual returns over long periods.` :
+                    `<strong>Period Return:</strong> Total gain/loss over the analysis period
+
+<pre><code>Ending Value − Starting Value
+--------------------------------
+        Starting Value</code></pre>
+
+Where:
+• Starting Value = Price at beginning of period
+• Ending Value = Price at end of period
+
+If you invested $100 at the start, this shows what you'd have at the end. This is the actual price change you experienced.
+
+<strong>Example:</strong> SPY (S&P 500 ETF) typically has 8-12% annual returns over long periods.`
             },
             annualizedReturn: {
                 title: 'Annualized Return',
                 content: val ? 
-                    `The arithmetic mean of daily returns multiplied by 252 trading days: ${valPct}. Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag. See detailed analysis for full explanation. <strong>Example:</strong> SPY's annualized return is typically 8-12% over long periods, though actual returns vary year-to-year.` :
-                    `The arithmetic mean of daily returns multiplied by 252 trading days. Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag. <strong>Example:</strong> SPY's annualized return is typically 8-12% over long periods, though actual returns vary year-to-year.`
+                    `<strong>Annualized Return:</strong> Arithmetic mean scaled to yearly basis
+
+<pre><code>Mean Daily Return × 252</code></pre>
+
+Where:
+• Mean Daily Return = Average of all daily returns
+• 252 = Number of trading days per year
+
+Current value: <strong>${valPct}</strong>
+
+Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag—higher volatility creates a bigger gap between arithmetic and geometric returns.
+
+<strong>Example:</strong> SPY's annualized return is typically 8-12% over long periods, though actual returns vary year-to-year.` :
+                    `<strong>Annualized Return:</strong> Arithmetic mean scaled to yearly basis
+
+<pre><code>Mean Daily Return × 252</code></pre>
+
+Where:
+• Mean Daily Return = Average of all daily returns
+• 252 = Number of trading days per year
+
+Used in Sharpe/Sortino/Calmar calculations. Note: This can differ from actual period return due to volatility drag—higher volatility creates a bigger gap between arithmetic and geometric returns.
+
+<strong>Example:</strong> SPY's annualized return is typically 8-12% over long periods, though actual returns vary year-to-year.`
             },
             volatility: {
                 title: 'Volatility (Standard Deviation)',
                 content: val ? 
-                    `Measures price consistency. ${valPct} annualized volatility means daily returns typically vary by this much from the average. Higher = more price swings and risk. About 68% of returns fall within ±${valPct} in a typical year. <strong>Example:</strong> SPY typically has 15-20% annual volatility, while individual stocks can range from 20-40%.` :
-                    `Measures price consistency. Annualized volatility shows how much daily returns typically vary from the average. Higher = more price swings and risk. <strong>Example:</strong> SPY typically has 15-20% annual volatility, while individual stocks can range from 20-40%.`
+                    `<strong>Volatility:</strong> Standard deviation of returns (annualized)
+
+<pre><code>√(Σ(Returnᵢ − Mean Return)² / n) × √252</code></pre>
+
+Where:
+• Returnᵢ = Individual daily return
+• Mean Return = Average of all daily returns
+• n = Number of trading days
+• √252 = Annualization factor
+
+Current value: <strong>${valPct}</strong>
+
+Measures price consistency. Higher = more price swings and risk. About 68% of returns fall within ±${valPct} in a typical year.
+
+<strong>Example:</strong> SPY typically has 15-20% annual volatility, while individual stocks can range from 20-40%.` :
+                    `<strong>Volatility:</strong> Standard deviation of returns (annualized)
+
+<pre><code>√(Σ(Returnᵢ − Mean Return)² / n) × √252</code></pre>
+
+Where:
+• Returnᵢ = Individual daily return
+• Mean Return = Average of all daily returns
+• n = Number of trading days
+• √252 = Annualization factor
+
+Measures price consistency. Higher = more price swings and risk.
+
+<strong>Example:</strong> SPY typically has 15-20% annual volatility, while individual stocks can range from 20-40%.`
             },
             maxDrawdown: {
                 title: 'Maximum Drawdown',
@@ -3579,32 +3716,182 @@ document.addEventListener('DOMContentLoaded', async () => {
             sharpe: {
                 title: 'Sharpe Ratio',
                 content: val ? 
-                    `Risk-adjusted return metric: ${val}. Calculated as (Return - Risk-Free Rate) ÷ Volatility. Higher is better. >1 = good, >2 = very good, >3 = excellent. Measures return per unit of total risk. <strong>Example:</strong> SPY typically has a Sharpe ratio of 0.5-1.0. Hedge funds aim for >1.5.` :
-                    `Risk-adjusted return metric. Calculated as (Return - Risk-Free Rate) ÷ Volatility. Higher is better. >1 = good, >2 = very good, >3 = excellent. Measures return per unit of total risk. <strong>Example:</strong> SPY typically has a Sharpe ratio of 0.5-1.0. Hedge funds aim for >1.5.`
+                    `<strong>Sharpe Ratio:</strong> Return per unit of total risk
+
+<pre><code>(Mean Return − Risk-Free Rate)
+--------------------------------
+        Standard Deviation</code></pre>
+
+Where:
+• Mean Return = Annualized average return
+• Risk-Free Rate = 10-Year Treasury yield
+• Standard Deviation = Annualized volatility
+
+Current value: <strong>${val}</strong>
+
+Higher is better: >1 = good, >2 = very good, >3 = excellent
+
+<strong>Example:</strong> SPY typically has a Sharpe ratio of 0.5-1.0. Hedge funds aim for >1.5.` :
+                    `<strong>Sharpe Ratio:</strong> Return per unit of total risk
+
+<pre><code>(Mean Return − Risk-Free Rate)
+--------------------------------
+        Standard Deviation</code></pre>
+
+Where:
+• Mean Return = Annualized average return
+• Risk-Free Rate = 10-Year Treasury yield
+• Standard Deviation = Annualized volatility
+
+Higher is better: >1 = good, >2 = very good, >3 = excellent
+
+<strong>Example:</strong> SPY typically has a Sharpe ratio of 0.5-1.0. Hedge funds aim for >1.5.`
             },
             sortino: {
                 title: 'Sortino Ratio',
                 content: val ? 
-                    `Like Sharpe but only penalizes downside volatility: ${val}. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains). <strong>Example:</strong> SPY's Sortino ratio is typically 0.8-1.2, higher than its Sharpe ratio since it doesn't penalize upside volatility.` :
-                    `Like Sharpe but only penalizes downside volatility. Better for crypto as it doesn't penalize upside gains. Higher is better. Focuses on "bad" volatility (losses) vs "good" volatility (gains). <strong>Example:</strong> SPY's Sortino ratio is typically 0.8-1.2, higher than its Sharpe ratio since it doesn't penalize upside volatility.`
+                    `<strong>Sortino Ratio:</strong> Return per unit of downside risk
+
+<pre><code>(Mean Return − Risk-Free Rate)
+--------------------------------
+     Downside Deviation</code></pre>
+
+Where:
+• Mean Return = Annualized average return
+• Risk-Free Rate = 10-Year Treasury yield
+• Downside Deviation = Standard deviation of negative returns only
+
+Current value: <strong>${val}</strong>
+
+Better for crypto than Sharpe—only penalizes "bad" volatility (losses), not upside gains. Higher is better.
+
+<strong>Example:</strong> SPY's Sortino ratio is typically 0.8-1.2, higher than its Sharpe ratio since it doesn't penalize upside volatility.` :
+                    `<strong>Sortino Ratio:</strong> Return per unit of downside risk
+
+<pre><code>(Mean Return − Risk-Free Rate)
+--------------------------------
+     Downside Deviation</code></pre>
+
+Where:
+• Mean Return = Annualized average return
+• Risk-Free Rate = 10-Year Treasury yield
+• Downside Deviation = Standard deviation of negative returns only
+
+Better for crypto than Sharpe—only penalizes "bad" volatility (losses), not upside gains. Higher is better.
+
+<strong>Example:</strong> SPY's Sortino ratio is typically 0.8-1.2, higher than its Sharpe ratio since it doesn't penalize upside volatility.`
             },
             calmar: {
                 title: 'Calmar Ratio',
                 content: val ? 
-                    `Return-to-drawdown metric: ${val}. Calculated as Annualized Return ÷ |Max Drawdown|. Higher is better. Shows how much return you get per unit of worst-case loss. Popular for hedge funds and trend-following strategies. >3 = excellent, >1 = good. <strong>Example:</strong> SPY's Calmar ratio is typically 0.2-0.4 over long periods. Successful hedge funds often achieve >1.0.` :
-                    `Return-to-drawdown metric. Calculated as Annualized Return ÷ |Max Drawdown|. Higher is better. Shows how much return you get per unit of worst-case loss. Popular for hedge funds and trend-following strategies. >3 = excellent, >1 = good. <strong>Example:</strong> SPY's Calmar ratio is typically 0.2-0.4 over long periods. Successful hedge funds often achieve >1.0.`
+                    `<strong>Calmar Ratio:</strong> Return per unit of maximum drawdown
+
+<pre><code>Annualized Return
+-----------------------------
+  |Maximum Drawdown|</code></pre>
+
+Where:
+• Annualized Return = Mean daily return × 252 trading days
+• Maximum Drawdown = Largest peak-to-trough decline (absolute value)
+
+Current value: <strong>${val}</strong>
+
+Higher is better: >3 = excellent, >1 = good. Shows return per unit of worst-case loss. Popular for hedge funds and trend-following strategies.
+
+<strong>Example:</strong> SPY's Calmar ratio is typically 0.2-0.4 over long periods. Successful hedge funds often achieve >1.0.` :
+                    `<strong>Calmar Ratio:</strong> Return per unit of maximum drawdown
+
+<pre><code>Annualized Return
+-----------------------------
+  |Maximum Drawdown|</code></pre>
+
+Where:
+• Annualized Return = Mean daily return × 252 trading days
+• Maximum Drawdown = Largest peak-to-trough decline (absolute value)
+
+Higher is better: >3 = excellent, >1 = good. Shows return per unit of worst-case loss. Popular for hedge funds and trend-following strategies.
+
+<strong>Example:</strong> SPY's Calmar ratio is typically 0.2-0.4 over long periods. Successful hedge funds often achieve >1.0.`
             },
             betaSP500: {
                 title: 'Beta to S&P 500',
                 content: val ? 
-                    `Measures sensitivity to S&P 500 movements: ${val}. Beta=1 means moves with market, >1 = more volatile than market, <1 = less volatile. Important: Beta assumes diversification. Single crypto assets are NOT diversified, so interpret cautiously. Best for portfolios. <strong>Example:</strong> SPY itself has Beta=1.0. Tech stocks often have Beta 1.2-1.5. Utilities typically have Beta 0.5-0.7.` :
-                    `Measures sensitivity to S&P 500 movements. Beta=1 means moves with market, >1 = more volatile than market, <1 = less volatile. Important: Beta assumes diversification. Single crypto assets are NOT diversified, so interpret cautiously. <strong>Example:</strong> SPY itself has Beta=1.0. Tech stocks often have Beta 1.2-1.5. Utilities typically have Beta 0.5-0.7.`
+                    `<strong>Beta to S&P 500:</strong> Sensitivity to market movements
+
+<pre><code>Covariance(Asset, S&P 500)
+-----------------------------
+   Variance(S&P 500)</code></pre>
+
+Where:
+• Covariance = How asset moves relative to S&P 500
+• Variance = Volatility of S&P 500
+
+Current value: <strong>${val}</strong>
+
+Beta = 1: Moves with market
+Beta > 1: More volatile than market
+Beta < 1: Less volatile than market
+
+⚠️ Important: Beta assumes diversification. Single crypto assets are NOT diversified—interpret cautiously.
+
+<strong>Example:</strong> SPY has Beta=1.0. Tech stocks often 1.2-1.5. Utilities typically 0.5-0.7.` :
+                    `<strong>Beta to S&P 500:</strong> Sensitivity to market movements
+
+<pre><code>Covariance(Asset, S&P 500)
+-----------------------------
+   Variance(S&P 500)</code></pre>
+
+Where:
+• Covariance = How asset moves relative to S&P 500
+• Variance = Volatility of S&P 500
+
+Beta = 1: Moves with market
+Beta > 1: More volatile than market
+Beta < 1: Less volatile than market
+
+⚠️ Important: Beta assumes diversification. Single crypto assets are NOT diversified—interpret cautiously.
+
+<strong>Example:</strong> SPY has Beta=1.0. Tech stocks often 1.2-1.5. Utilities typically 0.5-0.7.`
             },
             betaBTC: {
                 title: 'Beta to Bitcoin',
                 content: val ? 
-                    `Measures sensitivity to Bitcoin movements: ${val}. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics. <strong>Example:</strong> Similar to how tech stocks have Beta >1 to SPY, altcoins often have Beta >1 to Bitcoin.` :
-                    `Measures sensitivity to Bitcoin movements. Beta=1 means moves with BTC, >1 = amplifies BTC moves, <1 = dampens BTC moves. Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics. <strong>Example:</strong> Similar to how tech stocks have Beta >1 to SPY, altcoins often have Beta >1 to Bitcoin.`
+                    `<strong>Beta to Bitcoin:</strong> Sensitivity to BTC movements
+
+<pre><code>Covariance(Asset, Bitcoin)
+-----------------------------
+   Variance(Bitcoin)</code></pre>
+
+Where:
+• Covariance = How asset moves relative to Bitcoin
+• Variance = Volatility of Bitcoin
+
+Current value: <strong>${val}</strong>
+
+Beta = 1: Moves with BTC
+Beta > 1: Amplifies BTC moves
+Beta < 1: Dampens BTC moves
+
+Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics.
+
+<strong>Example:</strong> Similar to how tech stocks have Beta >1 to SPY, altcoins often have Beta >1 to Bitcoin.` :
+                    `<strong>Beta to Bitcoin:</strong> Sensitivity to BTC movements
+
+<pre><code>Covariance(Asset, Bitcoin)
+-----------------------------
+   Variance(Bitcoin)</code></pre>
+
+Where:
+• Covariance = How asset moves relative to Bitcoin
+• Variance = Volatility of Bitcoin
+
+Beta = 1: Moves with BTC
+Beta > 1: Amplifies BTC moves
+Beta < 1: Dampens BTC moves
+
+Shows how much this asset follows Bitcoin's lead. Useful for understanding crypto market dynamics.
+
+<strong>Example:</strong> Similar to how tech stocks have Beta >1 to SPY, altcoins often have Beta >1 to Bitcoin.`
             },
             correlationSP500: {
                 title: 'Correlation to S&P 500',
