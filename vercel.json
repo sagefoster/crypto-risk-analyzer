@@ -17,21 +17,18 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/public/$1"
-    }
-  ],
-  "redirects": [
-    {
-      "source": "/(.*)",
       "has": [
         {
           "type": "host",
           "value": "crypto-risk-analyzer-zeta.vercel.app"
         }
       ],
-      "destination": "https://cryptorisk.blocksage.tech/$1",
-      "permanent": true,
-      "statusCode": 301
+      "dest": "https://cryptorisk.blocksage.tech/$1",
+      "status": 301
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/public/$1"
     }
   ]
 }
