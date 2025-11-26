@@ -1080,10 +1080,8 @@ app.get('/api/search-tokens', async (req, res) => {
   }
 });
 
-// Serve frontend
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
+// Serve frontend - Let Vercel handle static file serving via vercel.json
+// Removed app.get('/') route to allow Vercel's static file routing to work correctly
 
 // API endpoint to fetch 1-year price history for a single coin (for mini charts)
 app.get('/api/coin-history/:id', async (req, res) => {
