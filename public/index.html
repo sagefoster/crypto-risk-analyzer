@@ -6,7 +6,7 @@
     <title>Crypto Risk Analyzer - Compare Risk-Adjusted Returns</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2">
     <link rel="alternate icon" href="/favicon.ico?v=2">
-    <link rel="stylesheet" href="style.css?v=2.9">
+    <link rel="stylesheet" href="style.css?v=3.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <script>
         // Redirect from old vercel.app domain to new custom domain
@@ -52,6 +52,10 @@
     </div>
 
     <div class="container" id="mainContent">
+        <header class="app-header">
+            <button class="header-btn header-abstract" id="abstractBtn">Abstract</button>
+            <a href="https://blocksage.tech" class="header-btn header-back">Back to BlockSage</a>
+        </header>
         <div class="card">
             <h2>Choose assets to analyze</h2>
             <p class="form-tip"><span class="tip-icon">💡</span> Example assets are loaded by default.<br>Search, edit, or randomize your selection.</p>
@@ -220,6 +224,35 @@
                 <p class="footer-contact-text">Contact: <a href="mailto:sage.algo@proton.me" class="footer-contact-link">sage.algo@proton.me</a></p>
             </div>
         </footer>
+    </div>
+
+    <!-- Abstract Modal -->
+    <div id="abstractModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Abstract — BlockSage Risk</h2>
+                <button class="modal-close" id="closeAbstractModal" aria-label="Close modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Risk is an analytics engine designed to quantify the risk characteristics of digital assets through established statistical frameworks used in traditional finance. Crypto markets move faster and with greater variance than equities or fixed income instruments; this tool adapts that methodology to a higher-volatility environment without diluting statistical integrity.</p>
+                
+                <p>The platform analyzes each asset's historical return distribution and produces a suite of standardized metrics, including:</p>
+                
+                <ul>
+                    <li><strong>Volatility (σ):</strong> Standard deviation of daily returns, annualized.</li>
+                    <li><strong>Sharpe Ratio:</strong> Excess return relative to the risk-free rate, normalized by volatility.</li>
+                    <li><strong>Sortino Ratio:</strong> Downside-focused risk-adjusted performance, penalizing negative deviation only.</li>
+                    <li><strong>Max Drawdown:</strong> Largest peak-to-trough decline within the measurement period.</li>
+                    <li><strong>Calmar Ratio:</strong> Return relative to max drawdown over the same window.</li>
+                    <li><strong>Beta & Correlation:</strong> Sensitivity and relationship to benchmark assets (e.g., BTC, ETH, S&P 500).</li>
+                    <li><strong>Return Measures:</strong> Holding-period return, annualized return, and log/arithmic return comparisons.</li>
+                </ul>
+                
+                <p>These metrics allow users to evaluate how an asset behaved across the chosen timeframe, how it responds to market stress, and how it performs relative to benchmarks or peers. The result is a consistent, transparent framework for comparing risk across fundamentally different digital assets.</p>
+                
+                <p>The goal is not to produce predictions or recommendations, but to provide rigorous, interpretable risk measures that help contextualize volatility, identify tail-risk exposure, and support more informed decision-making. Risk is most meaningful when it is measurable; this tool makes it measurable.</p>
+            </div>
+        </div>
     </div>
 
     <script src="script.js?v=4.27"></script>

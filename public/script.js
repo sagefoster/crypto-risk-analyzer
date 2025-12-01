@@ -26,7 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (price >= 0.01) return `$${price.toFixed(4)}`;
         return `$${price.toFixed(6)}`;
     }
-    
+
     // Helper function to check if asset is confirmed (logo is visible)
     function isAssetConfirmed(inputElement) {
         const inputId = inputElement.id;
@@ -383,6 +383,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     const initialLoader = document.getElementById('initialLoader');
     const mainContent = document.getElementById('mainContent');
     const enterButton = document.getElementById('enterButton');
+    const appHeader = document.querySelector('.app-header');
+    const abstractBtn = document.getElementById('abstractBtn');
+    const abstractModal = document.getElementById('abstractModal');
+    const closeAbstractModal = document.getElementById('closeAbstractModal');
     
     // Function to completely remove loader and show main content
     function removeLoaderAndShowContent() {
@@ -393,6 +397,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             mainContent.style.visibility = 'visible';
             mainContent.style.display = 'block';
             mainContent.style.zIndex = '1';
+            
+            // Show header after loader is dismissed
+            if (appHeader) {
+                appHeader.style.display = 'flex';
+                appHeader.style.opacity = '1';
+                appHeader.style.visibility = 'visible';
+            }
             
             // Trigger header animation by restarting it
             const header = mainContent.querySelector('.card h2');
@@ -3304,7 +3315,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="asset-chart-container">
                             <div class="chart-labels" id="summary-${tokenId}-chart-labels"></div>
                             <canvas id="summary-${tokenId}-chart" class="asset-chart"></canvas>
-                        </div>
+                    </div>
                     </div>
                     <div class="summary-stat">
                         <span class="summary-label">${returnLabel}</span>
@@ -4176,5 +4187,59 @@ Shows how much this asset follows Bitcoin's lead. Useful for understanding crypt
                 tooltipText.classList.remove('visible');
             }
         });
+    }
+    
+    // Abstract Modal Functionality (variables already declared at top)
+    function openAbstractModal() {
+        if (abstractModal) {
+            abstractModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+    }
+    
+    function closeAbstractModalFunc() {
+        if (abstractModal) {
+            abstractModal.classList.add('hidden');
+            document.body.style.overflow = ''; // Restore scrolling
+        }
+    }
+    
+    // Open modal when Abstract button is clicked
+    if (abstractBtn) {
+        abstractBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openAbstractModal();
+        });
+    }
+    
+    // Close modal when close button is clicked
+    if (closeAbstractModal) {
+        closeAbstractModal.addEventListener('click', (e) => {
+            e.preventDefault();
+            closeAbstractModalFunc();
+        });
+    }
+    
+    // Close modal when clicking outside the modal content
+    if (abstractModal) {
+        abstractModal.addEventListener('click', (e) => {
+            if (e.target === abstractModal) {
+                closeAbstractModalFunc();
+            }
+        });
+    }
+    
+    // Close modal when ESC key is pressed
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && abstractModal && !abstractModal.classList.contains('hidden')) {
+            closeAbstractModalFunc();
+        }
+    });
+    
+    // Initially hide header until loader is dismissed (already declared at top)
+    if (appHeader) {
+        appHeader.style.display = 'none';
+        appHeader.style.opacity = '0';
+        appHeader.style.visibility = 'hidden';
     }
 });
